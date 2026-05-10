@@ -3,6 +3,7 @@ import Home from './pages/Home';
 import Network from './pages/Network';
 import Jobs from './pages/Jobs';
 import Messages from './pages/Messages';
+import Profile from './pages/Profile';
 
 function App() {
   return (
@@ -15,6 +16,7 @@ function App() {
         <Route path="/network" element={<Network />} />
         <Route path="/jobs" element={<Jobs />} />
         <Route path="/messages" element={<Messages />} />
+        <Route path="/profile" element={<Profile />} />
       </Routes>
     </BrowserRouter>
   );
