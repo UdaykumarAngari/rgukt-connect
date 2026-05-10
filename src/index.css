@@ -1,3 +1,4 @@
+/* src/index.css */
 @import "tailwindcss";
 
 @theme {
@@ -8,9 +9,18 @@
   --shadow-dock: 0 20px 50px rgba(0, 0, 0, 0.1);
 }
 
-/* Using standard CSS variables to avoid the @apply warning */
+/* Force the document to be scrollable */
+html, body {
+  height: auto !important;
+  min-height: 100% !important;
+  overflow-y: auto !important;
+  overflow-x: hidden;
+}
+
 body {
   background-color: var(--color-rgukt-slate);
   color: var(--color-charcoal);
   font-family: 'Inter', system-ui, sans-serif;
+  /* Add an extra safety margin at the very bottom of the body */
+  padding-bottom: 250px; 
 }
