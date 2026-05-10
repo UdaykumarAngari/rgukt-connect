@@ -1,32 +1,40 @@
 import React from 'react';
+import { useNavigate, useLocation } from 'react-router-dom';
 import { Home, Users, Plus, Briefcase, MessageSquare } from 'lucide-react';
 
-const FloatingDock = ({ activeTab, setActiveTab, onPlusClick }) => {
+const FloatingDock = ({ onPlusClick }) => {
+  const navigate = useNavigate();
+  const location = useLocation();
+
+  // Helper function to check if the current URL matches the button path
+  const isActive = (path) => location.pathname === path;
+
   return (
     <div className="fixed bottom-8 left-0 right-0 flex justify-center z-50">
-      
       <nav className="flex items-center gap-1.5 md:gap-2.5 bg-white/90 backdrop-blur-md px-6 py-2.5 rounded-full border border-slate-200 shadow-dock">
-    
+        
+        {/* Home Button */}
         <button 
-          onClick={() => setActiveTab('home')}
+          onClick={() => navigate('/home')}
           className={`p-2.5 rounded-full transition-colors cursor-pointer ${
-            activeTab === 'home' ? 'text-rgukt-maroon' : 'text-slate-400 hover:text-slate-600'
+            isActive('/home') ? 'text-rgukt-maroon' : 'text-slate-400 hover:text-slate-600'
           }`}
         >
-          <Home size={22} fill={activeTab === 'home' ? "currentColor" : "none"} />
+          <Home size={22} fill={isActive('/home') ? "currentColor" : "none"} />
         </button>
  
+        {/* Network Button */}
         <button 
-          onClick={() => setActiveTab('network')}
+          onClick={() => navigate('/network')}
           className={`p-2.5 rounded-full transition-colors cursor-pointer ${
-            activeTab === 'network' ? 'text-rgukt-maroon' : 'text-slate-400 hover:text-slate-600'
+            isActive('/network') ? 'text-rgukt-maroon' : 'text-slate-400 hover:text-slate-600'
           }`}
         >
-          <Users size={22} fill={activeTab === 'network' ? "currentColor" : "none"} />
+          <Users size={22} fill={isActive('/network') ? "currentColor" : "none"} />
         </button>
 
+        {/* Create Post Button */}
         <div className="relative px-2">
-          {/* 2. ADD THE onClick HANDLER TO THIS BUTTON */}
           <button 
             onClick={onPlusClick}
             className="bg-rgukt-maroon p-4 rounded-full -mt-12 border-4 border-rgukt-slate shadow-lg hover:scale-110 transition-transform cursor-pointer group"
@@ -35,22 +43,24 @@ const FloatingDock = ({ activeTab, setActiveTab, onPlusClick }) => {
           </button>
         </div>
 
+        {/* Jobs Button */}
         <button 
-          onClick={() => setActiveTab('jobs')}
+          onClick={() => navigate('/jobs')}
           className={`p-2.5 rounded-full transition-colors cursor-pointer ${
-            activeTab === 'jobs' ? 'text-rgukt-maroon' : 'text-slate-400 hover:text-slate-600'
+            isActive('/jobs') ? 'text-rgukt-maroon' : 'text-slate-400 hover:text-slate-600'
           }`}
         >
-          <Briefcase size={22} fill={activeTab === 'jobs' ? "currentColor" : "none"} />
+          <Briefcase size={22} fill={isActive('/jobs') ? "currentColor" : "none"} />
         </button>
 
+        {/* Messages Button */}
         <button 
-          onClick={() => setActiveTab('messages')}
+          onClick={() => navigate('/messages')}
           className={`p-2.5 rounded-full transition-colors cursor-pointer ${
-            activeTab === 'messages' ? 'text-rgukt-maroon' : 'text-slate-400 hover:text-slate-600'
+            isActive('/messages') ? 'text-rgukt-maroon' : 'text-slate-400 hover:text-slate-600'
           }`}
         >
-          <MessageSquare size={22} fill={activeTab === 'messages' ? "currentColor" : "none"} />
+          <MessageSquare size={22} fill={isActive('/messages') ? "currentColor" : "none"} />
         </button>
 
       </nav>
