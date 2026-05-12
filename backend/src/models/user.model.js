@@ -1,18 +1,16 @@
 import mongoose, { Schema } from 'mongoose';
 
-//Sub-Schema: Professional Experience 
 const experienceSchema = new Schema({
     company: { type: String, required: true },
     position: { type: String, required: true },
     location: { type: String },
     startDate: { type: Date, required: true },
-    endDate: { type: Date }, // Null if 'isCurrent' is true
+    endDate: { type: Date },  
     isCurrent: { type: Boolean, default: false },
     description: { type: String },
     companyLogo: { type: String } 
 });
 
-//Sub-Schema: Academic History
 const educationSchema = new Schema({
     school: { type: String, required: true, default: "RGUKT, Basar" },
     degree: { type: String, required: true }, 
@@ -23,9 +21,7 @@ const educationSchema = new Schema({
     description: { type: String }
 });
 
-//MAIN USER SCHEMA
 const userSchema = new Schema({
-    // 1. Identity & Campus Info
     idNumber: { 
         type: String, 
         required: true, 
@@ -49,13 +45,11 @@ const userSchema = new Schema({
         default: 'student' 
     },
 
-    // 2. Authentication & Verification
     universityEmail: { type: String, unique: true, sparse: true }, 
     personalEmail: { type: String, unique: true, sparse: true }, 
     password: { type: String, required: true }, 
     isVerified: { type: Boolean, default: false },
     
-    // 3. Profile Details
     avatar: { type: String }, 
     coverImage: { type: String }, 
     headline: { type: String, default: "CSE Student @ RGUKT Basar" },
@@ -68,7 +62,6 @@ const userSchema = new Schema({
         portfolio: { type: String }
     },
 
-    // 4. Professional & Technical Data
     skills: [{ type: String }], 
     experience: [experienceSchema],
     education: [educationSchema],
@@ -84,7 +77,6 @@ const userSchema = new Schema({
         }
     ],
 
-    // 5. Engagement Stats
     stats: {
         mentoredCount: { type: Number, default: 0 },
         projectsCount: { type: Number, default: 0 },
@@ -95,7 +87,6 @@ const userSchema = new Schema({
     timestamps: true 
 });
 
-//Validation Middleware 
 userSchema.pre('validate', function(next) {
     this.experience.forEach(exp => {
         if (exp.endDate && exp.startDate > exp.endDate) {
