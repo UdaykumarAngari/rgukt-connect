@@ -1,3 +1,1 @@
-module.exports = {
-    DB_NAME: 'rgukt_connect',
-};
+export const DB_NAME = 'rgukt-connect';

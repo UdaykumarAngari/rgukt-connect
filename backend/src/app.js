@@ -1,5 +1,6 @@
 import express from 'express';
 import cors from 'cors';
+import userRouter from './routes/user.routes.js';
 
 const app = express();
 
@@ -18,5 +19,8 @@ app.get("/api/v1/test", (req, res) => {
         message: "RGUKT Connect is online 🎓"
     });
 });
+
+app.use("/api/v1/users", userRouter);
+app.use(userRouter); // also exposes POST /register (same handler)
 
 export default app;

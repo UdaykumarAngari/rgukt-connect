@@ -1,4 +1,5 @@
 import mongoose, { Schema } from 'mongoose';
+import bcrypt from 'bcrypt';
 
 const experienceSchema = new Schema({
     company: { type: String, required: true },
@@ -87,18 +88,27 @@ const userSchema = new Schema({
     timestamps: true 
 });
 
-userSchema.pre('validate', function(next) {
-    this.experience.forEach(exp => {
+userSchema.pre('validate', async function () {
+    for (const exp of this.experience || []) {
         if (exp.endDate && exp.startDate > exp.endDate) {
-            return next(new Error('Experience start date must be before end date'));
+            throw new Error('Experience start date must be before end date');
         }
-    });
-    this.education.forEach(edu => {
+    }
+    for (const edu of this.education || []) {
         if (edu.endDate && edu.startDate > edu.endDate) {
-            return next(new Error('Education start date must be before end date'));
+            throw new Error('Education start date must be before end date');
         }
-    });
-    next();
+    }
 });
+
+userSchema.pre('save', async function () {
+    if (!this.isModified('password')) return;
+    this.password = await bcrypt.hash(this.password, 10);
+});
+
+
+userSchema.methods.isPasswordCorrect = async function (password) {
+    return await bcrypt.compare(password, this.password);
+};
 
 export const User = mongoose.model('User', userSchema);
