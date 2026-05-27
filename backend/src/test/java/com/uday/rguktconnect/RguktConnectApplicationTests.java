@@ -1,4 +1,4 @@
-package com.uday.rgukt_connect;
+package com.uday.rguktconnect;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;

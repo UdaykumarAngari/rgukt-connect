@@ -1,4 +1,4 @@
-package com.uday.rgukt_connect;
+package com.uday.rguktconnect;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
