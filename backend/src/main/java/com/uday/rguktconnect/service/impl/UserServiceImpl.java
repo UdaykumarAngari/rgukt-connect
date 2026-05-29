@@ -9,7 +9,7 @@ import com.uday.rguktconnect.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
-
+import com.uday.rguktconnect.security.JwtUtil;
 import java.net.PasswordAuthentication;
 
 @Service
@@ -21,11 +21,17 @@ public class UserServiceImpl implements UserService {
     @Autowired
     private PasswordEncoder passwordEncoder;
 
+    @Autowired
+    private JwtUtil jwtUtil;
+
     @Override
     public UserResponseDTO registerUser(UserRequestDTO requestDTO){
 
         if(userRepository.existsByIdNumberOrUniversityEmail(requestDTO.getIdNumber(), requestDTO.getUniversityEmail())){
             throw new RuntimeException("User with this ID number or UniversityEmail already Exists");
+        }
+        if (requestDTO.getPassword() == null || requestDTO.getPassword().trim().isEmpty()) {
+            throw new RuntimeException("Password cannot be blank or null!");
         }
 
         // Manual Data Mapping
@@ -36,7 +42,7 @@ public class UserServiceImpl implements UserService {
         user.setBranch(requestDTO.getBranch());
         user.setBatch(requestDTO.getBatch());
         user.setMobileNumber(requestDTO.getMobileNumber());
-
+        user.setUserType(requestDTO.getUserType());
         //encrypting password
 
         String securePassword = passwordEncoder.encode(requestDTO.getPassword());
@@ -49,9 +55,11 @@ public class UserServiceImpl implements UserService {
                 .idNumber(savedUser.getIdNumber())
                 .name(savedUser.getName())
                 .universityEmail(savedUser.getUniversityEmail())
+                .personalEmail(savedUser.getPersonalEmail())
                 .branch(savedUser.getBranch())
                 .batch(savedUser.getBatch())
                 .mobileNumber(savedUser.getMobileNumber())
+                .userType(savedUser.getUserType())
                 .createdAt(savedUser.getCreatedAt())
                 .build();
     }
@@ -70,17 +78,32 @@ public class UserServiceImpl implements UserService {
                 .idNumber(user.getIdNumber())
                 .name(user.getName())
                 .universityEmail(user.getUniversityEmail())
+                .personalEmail(user.getPersonalEmail())
                 .branch(user.getBranch())
                 .batch(user.getBatch())
                 .mobileNumber(user.getMobileNumber())
+                .userType(user.getUserType())
                 .createdAt(user.getCreatedAt())
                 .build();
 
+        String accessToken = jwtUtil.generateAccessToken(
+            user.getUniversityEmail(),
+            user.getIdNumber(),
+            user.getBranch(),
+            user.getUserType()
+        );
+
         return AuthResponseDTO.builder()
                 .user(safeUser)
-                .accessToken("Mock Phase 2 access token")
+                .accessToken(accessToken)
                 .refreshToken("Mock Phase 2 refresh token")
                 .build();
     }
 
+    @Override
+    public boolean isUserSessionValid(String email) {
+        // Check if the user exists in MySQL. Returns true if present, false if not.
+        return userRepository.findByUniversityEmail(email).isPresent();
+    }
 }
+

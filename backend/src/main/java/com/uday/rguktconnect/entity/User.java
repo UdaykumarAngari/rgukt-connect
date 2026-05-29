@@ -27,7 +27,7 @@ public class User{
     @Column(name = "university_email", nullable = false, unique = true, length = 20)
     private String universityEmail;
 
-    @Column(name = "personal_email", nullable = false, unique = true, length = 20)
+    @Column(name = "personal_email", nullable = true, unique = true, length = 20)
     private String personalEmail;
 
     @Column(name = "mobile_number", nullable = false, unique = true, length = 15)
@@ -41,6 +41,9 @@ public class User{
 
     @Column(nullable = false, length = 100)
     private String batch;
+
+    @Column(name = "user_type", nullable = false, length = 15)
+    private String userType;  //Will hold either "STUDENT" or "ALUMNI"
 
     @Column(name = "refresh_token", length = 500)
     private String refreshToken;

@@ -15,6 +15,8 @@ import com.uday.rguktconnect.dto.UserRequestDTO;
 public interface UserService {
     UserResponseDTO registerUser(UserRequestDTO requestDTO);
     AuthResponseDTO loginUser(UserRequestDTO loginRequest);
+
+    boolean isUserSessionValid(String email);
 }
 
 

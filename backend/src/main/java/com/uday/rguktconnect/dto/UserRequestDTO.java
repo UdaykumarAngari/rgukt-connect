@@ -14,4 +14,5 @@ public class UserRequestDTO {
     private String password;
     private String batch;
     private String branch;
+    private String userType;
 }

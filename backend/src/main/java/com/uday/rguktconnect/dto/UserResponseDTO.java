@@ -19,5 +19,6 @@ public class UserResponseDTO {
     private String mobileNumber;
     private String branch;
     private String batch;
+    private String userType;
     private LocalDateTime createdAt;
 }
