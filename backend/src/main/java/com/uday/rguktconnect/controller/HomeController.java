@@ -12,13 +12,8 @@ import org.springframework.web.bind.annotation.RestController;
 @CrossOrigin(origins = "*")
 public class HomeController {
 
-    /**
-     * 🔒 PROTECTED TESTING ENDPOINT
-     * URL: GET http://localhost:4000/api/home
-     */
     @GetMapping("/home")
     public ResponseEntity<String> getWelcomeMessage() {
-        // 🔑 Retrieve the identity that our JwtFilter verified and stored in context memory
         String currentAuthenticatedEmail = (String) SecurityContextHolder.getContext()
                 .getAuthentication()
                 .getPrincipal();

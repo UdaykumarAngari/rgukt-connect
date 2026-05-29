@@ -7,14 +7,16 @@ package com.uday.rguktconnect.service;
 //import java.util.List;
 //
 
+import com.uday.rguktconnect.dto.AuthRequestDTO;
 import com.uday.rguktconnect.dto.AuthResponseDTO;
+import com.uday.rguktconnect.dto.UserRegisterRequestDTO;
 import com.uday.rguktconnect.dto.UserResponseDTO;
-import com.uday.rguktconnect.dto.UserRequestDTO;
+//import com.uday.rguktconnect.dto.UserRequestDTO;
 
 
 public interface UserService {
-    UserResponseDTO registerUser(UserRequestDTO requestDTO);
-    AuthResponseDTO loginUser(UserRequestDTO loginRequest);
+    UserResponseDTO registerUser(UserRegisterRequestDTO requestDTO);
+    AuthResponseDTO loginUser(AuthRequestDTO loginRequest);
 
     boolean isUserSessionValid(String email);
 }

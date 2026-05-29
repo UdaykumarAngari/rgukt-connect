@@ -1,8 +1,9 @@
 package com.uday.rguktconnect.controller;
 
 
+import com.uday.rguktconnect.dto.AuthRequestDTO;
 import com.uday.rguktconnect.dto.AuthResponseDTO;
-import com.uday.rguktconnect.dto.UserRequestDTO;
+import com.uday.rguktconnect.dto.UserRegisterRequestDTO;
 import com.uday.rguktconnect.dto.UserResponseDTO;
 import com.uday.rguktconnect.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -13,6 +14,7 @@ import org.springframework.web.bind.annotation.*;
 
 import javax.swing.text.html.parser.Entity;
 import java.nio.file.attribute.PosixFileAttributes;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/api/auth")
@@ -23,24 +25,25 @@ public class UserController {
     private UserService userService;
 
     @PostMapping("/register")
-    public ResponseEntity<UserResponseDTO> register(@RequestBody UserRequestDTO requestDTO){
+    public ResponseEntity<?> register(@RequestBody UserRegisterRequestDTO requestDTO){
         try{
             UserResponseDTO registeredUser = userService.registerUser(requestDTO);
             return new ResponseEntity<>(registeredUser, HttpStatus.CREATED);
         }catch (RuntimeException e){
-            e.printStackTrace();
-            return new ResponseEntity<>((HttpHeaders) null, HttpStatus.BAD_REQUEST);
+//            e.printStackTrace();
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(Map.of("error", e.getMessage()));
         }
     }
 
-    @PostMapping("login")
-    public ResponseEntity<AuthResponseDTO> login(@RequestBody UserRequestDTO userRequestDTO){
+    @PostMapping("/login")
+    public ResponseEntity<?> login(@RequestBody AuthRequestDTO authRequestDTO){
         try{
-            AuthResponseDTO authResponse = userService.loginUser(userRequestDTO);
+            AuthResponseDTO authResponse = userService.loginUser(authRequestDTO);
             return ResponseEntity.ok(authResponse);
         } catch (RuntimeException e){
-             e.printStackTrace();
-            return new ResponseEntity<>((HttpHeaders) null, HttpStatus.UNAUTHORIZED);
+             //e.printStackTrace();
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+                    .body(Map.of("error", e.getMessage()));
         }
     }
 

@@ -15,10 +15,5 @@ public class UserResponseDTO {
     private String idNumber;
     private String name;
     private String universityEmail;
-    private String personalEmail;
-    private String mobileNumber;
-    private String branch;
-    private String batch;
-    private String userType;
     private LocalDateTime createdAt;
 }
