@@ -5,7 +5,7 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.context.annotation.ComponentScan;
 
 @SpringBootApplication
-@ComponentScan(basePackages = "com.uday.rguktconnect")
+//@ComponentScan(basePackages = "com.uday.rguktconnect")
 public class RguktConnectApplication {
 
 	public static void main(String[] args) {
