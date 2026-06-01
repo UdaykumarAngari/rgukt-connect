@@ -1,7 +1,7 @@
 package com.uday.rguktconnect.service;
 //
 //import com.uday.rguktconnect.entity.User;
-//import com.uday.rguktconnect.repository.UserRepository;
+//import com.uday.rguktconnect.repository.user.UserRepository;
 //import org.springframework.beans.factory.annotation.Autowired;
 //import org.springframework.stereotype.Service;
 //import java.util.List;

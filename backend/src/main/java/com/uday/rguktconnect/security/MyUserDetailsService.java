@@ -1,7 +1,7 @@
 package com.uday.rguktconnect.security;
 
 import com.uday.rguktconnect.entity.User;
-import com.uday.rguktconnect.repository.UserRepository;
+import com.uday.rguktconnect.repository.user.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
@@ -22,7 +22,6 @@ public class MyUserDetailsService implements UserDetailsService {
         User user = userRepository.findByUniversityEmail(email)
                 .orElseThrow(() -> new UsernameNotFoundException("User not found with email: " + email));
 
-        // Wrap the MySQL user entity into Spring Security's native UserDetails object
         return new org.springframework.security.core.userdetails.User(
                 user.getUniversityEmail(),
                 user.getPassword(),
