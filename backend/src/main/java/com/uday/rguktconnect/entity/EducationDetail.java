@@ -1,5 +1,6 @@
 package com.uday.rguktconnect.entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -18,6 +19,7 @@ public class EducationDetail {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id", referencedColumnName = "id", nullable = false)
+    @JsonIgnore // using this to not send user details in response while retrieving
     private User user;
 
     @Column(name = "institution_name", nullable = false)

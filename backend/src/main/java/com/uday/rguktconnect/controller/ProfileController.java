@@ -11,7 +11,6 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
@@ -38,7 +37,7 @@ public class ProfileController {
     @Autowired
     private CompanyDetailRepository companyDetailRepository;
 
-
+    //updating profile photo
     @PutMapping("/profile/photo")
     public ResponseEntity<?> uploadProfilePhoto(@RequestParam("file")MultipartFile file){
         try{
@@ -65,6 +64,27 @@ public class ProfileController {
         }
     }
 
+    @PostMapping("/profile/projects")
+    public ResponseEntity<?> updateProjects(@RequestBody Project project){
+        try{
+            String authenticatedEmail = (String) SecurityContextHolder.getContext()
+                    .getAuthentication()
+                    .getPrincipal();
+            User user = userRepository.findByUniversityEmail(authenticatedEmail)
+                    .orElseThrow(() -> new RuntimeException("User Not found"));
+
+            project.setUser(user);
+            projectDetailRepository.save(project);
+
+            return ResponseEntity.status(HttpStatus.CREATED)
+                    .body(Map.of("message", "Project added successfully" ));
+        }catch (Exception e){
+            return  ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(Map.of("error", e.getMessage()));
+        }
+    }
+
+    //this is for getting all profile details
     @GetMapping("/profile")
     public ResponseEntity<?> getFullUserProfile(){
         try{
