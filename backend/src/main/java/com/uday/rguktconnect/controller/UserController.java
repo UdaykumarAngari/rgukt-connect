@@ -5,15 +5,12 @@ import com.uday.rguktconnect.dto.AuthRequestDTO;
 import com.uday.rguktconnect.dto.AuthResponseDTO;
 import com.uday.rguktconnect.dto.UserRegisterRequestDTO;
 import com.uday.rguktconnect.dto.UserResponseDTO;
-import com.uday.rguktconnect.service.UserService;
+import com.uday.rguktconnect.service.user.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import javax.swing.text.html.parser.Entity;
-import java.nio.file.attribute.PosixFileAttributes;
 import java.util.Map;
 
 @RestController

@@ -19,7 +19,7 @@ public class EducationDetail {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id", referencedColumnName = "id", nullable = false)
-    @JsonIgnore // using this to not send user details in response while retrieving
+    @JsonIgnore
     private User user;
 
     @Column(name = "institution_name", nullable = false)
@@ -31,10 +31,10 @@ public class EducationDetail {
     @Column(name = "field_of_study")
     private String fieldOfStudy;
 
-    @Column(name = "start_year", length = 10, nullable = false)
+    @Column(name = "start_year", length = 4, nullable = false)
     private String startYear;
 
-    @Column(name = "end_year", length = 10, nullable = false)
+    @Column(name = "end_year", length = 4, nullable = false)
     private String endYear;
 
     @Column(length = 50)

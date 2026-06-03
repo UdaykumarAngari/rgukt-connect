@@ -1,18 +1,20 @@
 package com.uday.rguktconnect.entity;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
 
 @Entity
 @Table(name = "user_experiences")
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-public class CompanyDetail {
+public class UserExperiences {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -39,8 +41,17 @@ public class CompanyDetail {
     @Column(name = "end_date")
     private LocalDate endDate;
 
+    @Column(name = "is_current_role", nullable = false)
     private boolean isCurrentRole;
 
     @Column(columnDefinition = "TEXT")
     private String description;
+
+    @JsonProperty("formattedEndDate")
+    public String getFormattedEndDate() {
+        if (this.isCurrentRole || this.endDate == null) {
+            return "Present";
+        }
+        return this.endDate.toString();
+    }
 }

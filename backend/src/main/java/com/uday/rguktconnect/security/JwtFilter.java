@@ -1,6 +1,6 @@
 package com.uday.rguktconnect.security;
 
-import com.uday.rguktconnect.service.impl.UserServiceImpl;
+import com.uday.rguktconnect.service.user.impl.UserServiceImpl;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;

@@ -1,4 +1,4 @@
-package com.uday.rguktconnect.service;
+package com.uday.rguktconnect.service.user;
 //
 //import com.uday.rguktconnect.entity.User;
 //import com.uday.rguktconnect.repository.user.UserRepository;

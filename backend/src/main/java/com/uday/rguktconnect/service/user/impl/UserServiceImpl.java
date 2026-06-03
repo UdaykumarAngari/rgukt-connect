@@ -1,4 +1,4 @@
-package com.uday.rguktconnect.service.impl;
+package com.uday.rguktconnect.service.user.impl;
 
 import com.uday.rguktconnect.dto.AuthRequestDTO;
 import com.uday.rguktconnect.dto.AuthResponseDTO;
@@ -9,7 +9,7 @@ import com.uday.rguktconnect.entity.User;
 import com.uday.rguktconnect.entity.UserDetails;
 import com.uday.rguktconnect.repository.user.UserDetailsRepository;
 import com.uday.rguktconnect.repository.user.UserRepository;
-import com.uday.rguktconnect.service.UserService;
+import com.uday.rguktconnect.service.user.UserService;
 import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.password.PasswordEncoder;

@@ -1,6 +1,6 @@
 package com.uday.rguktconnect.dto;
 
-import com.uday.rguktconnect.entity.CompanyDetail;
+import com.uday.rguktconnect.entity.UserExperiences;
 import com.uday.rguktconnect.entity.EducationDetail;
 import com.uday.rguktconnect.entity.Project;
 import lombok.Builder;
@@ -28,6 +28,6 @@ public class ProfileResponseDTO {
 
     // Relational Collections Arrays
     private List<Project> projects;
-    private List<CompanyDetail> experiences;
+    private List<UserExperiences> experiences;
     private List<EducationDetail> education;
 }
