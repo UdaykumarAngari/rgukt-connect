@@ -1,11 +1,15 @@
 import React, { useState, useRef } from 'react';
-import { X, Code, Image as ImageIcon, Video, Link, AtSign } from 'lucide-react';
+import { X, Code, Image as ImageIcon, Loader2 } from 'lucide-react';
+import axios from 'axios';
 
-const CreatePostModal = ({ isOpen, onClose, onSubmit }) => {
+const CreatePostModal = ({ isOpen, onClose, onSubmit, session }) => {
   // 1. STATE MANAGEMENT
   const [postType, setPostType] = useState('text');
   const [content, setContent] = useState('');
+  const [codeSnippet, setCodeSnippet] = useState('');
   const [selectedMedia, setSelectedMedia] = useState(null);
+  const [selectedFile, setSelectedFile] = useState(null);
+  const [loading, setLoading] = useState(false);
   const fileInputRef = useRef(null);
 
   // 2. LOGIC HANDLERS
@@ -14,35 +18,60 @@ const CreatePostModal = ({ isOpen, onClose, onSubmit }) => {
   const handleFileChange = (e) => {
     const file = e.target.files[0];
     if (file) {
+      setSelectedFile(file);
       // Create a temporary local URL for the preview
       setSelectedMedia(URL.createObjectURL(file));
     }
   };
 
-  const handlePostSubmit = () => {
-    if (!content.trim() && !selectedMedia) return;
+  const handlePostSubmit = async () => {
+    if (!content.trim() && !selectedFile) return;
 
-    // Construct the mock post object
-    const newPost = {
-      id: Date.now(),
-      author: "Udaykumar Angari",
-      authorTitle: "CSE | Batch 2026",
-      timestamp: "Just now",
-      isVerified: false,
-      type: postType,
-      content: content,
-      mediaUrl: selectedMedia, // In production, this will be the S3 URL
-      mediaType: selectedMedia ? 'image' : 'text',
-      likes: 0,
-      comments: 0
-    };
+    setLoading(true);
+    try {
+      let uploadedMediaUrl = null;
 
-    onSubmit(newPost);
-    
-    // Reset state for next time
-    setContent('');
-    setSelectedMedia(null);
-    setPostType('text');
+      // 1. If a file was selected, upload it to AWS S3 first
+      if (selectedFile) {
+        const formData = new FormData();
+        formData.append('file', selectedFile);
+        
+        const mediaRes = await axios.post('/api/posts/media', formData, {
+          headers: {
+            'Content-Type': 'multipart/form-data',
+            Authorization: `Bearer ${session?.token}`
+          }
+        });
+        uploadedMediaUrl = mediaRes.data.mediaUrl;
+      }
+
+      // 2. Send the post creation request to backend
+      const res = await axios.post('/api/posts', {
+        type: postType,
+        content: content,
+        codeSnippet: postType === 'code' ? codeSnippet : null,
+        mediaUrl: uploadedMediaUrl
+      }, {
+        headers: {
+          Authorization: `Bearer ${session?.token}`
+        }
+      });
+
+      // 3. Callback parent to update feed
+      onSubmit(res.data);
+      
+      // Reset state for next time
+      setContent('');
+      setCodeSnippet('');
+      setSelectedMedia(null);
+      setSelectedFile(null);
+      setPostType('text');
+    } catch (err) {
+      console.error('Error creating post:', err);
+      alert(err.response?.data?.error || 'Failed to create post. Please try again.');
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -87,6 +116,9 @@ const CreatePostModal = ({ isOpen, onClose, onSubmit }) => {
           {postType === 'code' && (
             <textarea 
               placeholder="Paste your code snippet here..."
+              value={codeSnippet}
+              onChange={(e) => setCodeSnippet(e.target.value)}
+              disabled={loading}
               className="w-full h-40 bg-[#1e1e1e] text-slate-300 font-mono text-xs rounded-2xl p-4 outline-none border border-slate-800"
             />
           )}
@@ -102,18 +134,21 @@ const CreatePostModal = ({ isOpen, onClose, onSubmit }) => {
                 onChange={handleFileChange} 
                 accept="image/*,video/*" 
                 className="hidden" 
+                disabled={loading}
               />
               
               <button 
                 onClick={() => fileInputRef.current.click()} 
-                className="p-2.5 text-slate-500 hover:text-rgukt-maroon hover:bg-white rounded-xl transition-all cursor-pointer"
+                disabled={loading}
+                className="p-2.5 text-slate-500 hover:text-rgukt-maroon hover:bg-white rounded-xl transition-all cursor-pointer disabled:opacity-50"
               >
                 <ImageIcon size={20} />
               </button>
               
               <button 
                 onClick={() => setPostType(postType === 'code' ? 'text' : 'code')} 
-                className={`p-2.5 rounded-xl cursor-pointer transition-all ${
+                disabled={loading}
+                className={`p-2.5 rounded-xl cursor-pointer transition-all disabled:opacity-50 ${
                   postType === 'code' 
                   ? 'bg-rgukt-maroon text-white shadow-sm' 
                   : 'text-slate-500 hover:text-rgukt-maroon hover:bg-white'
@@ -125,9 +160,17 @@ const CreatePostModal = ({ isOpen, onClose, onSubmit }) => {
 
             <button 
               onClick={handlePostSubmit}
-              className="bg-rgukt-maroon text-white px-8 py-2.5 rounded-xl font-bold hover:opacity-90 shadow-md transition-all cursor-pointer active:scale-95"
+              disabled={loading || (!content.trim() && !selectedFile)}
+              className="bg-rgukt-maroon text-white px-8 py-2.5 rounded-xl font-bold hover:opacity-90 shadow-md transition-all cursor-pointer active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
             >
-              Post
+              {loading ? (
+                <>
+                  <Loader2 className="animate-spin" size={16} />
+                  <span>Posting...</span>
+                </>
+              ) : (
+                <span>Post</span>
+              )}
             </button>
           </div>
         </div>

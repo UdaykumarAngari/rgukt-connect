@@ -115,12 +115,30 @@ public class ConnectionServiceImpl implements ConnectionService {
         return connectionRepository.findByReceiverAndStatus(currentUser, "PENDING");
     }
 
+    @Autowired
+    private com.uday.rguktconnect.repository.user.UserDetailsRepository userDetailsRepository;
+
     @Override
-    public List<User> getUserConnectionList(Long userId) {
+    public List<Map<String, Object>> getUserConnectionList(Long userId) {
         if (!userRepository.existsById(userId)) {
             throw new RuntimeException("Target profile record not found");
         }
-        return connectionRepository.findConnectedUsers(userId);
+        List<User> connectedUsers = connectionRepository.findConnectedUsers(userId);
+        List<Map<String, Object>> result = new java.util.ArrayList<>();
+        for (User u : connectedUsers) {
+            Map<String, Object> map = new java.util.HashMap<>();
+            map.put("id", u.getId());
+            map.put("idNumber", u.getIdNumber());
+            map.put("name", u.getName());
+            map.put("universityEmail", u.getUniversityEmail());
+            
+            String photo = userDetailsRepository.findByUser(u)
+                    .map(com.uday.rguktconnect.entity.UserDetails::getProfilePhoto)
+                    .orElse(null);
+            map.put("profilePhoto", photo);
+            result.add(map);
+        }
+        return result;
     }
 
     @Override

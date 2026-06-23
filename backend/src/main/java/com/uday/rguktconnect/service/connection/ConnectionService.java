@@ -11,6 +11,6 @@ public interface ConnectionService {
     void rejectOrCancelConnection(String currentEmail, Long requestId);
     Map<String, Object> getConnectionStatusWithUser(String currentEmail, Long targetUserId);
     List<Connection> getPendingReceivedRequests(String currentEmail);
-    List<User> getUserConnectionList(Long userId);
+    List<Map<String, Object>> getUserConnectionList(Long userId);
     boolean areConnected(Long userAId, Long userBId);
 }

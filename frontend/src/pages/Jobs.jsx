@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import Navbar from '../components/Navbar';
 import FloatingDock from '../components/FloatingDock';
 import JobCard from '../components/JobCard';
@@ -7,7 +8,8 @@ import CreatePostModal from '../components/CreatePostModal';
 // Data imports
 import { mockJobs } from '../data/jobs';
 
-const Jobs = () => {
+const Jobs = ({ session, onLogout }) => {
+  const navigate = useNavigate();
   const [searchQuery, setSearchQuery] = useState("");
   const [isModalOpen, setIsModalOpen] = useState(false);
 
@@ -24,6 +26,8 @@ const Jobs = () => {
         isLanding={false} 
         searchQuery={searchQuery} 
         setSearchQuery={setSearchQuery} 
+        session={session}
+        onLogout={onLogout}
       />
 
       <main className="flex-1 max-w-6xl mx-auto w-full px-4 pt-8 pb-60">
@@ -62,9 +66,10 @@ const Jobs = () => {
         isOpen={isModalOpen} 
         onClose={() => setIsModalOpen(false)} 
         onSubmit={(newPost) => {
-            console.log("Post created from Jobs page:", newPost);
             setIsModalOpen(false);
+            navigate('/home');
         }}
+        session={session}
       />
 
       <FloatingDock onPlusClick={() => setIsModalOpen(true)} />

@@ -1,28 +1,55 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import Navbar from '../components/Navbar';
 import FloatingDock from '../components/FloatingDock';
 import PostCard from '../components/PostCard';
 import CreatePostModal from '../components/CreatePostModal';
+import axios from 'axios';
 
-// Data imports - Only need posts for this page
-import { mockPosts as initialPosts } from '../data/posts';
-
-const Home = () => {
+const Home = ({ session, onLogout }) => {
   // 1. STATE MANAGEMENT
-  const [posts, setPosts] = useState(initialPosts);
+  const [posts, setPosts] = useState([]);
   const [searchQuery, setSearchQuery] = useState("");
   const [isModalOpen, setIsModalOpen] = useState(false);
 
+  // Load feed from backend on mount
+  useEffect(() => {
+    const fetchFeed = async () => {
+      try {
+        const res = await axios.get('/api/posts', {
+          headers: { Authorization: `Bearer ${session?.token}` }
+        });
+        setPosts(res.data);
+      } catch (err) {
+        console.error("Failed to fetch feed:", err);
+        if (err.response?.status === 401 || err.response?.status === 403) {
+          onLogout();
+        }
+      }
+    };
+
+    if (session?.token) {
+      fetchFeed();
+    }
+  }, [session, onLogout]);
+
   // 2. HANDLERS
   const handleCreatePost = (newPost) => {
-    setPosts([newPost, ...posts]);
+    setPosts(prevPosts => [newPost, ...prevPosts]);
     setIsModalOpen(false);
   };
 
-  // 3. FILTER LOGIC (Specifically for posts)
+  const handleLikeToggle = (updatedPost) => {
+    setPosts(prevPosts => prevPosts.map(p => p.id === updatedPost.id ? updatedPost : p));
+  };
+
+  const handleDeletePost = (deletedPostId) => {
+    setPosts(prevPosts => prevPosts.filter(p => p.id !== deletedPostId));
+  };
+
+  // 3. FILTER LOGIC
   const filteredPosts = posts.filter(p => 
-    p.author.toLowerCase().includes(searchQuery.toLowerCase()) || 
-    p.content.toLowerCase().includes(searchQuery.toLowerCase())
+    (p.author && p.author.toLowerCase().includes(searchQuery.toLowerCase())) || 
+    (p.content && p.content.toLowerCase().includes(searchQuery.toLowerCase()))
   );
 
   return (
@@ -32,6 +59,8 @@ const Home = () => {
         isLanding={false} 
         searchQuery={searchQuery} 
         setSearchQuery={setSearchQuery} 
+        session={session}
+        onLogout={onLogout}
       />
 
       <main className="flex-1 max-w-5xl mx-auto w-full px-4 pt-8 pb-60">
@@ -52,7 +81,13 @@ const Home = () => {
         {/* Feed Section - Centered single column for better readability */}
         <section className="max-w-2xl mx-auto space-y-6">
           {filteredPosts.map(post => (
-            <PostCard key={post.id} post={post} />
+            <PostCard 
+              key={post.id} 
+              post={post} 
+              session={session} 
+              onLikeToggle={handleLikeToggle} 
+              onDelete={handleDeletePost}
+            />
           ))}
         </section>
 
@@ -70,6 +105,7 @@ const Home = () => {
         isOpen={isModalOpen} 
         onClose={() => setIsModalOpen(false)} 
         onSubmit={handleCreatePost}
+        session={session}
       />
 
       <FloatingDock onPlusClick={() => setIsModalOpen(true)} />

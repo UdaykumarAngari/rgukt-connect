@@ -71,4 +71,27 @@ public class FileStorageService {
             throw new RuntimeException("Failed to upload profile photo to AWS S3", e);
         }
     }
+
+    public String uploadPostMedia(MultipartFile file, String idNumber) {
+        try {
+            String originalName = file.getOriginalFilename();
+            String extension = (originalName != null && originalName.contains("."))
+                    ? originalName.substring(originalName.lastIndexOf("."))
+                    : ".png";
+
+            String fileName = "posts/" + idNumber + "-" + System.currentTimeMillis() + extension;
+
+            PutObjectRequest putObjectRequest = PutObjectRequest.builder()
+                    .bucket(bucketName)
+                    .key(fileName)
+                    .contentType(file.getContentType())
+                    .build();
+
+            s3Client.putObject(putObjectRequest, RequestBody.fromInputStream(file.getInputStream(), file.getSize()));
+
+            return String.format("https://%s.s3.%s.amazonaws.com/%s", bucketName, region, fileName);
+        } catch (IOException e) {
+            throw new RuntimeException("Failed to upload post media to AWS S3", e);
+        }
+    }
 }

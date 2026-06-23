@@ -72,6 +72,41 @@ public class ProfileServiceImpl implements ProfileService {
                 .build();
     }
 
+    @Override
+    public ProfileResponseDTO getFullProfileById(Long userId) {
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new RuntimeException("User not found"));
+
+        UserDetails userDetails = userDetailsRepository.findByUser(user)
+                .orElseGet(() -> {
+                    UserDetails blank = new UserDetails();
+                    blank.setUser(user);
+                    return userDetailsRepository.save(blank);
+                });
+
+        List<Project> userProjects = projectDetailRepository.findByUser(user);
+        List<EducationDetail> userEducationalDetails = educationDetailRepository.findByUser(user);
+        List<UserExperiences> userExperiences = userExperienceRepository.findByUser(user);
+
+        return ProfileResponseDTO.builder()
+                .idNumber(user.getIdNumber())
+                .name(user.getName())
+                .universityEmail(user.getUniversityEmail())
+                .mobileNumber(userDetails.getMobileNumber())
+                .personalEmail(userDetails.getPersonalEmail())
+                .branch(userDetails.getBranch())
+                .batch(userDetails.getBatch())
+                .profilePhoto(userDetails.getProfilePhoto())
+                .description(userDetails.getDescription())
+                .githubUrl(userDetails.getGithubUrl())
+                .linkedinUrl(userDetails.getLinkedinUrl())
+                .mentoredStudentsCount(userDetails.getMentoredStudentsCount())
+                .projects(userProjects)
+                .experiences(userExperiences)
+                .education(userEducationalDetails)
+                .build();
+    }
+
     // Handles the smart initialize-and-patch strategy to prevent metadata loss
     @Override
     public void updateProfileDetails(String email, ProfileUpdateRequestDTO updateDTO) {

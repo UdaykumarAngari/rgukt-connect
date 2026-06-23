@@ -58,7 +58,7 @@ public class ConnectionController {
     }
 
     @GetMapping("/list/{userId}")
-    public ResponseEntity<List<User>> getConnectionList(@PathVariable Long userId) {
+    public ResponseEntity<?> getConnectionList(@PathVariable Long userId) {
         return ResponseEntity.ok(connectionService.getUserConnectionList(userId));
     }
 }

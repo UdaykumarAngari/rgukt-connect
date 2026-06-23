@@ -11,9 +11,9 @@ import org.springframework.web.multipart.MultipartFile;
 public interface ProfileService {
 
     ProfileResponseDTO getFullProfile(String email);
+    ProfileResponseDTO getFullProfileById(Long userId);
     void updateProfileDetails(String email, ProfileUpdateRequestDTO updateDTO);
-
-    // Manages AWS S3 picture streams and purges legacy assets automatically
+ 
     ResponseEntity<?> uploadProfilePhoto(MultipartFile file, String email);
 
     Project addProject(Project project, String email);

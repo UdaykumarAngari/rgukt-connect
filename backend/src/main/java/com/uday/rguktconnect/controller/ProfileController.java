@@ -39,6 +39,13 @@ public class ProfileController {
         return ResponseEntity.ok(profile);
     }
 
+    // Get another user's profile details by userId
+    @GetMapping("/profile/{userId}")
+    public ResponseEntity<?> getOtherUserProfile(@PathVariable Long userId) {
+        ProfileResponseDTO profile = profileService.getFullProfileById(userId);
+        return ResponseEntity.ok(profile);
+    }
+
     // Update basic user metadata details
     @PutMapping("/profile/update")
     public ResponseEntity<?> updateProfile(@RequestBody ProfileUpdateRequestDTO profileUpdateRequestDTO) {
@@ -98,8 +105,7 @@ public class ProfileController {
         profileService.deleteExperience(id, getAuthenticatedEmail());
         return ResponseEntity.ok(Map.of("message", "Experience record deleted successfully!"));
     }
-
-
+    
     // Add a new education entry
     @PostMapping("/profile/education")
     public ResponseEntity<?> addEducation(@RequestBody EducationDetail education) {

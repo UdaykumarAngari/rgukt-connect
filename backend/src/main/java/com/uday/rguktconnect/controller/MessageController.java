@@ -48,6 +48,39 @@ public class MessageController {
         return ResponseEntity.ok(history);
     }
 
+    @PostMapping("/api/chat/send")
+    public ResponseEntity<?> sendHttpMessage(@RequestBody Map<String, Object> payload) {
+        try {
+            User sender = userRepository.findByUniversityEmail(getAuthenticatedEmail())
+                    .orElseThrow(() -> new RuntimeException("Identity context missing"));
+            Long receiverId = Long.valueOf(payload.get("receiverId").toString());
+            String content = payload.get("content").toString();
+
+            if (!connectionRepository.areUsersConnected(sender.getId(), receiverId)) {
+                return ResponseEntity.status(403).body(Map.of("error", "You can only message connected members"));
+            }
+
+            User receiver = userRepository.findById(receiverId)
+                    .orElseThrow(() -> new RuntimeException("Receiver not found"));
+
+            ChatMessage msg = new ChatMessage();
+            msg.setSender(sender);
+            msg.setReceiver(receiver);
+            msg.setContent(content);
+            ChatMessage savedMsg = chatMessageRepository.save(msg);
+
+            messagingTemplate.convertAndSendToUser(
+                    receiverId.toString(),
+                    "/queue/messages",
+                    savedMsg
+            );
+
+            return ResponseEntity.ok(savedMsg);
+        } catch (Exception e) {
+            return ResponseEntity.status(400).body(Map.of("error", e.getMessage()));
+        }
+    }
+
 
     @MessageMapping("/chat.sendMessage")
     public void processMessage(@RequestBody Map<String, Object> payload) {
