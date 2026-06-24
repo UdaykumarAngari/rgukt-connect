@@ -13,6 +13,7 @@ import org.springframework.web.multipart.MultipartFile;
 import com.uday.rguktconnect.service.FileStorageService;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 @Service
 @Transactional // Ensures transactional safety across all dynamic entity modifications
@@ -54,6 +55,7 @@ public class ProfileServiceImpl implements ProfileService {
         List<UserExperiences> userExperiences = userExperienceRepository.findByUser(user);
 
         return ProfileResponseDTO.builder()
+                .id(user.getId())
                 .idNumber(user.getIdNumber())
                 .name(user.getName())
                 .universityEmail(user.getUniversityEmail())
@@ -89,6 +91,7 @@ public class ProfileServiceImpl implements ProfileService {
         List<UserExperiences> userExperiences = userExperienceRepository.findByUser(user);
 
         return ProfileResponseDTO.builder()
+                .id(user.getId())
                 .idNumber(user.getIdNumber())
                 .name(user.getName())
                 .universityEmail(user.getUniversityEmail())
@@ -105,6 +108,64 @@ public class ProfileServiceImpl implements ProfileService {
                 .experiences(userExperiences)
                 .education(userEducationalDetails)
                 .build();
+    }
+
+    @Override
+    public List<ProfileResponseDTO> getAlumniDirectory(String currentEmail) {
+        // 1. Fetch all users
+        List<User> users = userRepository.findAll();
+        
+        // 2. Fetch all user details to avoid N+1 queries during iteration
+        List<UserDetails> allDetails = userDetailsRepository.findAll();
+        
+        // Map user details by user ID for O(1) in-memory lookup, filtering out any null or broken user associations safely
+        Map<Long, UserDetails> detailsMap = new java.util.HashMap<>();
+        for (UserDetails ud : allDetails) {
+            try {
+                if (ud != null && ud.getUser() != null) {
+                    detailsMap.put(ud.getUser().getId(), ud);
+                }
+            } catch (Exception e) {
+                // Ignore any lazy loading or EntityNotFoundException for broken/deleted user associations
+            }
+        }
+
+        // 3. Fetch all experiences in a single query and group them by user ID in-memory
+        List<UserExperiences> allExperiences = userExperienceRepository.findAll();
+        Map<Long, List<UserExperiences>> experiencesMap = new java.util.HashMap<>();
+        for (UserExperiences exp : allExperiences) {
+            try {
+                if (exp != null && exp.getUser() != null) {
+                    experiencesMap.computeIfAbsent(exp.getUser().getId(), k -> new java.util.ArrayList<>()).add(exp);
+                }
+            } catch (Exception e) {
+                // Ignore broken associations
+            }
+        }
+                
+        // 4. Map to DTOs, excluding the current logged-in user
+        return users.stream()
+                .filter(user -> !user.getUniversityEmail().equalsIgnoreCase(currentEmail))
+                .map(user -> {
+                    UserDetails details = detailsMap.get(user.getId());
+                    if (details == null) {
+                        details = new UserDetails();
+                        details.setUser(user);
+                    }
+                    
+                    return ProfileResponseDTO.builder()
+                            .id(user.getId())
+                            .idNumber(user.getIdNumber())
+                            .name(user.getName())
+                            .universityEmail(user.getUniversityEmail())
+                            .branch(details.getBranch())
+                            .batch(details.getBatch())
+                            .profilePhoto(details.getProfilePhoto())
+                            .description(details.getDescription())
+                            .experiences(experiencesMap.getOrDefault(user.getId(), java.util.Collections.emptyList()))
+                            .build();
+                })
+                .collect(Collectors.toList());
     }
 
     // Handles the smart initialize-and-patch strategy to prevent metadata loss

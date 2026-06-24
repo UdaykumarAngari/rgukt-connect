@@ -2,14 +2,23 @@ import React, { useState, useEffect, useRef } from 'react';
 import Navbar from '../components/Navbar';
 import FloatingDock from '../components/FloatingDock';
 import { Search, ChevronLeft, Send, Image as ImageIcon, Paperclip, Smile, MoreHorizontal, Edit, Star } from 'lucide-react';
-import { Client } from '@stomp/stompjs';
+import { useNotifications } from '../context/NotificationContext';
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
 
 const Messages = ({ session, onLogout }) => {
   const navigate = useNavigate();
+  const { 
+    registerMessageListener, 
+    unregisterMessageListener, 
+    setActiveChatUserId, 
+    sendStompMessage,
+    fetchUnreadCounts 
+  } = useNotifications();
+
   const [connections, setConnections] = useState([]);
   const [selectedChat, setSelectedChat] = useState(null);
+  const [unreadCounts, setUnreadCounts] = useState({});
   const [myProfilePhoto, setMyProfilePhoto] = useState(null);
 
   // Fetch current user's profile photo
@@ -31,7 +40,6 @@ const Messages = ({ session, onLogout }) => {
   const [loadingConnections, setLoadingConnections] = useState(true);
   const [searchQuery, setSearchQuery] = useState("");
 
-  const stompClientRef = useRef(null);
   const selectedChatRef = useRef(null);
   const messagesContainerRef = useRef(null);
 
@@ -71,8 +79,20 @@ const Messages = ({ session, onLogout }) => {
     }
   };
 
+  const fetchUnreadCountsBySender = async () => {
+    try {
+      const res = await axios.get('/api/chat/unread-by-sender', {
+        headers: { Authorization: `Bearer ${session.token}` }
+      });
+      setUnreadCounts(res.data);
+    } catch (err) {
+      console.error("Failed to load unread counts by sender:", err);
+    }
+  };
+
   useEffect(() => {
     fetchConnections();
+    fetchUnreadCountsBySender();
   }, [session]);
 
   // Fetch history when selection changes
@@ -85,6 +105,15 @@ const Messages = ({ session, onLogout }) => {
           headers: { Authorization: `Bearer ${session.token}` }
         });
         setMessagesList(res.data);
+
+        // After loading history (which marks thread as read on BE), refresh global unread count
+        fetchUnreadCounts();
+
+        // Clear local thread unread count
+        setUnreadCounts(prev => ({
+          ...prev,
+          [selectedChat.id]: 0
+        }));
       } catch (err) {
         console.error('Failed to load chat history:', err);
         setMessagesList([]);
@@ -97,6 +126,16 @@ const Messages = ({ session, onLogout }) => {
     fetchHistory();
   }, [selectedChat, session]);
 
+  // Sync active chat state with global context to suppress badges for the open thread
+  useEffect(() => {
+    if (selectedChat) {
+      setActiveChatUserId(selectedChat.id);
+    } else {
+      setActiveChatUserId(null);
+    }
+    return () => setActiveChatUserId(null);
+  }, [selectedChat]);
+
   // Scroll to bottom on new messages
   useEffect(() => {
     if (messagesContainerRef.current) {
@@ -107,30 +146,21 @@ const Messages = ({ session, onLogout }) => {
     }
   }, [messagesList]);
 
-  // Configure and Connect STOMP Client
+  // Register global message listener
   useEffect(() => {
-    const client = new Client({
-      brokerURL: `ws://${window.location.host}/ws-chat/websocket`,
-      connectHeaders: {
-        Authorization: `Bearer ${session.token}`
-      },
-      debug: (str) => {
-        console.log('[STOMP]:', str);
-      },
-      reconnectDelay: 5000,
-      heartbeatIncoming: 4000,
-      heartbeatOutgoing: 4000
-    });
-
     const handleIncomingMessage = (msg) => {
-      // msg has schema: { id, sender, receiver, content, timestamp }
       const activeChat = selectedChatRef.current;
       if (activeChat && (msg.sender.id === activeChat.id || msg.sender.id === session.id)) {
         setMessagesList(prev => {
-          // Prevent duplicates if already appended locally
           if (prev.some(m => m.id === msg.id)) return prev;
           return [...prev, msg];
         });
+      } else {
+        // Increment local unread count for this sender
+        setUnreadCounts(prev => ({
+          ...prev,
+          [msg.sender.id]: (prev[msg.sender.id] || 0) + 1
+        }));
       }
 
       // Update sidebar last message state
@@ -149,54 +179,13 @@ const Messages = ({ session, onLogout }) => {
       }));
     };
 
-    client.onConnect = (frame) => {
-      console.log('STOMP connected successfully.');
-
-      // 1. Standard user-specific destination
-      client.subscribe('/user/queue/messages', (message) => {
-        try {
-          handleIncomingMessage(JSON.parse(message.body));
-        } catch (e) {
-          console.error(e);
-        }
-      });
-
-      // 2. User ID-specific destination fallback
-      client.subscribe(`/user/${session.id}/queue/messages`, (message) => {
-        try {
-          handleIncomingMessage(JSON.parse(message.body));
-        } catch (e) {
-          console.error(e);
-        }
-      });
-
-      // 3. Fallback direct queue naming route
-      client.subscribe(`/queue/messages-user${session.id}`, (message) => {
-        try {
-          handleIncomingMessage(JSON.parse(message.body));
-        } catch (e) {
-          console.error(e);
-        }
-      });
-    };
-
-    client.onStompError = (frame) => {
-      console.error('STOMP protocol error:', frame);
-    };
-
-    client.activate();
-    stompClientRef.current = client;
-
-    return () => {
-      if (stompClientRef.current) {
-        stompClientRef.current.deactivate();
-      }
-    };
+    registerMessageListener(handleIncomingMessage);
+    return () => unregisterMessageListener(handleIncomingMessage);
   }, [session]);
 
   const handleSendMessage = (e) => {
     if (e) e.preventDefault();
-    if (!messageText.trim() || !selectedChat || !stompClientRef.current) return;
+    if (!messageText.trim() || !selectedChat) return;
 
     const payload = {
       senderId: session.id,
@@ -204,11 +193,8 @@ const Messages = ({ session, onLogout }) => {
       content: messageText.trim()
     };
 
-    // Publish via STOMP broker
-    stompClientRef.current.publish({
-      destination: '/app/chat.sendMessage',
-      body: JSON.stringify(payload)
-    });
+    // Publish via global STOMP broker
+    sendStompMessage('/app/chat.sendMessage', payload);
 
     // Create a local packet to display immediately in UI for premium latency-free UX
     const localMsg = {
@@ -300,13 +286,20 @@ const Messages = ({ session, onLogout }) => {
                         chat.avatar
                       )}
                     </div>
-                    <div className="flex-1 min-w-0 pb-2">
-                      <div className="flex justify-between items-center">
-                        <h4 className={`font-bold text-[15px] truncate ${selectedChat?.id === chat.id ? 'text-rgukt-maroon' : 'text-charcoal'}`}>
-                          {chat.name}
-                        </h4>
-                        <span className="text-[10px] font-medium text-slate-400 uppercase">{chat.time}</span>
-                      </div>
+                     <div className="flex-1 min-w-0 pb-2">
+                       <div className="flex justify-between items-center">
+                         <h4 className={`font-bold text-[15px] truncate ${selectedChat?.id === chat.id ? 'text-rgukt-maroon' : 'text-charcoal'}`}>
+                           {chat.name}
+                         </h4>
+                         <div className="flex flex-col items-end gap-1 shrink-0">
+                           <span className="text-[10px] font-medium text-slate-400 uppercase">{chat.time}</span>
+                           {unreadCounts[chat.id] > 0 && selectedChat?.id !== chat.id && (
+                             <span className="bg-rgukt-maroon text-white text-[9px] font-black h-4.5 w-4.5 rounded-full flex items-center justify-center border border-white shadow-sm shadow-rgukt-maroon/10">
+                               {unreadCounts[chat.id]}
+                             </span>
+                           )}
+                         </div>
+                       </div>
                       <p className="text-[13px] text-slate-500 truncate leading-tight mt-1">
                         {chat.lastMessage}
                       </p>

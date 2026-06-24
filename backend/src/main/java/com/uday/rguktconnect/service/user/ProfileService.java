@@ -7,9 +7,11 @@ import com.uday.rguktconnect.entity.EducationDetail;
 import com.uday.rguktconnect.entity.Project;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.multipart.MultipartFile;
+import java.util.List;
 
 public interface ProfileService {
 
+    List<ProfileResponseDTO> getAlumniDirectory(String currentEmail);
     ProfileResponseDTO getFullProfile(String email);
     ProfileResponseDTO getFullProfileById(Long userId);
     void updateProfileDetails(String email, ProfileUpdateRequestDTO updateDTO);

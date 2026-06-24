@@ -30,6 +30,9 @@ public class ChatMessage {
     @Column(columnDefinition = "TEXT", nullable = false)
     private String content;
 
+    @Column(name = "is_read", nullable = false)
+    private boolean isRead = false;
+
     @CreationTimestamp
     @Column(name = "timestamp", nullable = false, updatable = false)
     private LocalDateTime timestamp;

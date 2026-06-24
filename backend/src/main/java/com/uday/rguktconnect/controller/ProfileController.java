@@ -13,6 +13,7 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 
@@ -31,6 +32,12 @@ public class ProfileController {
         ).getPrincipal();
     }
 
+    // Get list of all users for the alumni directory
+    @GetMapping("/directory")
+    public ResponseEntity<List<ProfileResponseDTO>> getAlumniDirectory() {
+        List<ProfileResponseDTO> directory = profileService.getAlumniDirectory(getAuthenticatedEmail());
+        return ResponseEntity.ok(directory);
+    }
 
     // Get all profile details
     @GetMapping("/profile")

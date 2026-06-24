@@ -8,6 +8,7 @@ import com.uday.rguktconnect.service.connection.ConnectionService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import com.uday.rguktconnect.service.notification.NotificationService;
 
 import java.util.List;
 import java.util.Map;
@@ -22,6 +23,9 @@ public class ConnectionServiceImpl implements ConnectionService {
 
     @Autowired
     private UserRepository userRepository;
+
+    @Autowired
+    private NotificationService notificationService;
 
     @Override
     public void sendConnectionRequest(String currentEmail, Long receiverId) {
@@ -45,7 +49,8 @@ public class ConnectionServiceImpl implements ConnectionService {
         newInvite.setReceiver(receiver);
         newInvite.setStatus("PENDING");
 
-        connectionRepository.save(newInvite);
+        Connection savedInvite = connectionRepository.save(newInvite);
+        notificationService.createNotification(sender, receiver, "CONNECTION_REQUEST", savedInvite.getId());
     }
 
     @Override
@@ -61,7 +66,8 @@ public class ConnectionServiceImpl implements ConnectionService {
         }
 
         invite.setStatus("ACCEPTED");
-        connectionRepository.save(invite);
+        Connection savedInvite = connectionRepository.save(invite);
+        notificationService.createNotification(currentUser, invite.getSender(), "CONNECTION_ACCEPTED", savedInvite.getId());
     }
 
     @Override

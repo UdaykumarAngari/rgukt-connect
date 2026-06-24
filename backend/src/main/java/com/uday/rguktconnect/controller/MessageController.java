@@ -10,6 +10,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.messaging.handler.annotation.MessageMapping;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -35,6 +36,7 @@ public class MessageController {
     }
 
     @GetMapping("/api/chat/history/{targetUserId}")
+    @Transactional
     public ResponseEntity<?> getChatHistory(@PathVariable Long targetUserId) {
         User currentUser = userRepository.findByUniversityEmail(getAuthenticatedEmail())
                 .orElseThrow(() -> new RuntimeException("Identity context missing"));
@@ -44,8 +46,32 @@ public class MessageController {
             return ResponseEntity.status(403).body(Map.of("error", "You can only message connected members"));
         }
 
+        // Mark incoming messages from the target user as read
+        chatMessageRepository.markThreadAsRead(targetUserId, currentUser.getId());
+
         List<ChatMessage> history = chatMessageRepository.findChatHistory(currentUser.getId(), targetUserId);
         return ResponseEntity.ok(history);
+    }
+
+    @GetMapping("/api/chat/unread-count")
+    public ResponseEntity<?> getGlobalUnreadCount() {
+        User currentUser = userRepository.findByUniversityEmail(getAuthenticatedEmail())
+                .orElseThrow(() -> new RuntimeException("Identity context missing"));
+        long count = chatMessageRepository.countUnreadMessages(currentUser.getId());
+        return ResponseEntity.ok(Map.of("unreadCount", count));
+    }
+
+    @GetMapping("/api/chat/unread-by-sender")
+    public ResponseEntity<?> getUnreadBySender() {
+        User currentUser = userRepository.findByUniversityEmail(getAuthenticatedEmail())
+                .orElseThrow(() -> new RuntimeException("Identity context missing"));
+        List<Object[]> results = chatMessageRepository.countUnreadGroupBySender(currentUser.getId());
+        
+        java.util.Map<Long, Long> unreadMap = new java.util.HashMap<>();
+        for (Object[] row : results) {
+            unreadMap.put((Long) row[0], (Long) row[1]);
+        }
+        return ResponseEntity.ok(unreadMap);
     }
 
     @PostMapping("/api/chat/send")

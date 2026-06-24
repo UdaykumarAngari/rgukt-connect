@@ -10,6 +10,9 @@ import java.util.List;
 @Data
 @Builder
 public class ProfileResponseDTO {
+    // Core database identifier
+    private Long id;
+
     // Core Identity info
     private String idNumber;
     private String name;

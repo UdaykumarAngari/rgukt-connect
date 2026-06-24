@@ -4,13 +4,28 @@ import FloatingDock from '../components/FloatingDock';
 import UserCard from '../components/UserCard';
 import CreatePostModal from '../components/CreatePostModal';
 import axios from 'axios';
-import { mockUsers } from '../data/users';
+// Removed mockUsers import to connect with live backend database
 
 const Network = ({ session, onLogout }) => {
   const [searchQuery, setSearchQuery] = useState("");
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [pendingInvites, setPendingInvites] = useState([]);
   const [refreshTrigger, setRefreshTrigger] = useState(0);
+  const [users, setUsers] = useState([]);
+  const [loading, setLoading] = useState(true);
+
+  const fetchDirectory = async () => {
+    try {
+      const res = await axios.get('/api/users/directory', {
+        headers: { Authorization: `Bearer ${session.token}` }
+      });
+      setUsers(res.data);
+    } catch (err) {
+      console.error('Error fetching alumni directory:', err);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const fetchPendingInvites = async () => {
     try {
@@ -28,6 +43,7 @@ const Network = ({ session, onLogout }) => {
 
   useEffect(() => {
     fetchPendingInvites();
+    fetchDirectory();
   }, [session, refreshTrigger]);
 
   const handleAcceptInvite = async (requestId) => {
@@ -62,12 +78,25 @@ const Network = ({ session, onLogout }) => {
     setRefreshTrigger(prev => prev + 1);
   };
 
-  // Filter logic for Users (Search by Name, Role, or Branch)
-  const filteredUsers = mockUsers.filter(u => 
-    u.name.toLowerCase().includes(searchQuery.toLowerCase()) || 
-    u.role.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    u.branch?.toLowerCase().includes(searchQuery.toLowerCase())
-  );
+  // Filter logic for Users (Search by Name, Email, Headline, Branch, or Company/Role Experience)
+  const filteredUsers = users.filter(u => {
+    const search = searchQuery.toLowerCase();
+    
+    const matchesBasic = 
+      u.name?.toLowerCase().includes(search) || 
+      u.universityEmail?.toLowerCase().includes(search) || 
+      u.idNumber?.toLowerCase().includes(search) || 
+      u.description?.toLowerCase().includes(search) ||
+      u.role?.toLowerCase().includes(search) ||
+      u.branch?.toLowerCase().includes(search);
+      
+    const matchesExperience = u.experiences?.some(exp => 
+      exp.companyName?.toLowerCase().includes(search) ||
+      exp.title?.toLowerCase().includes(search)
+    ) || false;
+
+    return matchesBasic || matchesExperience;
+  });
 
   return (
     <div className="min-h-screen bg-rgukt-slate flex flex-col font-sans">
@@ -135,16 +164,30 @@ const Network = ({ session, onLogout }) => {
         )}
 
         {/* Directory Grid - 3 columns for a professional directory feel */}
-        <section className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-          {filteredUsers.map(user => (
-            <UserCard 
-              key={user.id} 
-              user={user} 
-              session={session} 
-              onStatusChange={handleStatusChange}
-            />
-          ))}
-        </section>
+        {loading ? (
+          <section className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+            {[...Array(6)].map((_, i) => (
+              <div key={i} className="bg-white rounded-3xl border border-slate-100 p-5 flex flex-col items-center text-center shadow-sm animate-pulse">
+                <div className="w-20 h-20 rounded-full bg-slate-100 mb-4" />
+                <div className="h-4 bg-slate-150 rounded-full w-2/3 mb-2" />
+                <div className="h-3 bg-slate-100 rounded-full w-1/2 mb-3" />
+                <div className="h-3 bg-slate-100 rounded-full w-3/4 mb-5" />
+                <div className="h-9 bg-slate-100 rounded-xl w-full" />
+              </div>
+            ))}
+          </section>
+        ) : (
+          <section className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+            {filteredUsers.map(user => (
+              <UserCard 
+                key={user.id} 
+                user={user} 
+                session={session} 
+                onStatusChange={handleStatusChange}
+              />
+            ))}
+          </section>
+        )}
 
         {/* Empty State */}
         {filteredUsers.length === 0 && (

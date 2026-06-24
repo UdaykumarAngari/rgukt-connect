@@ -1,10 +1,12 @@
 import React from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { Home, Users, Plus, Briefcase, MessageSquare } from 'lucide-react';
+import { useNotifications } from '../context/NotificationContext';
 
 const FloatingDock = ({ onPlusClick }) => {
   const navigate = useNavigate();
   const location = useLocation();
+  const { unreadMessages } = useNotifications();
 
   // Helper function to check if the current URL matches the button path
   const isActive = (path) => location.pathname === path;
@@ -56,11 +58,16 @@ const FloatingDock = ({ onPlusClick }) => {
         {/* Messages Button */}
         <button 
           onClick={() => navigate('/messages')}
-          className={`p-2.5 rounded-full transition-colors cursor-pointer ${
+          className={`p-2.5 rounded-full transition-colors cursor-pointer relative ${
             isActive('/messages') ? 'text-rgukt-maroon' : 'text-slate-400 hover:text-slate-600'
           }`}
         >
           <MessageSquare size={22} fill={isActive('/messages') ? "currentColor" : "none"} />
+          {unreadMessages > 0 && (
+            <span className="absolute top-1.5 right-1.5 bg-rgukt-maroon text-white text-[9px] font-black h-4 w-4 rounded-full flex items-center justify-center border border-white shadow-sm shadow-rgukt-maroon/20 animate-pulse">
+              {unreadMessages}
+            </span>
+          )}
         </button>
 
       </nav>

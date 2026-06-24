@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
+import { NotificationProvider } from './context/NotificationContext';
 import Home from './pages/Home';
 import Network from './pages/Network';
 import Jobs from './pages/Jobs';
@@ -48,7 +49,8 @@ function App() {
   };
 
   return (
-    <BrowserRouter>
+    <NotificationProvider session={session}>
+      <BrowserRouter>
       <Routes>
         {/* Default route points to Landing page */}
         <Route path="/" element={<Landing session={session} onLogout={handleLogout} />} />
@@ -98,7 +100,8 @@ function App() {
         {/* Fallback for broken URLs */}
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
-    </BrowserRouter>
+      </BrowserRouter>
+    </NotificationProvider>
   );
 }
 

@@ -4,6 +4,7 @@ import logo from '../assets/rgukt.png';
 import { Bell, Search } from 'lucide-react';
 import NotificationDropdown from './NotificationDropdown';
 import axios from 'axios';
+import { useNotifications } from '../context/NotificationContext';
 
 const Navbar = ({ isLanding = false, searchQuery, setSearchQuery, session, onLogout }) => {
   const navigate = useNavigate();
@@ -12,6 +13,7 @@ const Navbar = ({ isLanding = false, searchQuery, setSearchQuery, session, onLog
   const [profilePhoto, setProfilePhoto] = useState(null);
   const notificationRef = useRef(null);
   const profileDropdownRef = useRef(null);
+  const { unreadNotifications } = useNotifications();
 
   useEffect(() => {
     if (!session?.token) return;
@@ -106,12 +108,19 @@ const Navbar = ({ isLanding = false, searchQuery, setSearchQuery, session, onLog
                   }`}
                 >
                   <Bell size={22} />
-                  {/* Notification Dot */}
-                  <span className="absolute top-2 right-2 w-2 h-2 bg-red-500 rounded-full border-2 border-white"></span>
+                  {/* Notification Badge */}
+                  {unreadNotifications > 0 && (
+                    <span className="absolute -top-0.5 -right-0.5 bg-rgukt-maroon text-white text-[9px] font-black h-4.5 w-4.5 rounded-full flex items-center justify-center border border-white shadow-sm shadow-rgukt-maroon/20 animate-pulse">
+                      {unreadNotifications}
+                    </span>
+                  )}
                 </button>
 
                 {/* Dropdown Component */}
-                <NotificationDropdown isOpen={showNotifications} />
+                <NotificationDropdown 
+                  isOpen={showNotifications} 
+                  onClose={() => setShowNotifications(false)} 
+                />
               </div>
               
               {/* PROFILE AVATAR & DROPDOWN */}
