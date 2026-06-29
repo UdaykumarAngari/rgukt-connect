@@ -2,16 +2,21 @@ import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import Navbar from '../components/Navbar';
 import { Users, MessageSquare, Briefcase, GraduationCap, ChevronRight, Award, ShieldCheck } from 'lucide-react';
+import rguktBg from '../assets/rgukt_bg.png';
 
 const Landing = ({ session, onLogout }) => {
   const navigate = useNavigate();
 
   return (
-    <div className="min-h-screen bg-rgukt-slate flex flex-col font-sans">
+    <div className="min-h-screen flex flex-col font-sans" style={{ backgroundColor: '#f9f6f0' }}>
       <Navbar isLanding={true} session={session} onLogout={onLogout} />
       
       <main className="flex-1">
-        <section className="relative overflow-hidden py-20 px-6 sm:py-32 bg-radial from-rgukt-maroon/5 via-transparent to-transparent">
+        <section className="relative overflow-hidden py-20 px-6 sm:py-32" style={{
+          backgroundImage: `linear-gradient(to bottom, rgba(249, 246, 240, 0.82), rgba(249, 246, 240, 0.98)), url(${rguktBg})`,
+          backgroundSize: 'cover',
+          backgroundPosition: 'center'
+        }}>
           <div className="max-w-5xl mx-auto text-center relative z-10">
             <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-rgukt-maroon/10 border border-rgukt-maroon/20 text-rgukt-maroon text-xs font-bold uppercase tracking-wider mb-6">
               <Award size={14} /> The Official RGUKT Network

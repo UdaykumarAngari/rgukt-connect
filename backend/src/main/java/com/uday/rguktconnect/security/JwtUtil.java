@@ -32,11 +32,10 @@ public class JwtUtil {
         return Keys.hmacShaKeyFor(keyBytes);
     }
 
-    public String generateAccessToken(String email, String idNumber){
+    public String generateAccessToken(String email, String idNumber, String role){
         Map<String, Object> claims = new HashMap<>();
         claims.put("idNumber", idNumber);
-//        claims.put("branch", branch);
-//        claims.put("userType", userType);
+        claims.put("role", role);
 
         return Jwts.builder()
                 .setClaims(claims)
@@ -45,6 +44,10 @@ public class JwtUtil {
                 .setExpiration(new Date(System.currentTimeMillis() + accessTokenExpiration))
                 .signWith(getSigningKey(), SignatureAlgorithm.HS256)
                 .compact();
+    }
+
+    public String extractRole(String token){
+        return extractClaim(token, claims -> claims.get("role", String.class));
     }
     public String generateRefreshToken(String email) {
         return Jwts.builder()

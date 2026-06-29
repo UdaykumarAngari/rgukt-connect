@@ -41,6 +41,12 @@ public class PostServiceImpl implements PostService {
         User author = userRepository.findByUniversityEmail(authorEmail)
                 .orElseThrow(() -> new RuntimeException("Author identity not found"));
 
+        if ("referral".equalsIgnoreCase(requestDTO.getType())) {
+            if (!"ALUMNI".equalsIgnoreCase(author.getRole()) && !"ADMIN".equalsIgnoreCase(author.getRole())) {
+                throw new RuntimeException("Only Alumni or Admins can post job referrals");
+            }
+        }
+
         Post post = new Post();
         post.setAuthor(author);
         post.setType(requestDTO.getType() != null ? requestDTO.getType() : "text");
@@ -86,7 +92,12 @@ public class PostServiceImpl implements PostService {
         Post post = postRepository.findById(postId)
                 .orElseThrow(() -> new RuntimeException("Post not found"));
 
-        if (!post.getAuthor().getUniversityEmail().equalsIgnoreCase(email)) {
+        User requestingUser = userRepository.findByUniversityEmail(email)
+                .orElseThrow(() -> new RuntimeException("User not found"));
+
+        boolean isAdmin = "ADMIN".equalsIgnoreCase(requestingUser.getRole());
+
+        if (!post.getAuthor().getUniversityEmail().equalsIgnoreCase(email) && !isAdmin) {
             throw new RuntimeException("Unauthorized deletion request");
         }
  

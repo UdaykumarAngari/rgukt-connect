@@ -47,6 +47,11 @@ public class UserServiceImpl implements UserService {
         user.setIdNumber(requestDTO.getIdNumber());
         user.setName(requestDTO.getName());
         user.setUniversityEmail(requestDTO.getUniversityEmail());
+        if (requestDTO.getRole() != null && !requestDTO.getRole().trim().isEmpty()) {
+            user.setRole(requestDTO.getRole().toUpperCase());
+        } else {
+            user.setRole("STUDENT");
+        }
 
         //encrypting password
 
@@ -68,6 +73,7 @@ public class UserServiceImpl implements UserService {
                 .name(savedUser.getName())
                 .universityEmail(savedUser.getUniversityEmail())
                 .createdAt(savedUser.getCreatedAt())
+                .role(savedUser.getRole())
                 .build();
     }
 
@@ -86,11 +92,13 @@ public class UserServiceImpl implements UserService {
                 .name(user.getName())
                 .universityEmail(user.getUniversityEmail())
                 .createdAt(user.getCreatedAt())
+                .role(user.getRole())
                 .build();
 
         String accessToken = jwtUtil.generateAccessToken(
             user.getUniversityEmail(),
-            user.getIdNumber()
+            user.getIdNumber(),
+            user.getRole()
         );
 
         return AuthResponseDTO.builder()
