@@ -2,14 +2,12 @@ import React, { useState, useEffect } from 'react';
 import { Heart, MessageCircle, ShieldCheck, MoreHorizontal, Loader2, Share2, X } from 'lucide-react';
 import axios from 'axios';
 import { mockUsers } from '../data/users';
-
-// Sub-component to recursively render comment items and their nested replies
+ 
 const CommentItem = ({ comment, session, onLikeComment, onAddReply }) => {
   const [showReplyForm, setShowReplyForm] = useState(false);
   const [replyContent, setReplyContent] = useState('');
   const [submittingReply, setSubmittingReply] = useState(false);
 
-  // Mentions autocomplete within replies
   const [showReplySuggestions, setShowReplySuggestions] = useState(false);
   const [filteredReplySuggestions, setFilteredReplySuggestions] = useState([]);
 
@@ -129,8 +127,7 @@ const CommentItem = ({ comment, session, onLikeComment, onAddReply }) => {
           >
             Reply
           </button>
-
-          {/* Reply autocomplete suggestions */}
+ 
           {showReplySuggestions && (
             <div className="absolute bottom-full mb-1 left-0 w-56 bg-white border border-slate-100 rounded-xl shadow-lg z-30 max-h-32 overflow-y-auto py-1">
               {filteredReplySuggestions.map(u => (
@@ -147,8 +144,7 @@ const CommentItem = ({ comment, session, onLikeComment, onAddReply }) => {
           )}
         </form>
       )}
-
-      {/* Hierarchical Sub-replies */}
+ 
       {comment.replies && comment.replies.length > 0 && (
         <div className="ml-8 border-l border-slate-100 pl-3 mt-2 space-y-2">
           {comment.replies.map(reply => (
@@ -175,24 +171,20 @@ const PostCard = ({ post, session, onLikeToggle, onDelete }) => {
   const [loading, setLoading] = useState(false);
   const [showMenu, setShowMenu] = useState(false);
   const [showShareMenu, setShowShareMenu] = useState(false);
-  
-  // Comments states
+ 
   const [showComments, setShowComments] = useState(false);
   const [commentsList, setCommentsList] = useState([]);
   const [commentsLoading, setCommentsLoading] = useState(false);
   const [commentContent, setCommentContent] = useState('');
-  
-  // Mentions inside comments list
+   
   const [showSuggestions, setShowSuggestions] = useState(false);
   const [filteredSuggestions, setFilteredSuggestions] = useState([]);
-
-  // In-app share modal states
+ 
   const [showInAppModal, setShowInAppModal] = useState(false);
   const [connections, setConnections] = useState([]);
   const [connectionsLoading, setConnectionsLoading] = useState(false);
   const [sentStatus, setSentStatus] = useState({});
 
-  // 1. Like toggle
   const handleLike = async () => {
     if (loading) return;
     setLoading(true);
@@ -210,7 +202,6 @@ const PostCard = ({ post, session, onLikeToggle, onDelete }) => {
     }
   };
 
-  // 2. Delete post
   const handleDelete = async () => {
     if (!window.confirm("Are you sure you want to delete this post?")) return;
     try {
@@ -227,8 +218,7 @@ const PostCard = ({ post, session, onLikeToggle, onDelete }) => {
       setShowMenu(false);
     }
   };
-
-  // 3. Comments load
+ 
   const loadComments = async () => {
     setCommentsLoading(true);
     try {
@@ -251,7 +241,6 @@ const PostCard = ({ post, session, onLikeToggle, onDelete }) => {
     }
   };
 
-  // 4. Create top-level comment
   const handleCommentSubmit = async (e) => {
     e.preventDefault();
     if (!commentContent.trim()) return;
@@ -271,7 +260,6 @@ const PostCard = ({ post, session, onLikeToggle, onDelete }) => {
     }
   };
 
-  // 5. Autocomplete suggestions handler
   const handleCommentChange = (e) => {
     const val = e.target.value;
     setCommentContent(val);
@@ -297,7 +285,6 @@ const PostCard = ({ post, session, onLikeToggle, onDelete }) => {
     setShowSuggestions(false);
   };
 
-  // 6. Comment likes toggle
   const handleLikeComment = async (commentId) => {
     try {
       const res = await axios.post(`/api/comments/${commentId}/like`, {}, {
@@ -321,7 +308,6 @@ const PostCard = ({ post, session, onLikeToggle, onDelete }) => {
     }
   };
 
-  // 7. Add nested reply to memory state
   const handleAddReply = (parentCommentId, newReply) => {
     const addReplyRecursively = (comments) => {
       return comments.map(c => {
@@ -339,8 +325,7 @@ const PostCard = ({ post, session, onLikeToggle, onDelete }) => {
       onLikeToggle({ ...post, comments: comments + 1 });
     }
   };
-
-  // 8. Sharing Handlers
+ 
   const shareOnWhatsApp = () => {
     const postUrl = `${window.location.origin}/post/${id}`;
     const text = encodeURIComponent(`Check out this post by ${author} on RGUKT Connect: "${content.substring(0, 100)}..." \n\nRead more at ${postUrl}`);
@@ -391,7 +376,6 @@ const PostCard = ({ post, session, onLikeToggle, onDelete }) => {
 
   return (
     <div className="bg-white rounded-3xl border border-slate-100 shadow-sm overflow-visible mb-6 relative">
-      {/* 1. HEADER: Author Info */}
       <div className="p-5 flex justify-between items-start">
         <div className="flex gap-3">
           <div className="w-11 h-11 rounded-full bg-slate-200 shrink-0 overflow-hidden">
@@ -445,18 +429,15 @@ const PostCard = ({ post, session, onLikeToggle, onDelete }) => {
         </div>
       </div>
 
-      {/* 2. BODY: Content */}
       <div className="px-5 pb-4">
         <p className="text-slate-800 text-[15px] leading-relaxed mb-4">{content}</p>
 
-        {/* Media Attachments */}
         {mediaUrl && (
           <div className="rounded-2xl overflow-hidden border border-slate-100 mb-4 max-h-[360px] flex justify-center bg-slate-50">
             <img src={mediaUrl} alt="Post Attachment" className="w-full h-auto object-cover max-h-[360px]" />
           </div>
         )}
-
-        {/* TYPE: CODE SNIPPET */}
+ 
         {type === 'code' && (
           <div className="bg-[#1e1e1e] rounded-2xl p-5 font-mono text-[13px] text-slate-300 overflow-x-auto border border-slate-800 shadow-inner">
             <pre className="whitespace-pre">
@@ -464,8 +445,7 @@ const PostCard = ({ post, session, onLikeToggle, onDelete }) => {
             </pre>
           </div>
         )}
-
-        {/* TYPE: JOB REFERRAL */}
+ 
         {type === 'referral' && (
           <div className="bg-slate-50 rounded-2xl p-4 border border-slate-100 flex flex-col md:flex-row items-center justify-between gap-4">
             <div className="flex items-center gap-4 w-full">
@@ -483,8 +463,7 @@ const PostCard = ({ post, session, onLikeToggle, onDelete }) => {
           </div>
         )}
       </div>
-
-      {/* 3. FOOTER: Actions */}
+ 
       <div className="px-5 py-3 border-t border-slate-50 flex items-center gap-8">
         <button 
           onClick={handleLike}
@@ -513,8 +492,7 @@ const PostCard = ({ post, session, onLikeToggle, onDelete }) => {
           <MessageCircle size={18} /> 
           <span>{comments > 0 ? `${comments} ${comments === 1 ? 'Comment' : 'Comments'}` : 'Comment'}</span>
         </button>
-
-        {/* Share Dropdown Button */}
+ 
         <div className="relative">
           <button 
             onClick={() => setShowShareMenu(!showShareMenu)}
@@ -529,26 +507,25 @@ const PostCard = ({ post, session, onLikeToggle, onDelete }) => {
                 onClick={shareOnWhatsApp}
                 className="w-full text-left px-4 py-2 text-xs text-slate-700 hover:bg-slate-50 flex items-center gap-2 cursor-pointer font-bold"
               >
-                <span>💬</span> Share on WhatsApp
+                <span></span> Share on WhatsApp
               </button>
               <button 
                 onClick={handleInAppShareOpen}
                 className="w-full text-left px-4 py-2 text-xs text-slate-700 hover:bg-slate-50 flex items-center gap-2 cursor-pointer font-bold"
               >
-                <span>✉️</span> In-App Message
+                <span></span> In-App Message
               </button>
               <button 
                 onClick={copyPostLink}
                 className="w-full text-left px-4 py-2 text-xs text-slate-700 hover:bg-slate-50 flex items-center gap-2 cursor-pointer font-bold"
               >
-                <span>🔗</span> Copy Link
+                <span></span> Copy Link
               </button>
             </div>
           )}
         </div>
       </div>
 
-      {/* 4. EXPANDABLE COMMENTS PANEL */}
       {showComments && (
         <div className="px-5 py-4 bg-slate-50/40 border-t border-slate-100">
           <div className="space-y-4">
@@ -570,8 +547,7 @@ const PostCard = ({ post, session, onLikeToggle, onDelete }) => {
               ))
             )}
           </div>
-
-          {/* New Comment Input Field */}
+ 
           <form onSubmit={handleCommentSubmit} className="mt-4 pt-3 border-t border-slate-100">
             <div className="relative flex gap-2">
               <input 
@@ -588,8 +564,7 @@ const PostCard = ({ post, session, onLikeToggle, onDelete }) => {
               >
                 Comment
               </button>
-
-              {/* Autocomplete suggestion popup */}
+ 
               {showSuggestions && (
                 <div className="absolute bottom-full mb-2 left-0 w-64 bg-white border border-slate-150 rounded-2xl shadow-2xl z-30 max-h-40 overflow-y-auto py-1">
                   {filteredSuggestions.map(u => (
@@ -614,8 +589,7 @@ const PostCard = ({ post, session, onLikeToggle, onDelete }) => {
           </form>
         </div>
       )}
-
-      {/* Connection Picker Share Modal */}
+      
       {showInAppModal && (
         <div className="fixed inset-0 z-[70] flex items-center justify-center p-4 bg-charcoal/20 backdrop-blur-[2px]">
           <div className="bg-white w-full max-w-sm rounded-[32px] shadow-2xl flex flex-col max-h-[50vh] overflow-hidden border border-slate-100 animate-in fade-in zoom-in-95 duration-150">

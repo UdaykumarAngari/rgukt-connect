@@ -10,11 +10,10 @@ import java.util.Map;
 @RestControllerAdvice
 public class GlobalExceptionHandler {
 
-    // Catches any RuntimeException thrown anywhere from the Service Layer down
     @ExceptionHandler(RuntimeException.class)
     public ResponseEntity<?> handleRuntimeException(RuntimeException ex) {
         return ResponseEntity
-                .status(HttpStatus.BAD_REQUEST) // 400 Bad Request
+                .status(HttpStatus.BAD_REQUEST) 
                 .body(Map.of("error", ex.getMessage()));
     }
 

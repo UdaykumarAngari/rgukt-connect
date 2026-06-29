@@ -22,13 +22,11 @@ const Register = () => {
         setMessage('');
         setError('');
         try {
-            // 🚀 Send data to your Spring Boot Register Endpoint
             await axios.post('/api/auth/register', formData);
             
             setMessage('Registration successful! Redirecting to login...');
             setFormData({ name: '', idNumber: '', universityEmail: '', password: '' });
-            
-            // 🕒 Wait 2 seconds so the user can read the success message, then route to login
+ 
             setTimeout(() => {
                 navigate('/login');
             }, 2000);

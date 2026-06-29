@@ -17,7 +17,6 @@ public class UserDetails {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    // 🔗 The Foreign Key anchor that maps directly to the users table primary key 'id'
     @OneToOne
     @JoinColumn(name = "user_id", referencedColumnName = "id", nullable = false, unique = true)
     private User user;
@@ -35,10 +34,10 @@ public class UserDetails {
     private String batch;
 
     @Column(name = "profile_photo", columnDefinition = "LONGTEXT")
-    private String profilePhoto; // Holds base64 encoded strings or image URLs
+    private String profilePhoto; 
 
     @Column(columnDefinition = "TEXT")
-    private String description; // LinkedIn-style "About Me" bio section
+    private String description;
 
     @Column(name = "github_url")
     private String githubUrl;

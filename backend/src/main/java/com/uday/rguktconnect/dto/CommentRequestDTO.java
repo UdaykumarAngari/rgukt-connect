@@ -9,5 +9,5 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 public class CommentRequestDTO {
     private String content;
-    private Long parentCommentId; // Null for top-level comments, populated for replies
+    private Long parentCommentId; 
 }

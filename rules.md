@@ -72,3 +72,6 @@ navigate('/home');          // Route second
 
 * **Environment Extraction:** Hardcoded connection URLs (like `http://localhost:4000`) must be extracted into centralized environment files (`.env` or application configuration profiles) before passing the project codebase forward.
 * **Lifecycle Cleanup:** To prevent severe frontend browser memory leaks and hanging background socket ports, all active WebSocket connections must explicitly call their respective termination hooks (`client.deactivate()`) when components unmount or user contexts switch.
+
+
+Note : Dont add comments in the code and make it look like human written code nothing much complex

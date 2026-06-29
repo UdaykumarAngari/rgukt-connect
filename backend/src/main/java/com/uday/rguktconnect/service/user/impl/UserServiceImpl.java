@@ -101,8 +101,6 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public boolean isUserSessionValid(String email) {
-        // Check if the user exists in MySQL. Returns true if present, false if not.for jwt validation
         return userRepository.findByUniversityEmail(email).isPresent();
     }
 }
-

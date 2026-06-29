@@ -14,6 +14,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Service
@@ -44,10 +45,11 @@ public class NotificationServiceImpl implements NotificationService {
 
         Notification saved = notificationRepository.save(notification);
 
-        // Fetch sender's profile photo to display in notification toast/list
-        String senderPhoto = userDetailsRepository.findByUser(sender)
-                .map(UserDetails::getProfilePhoto)
-                .orElse(null);
+        String senderPhoto = null;
+        Optional<UserDetails> detailsOpt = userDetailsRepository.findByUser(sender);
+        if (detailsOpt.isPresent()) {
+            senderPhoto = detailsOpt.get().getProfilePhoto();
+        }
 
         NotificationResponseDTO dto = NotificationResponseDTO.builder()
                 .id(saved.getId())
@@ -60,7 +62,6 @@ public class NotificationServiceImpl implements NotificationService {
                 .createdAt(saved.getCreatedAt())
                 .build();
 
-        // Push real-time notification via STOMP broker to recipient's private queue
         messagingTemplate.convertAndSendToUser(
                 recipient.getId().toString(),
                 "/queue/notifications",
@@ -78,9 +79,11 @@ public class NotificationServiceImpl implements NotificationService {
         List<Notification> notifications = notificationRepository.findByRecipientOrderByCreatedAtDesc(recipient);
 
         return notifications.stream().map(n -> {
-            String senderPhoto = userDetailsRepository.findByUser(n.getSender())
-                    .map(UserDetails::getProfilePhoto)
-                    .orElse(null);
+            String senderPhoto = null;
+            Optional<UserDetails> detailsOpt = userDetailsRepository.findByUser(n.getSender());
+            if (detailsOpt.isPresent()) {
+                senderPhoto = detailsOpt.get().getProfilePhoto();
+            }
 
             return NotificationResponseDTO.builder()
                     .id(n.getId())

@@ -27,14 +27,11 @@ const Profile = ({ session, onLogout }) => {
   const [profile, setProfile] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
-
-  // Modals visibility
   const [showBasicModal, setShowBasicModal] = useState(false);
   const [showProjectModal, setShowProjectModal] = useState(false);
   const [showExpModal, setShowExpModal] = useState(false);
   const [showEduModal, setShowEduModal] = useState(false);
 
-  // Form states
   const [basicForm, setBasicForm] = useState({
     mobileNumber: '',
     personalEmail: '',
@@ -79,7 +76,6 @@ const Profile = ({ session, onLogout }) => {
 
   const [photoUploading, setPhotoUploading] = useState(false);
 
-  // Fetch complete profile on mount
   const fetchProfile = async () => {
     try {
       setLoading(true);
@@ -88,7 +84,6 @@ const Profile = ({ session, onLogout }) => {
         headers: { Authorization: `Bearer ${session.token}` }
       });
       setProfile(res.data);
-      // Pre-fill basic form only if it's the own profile
       if (isOwnProfile) {
         setBasicForm({
           mobileNumber: res.data.mobileNumber || '',
@@ -155,7 +150,6 @@ const Profile = ({ session, onLogout }) => {
     }
   };
 
-  // Projects CRUD handlers
   const openProjectModal = (proj = null) => {
     if (proj) {
       setProjectForm({
@@ -175,12 +169,10 @@ const Profile = ({ session, onLogout }) => {
     e.preventDefault();
     try {
       if (projectForm.id) {
-        // Update
         await axios.put(`/api/users/profile/projects/${projectForm.id}`, projectForm, {
           headers: { Authorization: `Bearer ${session.token}` }
         });
       } else {
-        // Create
         await axios.post('/api/users/profile/projects', projectForm, {
           headers: { Authorization: `Bearer ${session.token}` }
         });
@@ -206,7 +198,6 @@ const Profile = ({ session, onLogout }) => {
     }
   };
 
-  // Experience CRUD handlers
   const openExpModal = (exp = null) => {
     if (exp) {
       setExpForm({
@@ -246,12 +237,10 @@ const Profile = ({ session, onLogout }) => {
         payload.endDate = null;
       }
       if (expForm.id) {
-        // Update
         await axios.put(`/api/users/profile/experiences/${expForm.id}`, payload, {
           headers: { Authorization: `Bearer ${session.token}` }
         });
       } else {
-        // Create
         await axios.post('/api/users/profile/experiences', payload, {
           headers: { Authorization: `Bearer ${session.token}` }
         });
@@ -277,7 +266,6 @@ const Profile = ({ session, onLogout }) => {
     }
   };
 
-  // Education CRUD handlers
   const openEduModal = (edu = null) => {
     if (edu) {
       setEduForm({
@@ -307,12 +295,10 @@ const Profile = ({ session, onLogout }) => {
     e.preventDefault();
     try {
       if (eduForm.id) {
-        // Update
         await axios.put(`/api/users/profile/education/${eduForm.id}`, eduForm, {
           headers: { Authorization: `Bearer ${session.token}` }
         });
       } else {
-        // Create
         await axios.post('/api/users/profile/education', eduForm, {
           headers: { Authorization: `Bearer ${session.token}` }
         });
@@ -369,12 +355,10 @@ const Profile = ({ session, onLogout }) => {
           </div>
         ) : (
           <>
-        {/* Banner and Header Info Card */}
         <div className="bg-white rounded-[32px] overflow-hidden shadow-sm border border-slate-100">
           <div className="h-40 bg-gradient-to-r from-rgukt-maroon to-red-900"></div>
           <div className="px-8 pb-8">
             <div className="relative flex justify-between items-end -mt-16 mb-6">
-              {/* Avatar Wrapper with Upload Option */}
               <div className="relative group">
                 <div className="w-32 h-32 bg-rgukt-slate rounded-full border-4 border-white flex items-center justify-center overflow-hidden shadow-md text-4xl font-bold text-rgukt-maroon">
                   {profile.profilePhoto ? (
@@ -419,8 +403,7 @@ const Profile = ({ session, onLogout }) => {
             </div>
           </div>
         </div>
-
-        {/* Description Bio Card */}
+ 
         <div className="bg-white p-8 rounded-[32px] border border-slate-100 shadow-sm mt-6">
           <h3 className="font-bold text-charcoal text-lg mb-3">About Me</h3>
           <p className="text-slate-600 text-sm leading-relaxed whitespace-pre-wrap">
@@ -429,9 +412,7 @@ const Profile = ({ session, onLogout }) => {
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mt-6">
-          {/* Left Column: Socials and Stats */}
           <div className="space-y-6">
-            {/* Social Links */}
             <div className="bg-white p-6 rounded-[32px] border border-slate-100 shadow-sm">
               <h3 className="font-bold text-charcoal mb-4">On the Web</h3>
               <div className="space-y-3">
@@ -468,8 +449,7 @@ const Profile = ({ session, onLogout }) => {
                 )}
               </div>
             </div>
-
-            {/* Statistics */}
+ 
             <div className="bg-white p-6 rounded-[32px] border border-slate-100 shadow-sm">
               <h3 className="font-bold text-charcoal mb-4">Stats</h3>
               <div className="grid grid-cols-2 gap-4">
@@ -485,10 +465,7 @@ const Profile = ({ session, onLogout }) => {
             </div>
           </div>
 
-          {/* Right Column: Experience, Projects, Education */}
           <div className="md:col-span-2 space-y-6">
-            
-            {/* Experiences Section */}
             <div className="bg-white p-6 rounded-[32px] border border-slate-100 shadow-sm">
               <div className="flex justify-between items-center mb-4">
                 <h3 className="font-bold text-charcoal flex items-center gap-2 text-lg">
@@ -529,8 +506,7 @@ const Profile = ({ session, onLogout }) => {
                 )}
               </div>
             </div>
-
-            {/* Featured Projects Section */}
+ 
             <div className="bg-white p-6 rounded-[32px] border border-slate-100 shadow-sm">
               <div className="flex justify-between items-center mb-4">
                 <h3 className="font-bold text-charcoal flex items-center gap-2 text-lg">
@@ -580,7 +556,6 @@ const Profile = ({ session, onLogout }) => {
               </div>
             </div>
 
-            {/* Education Section */}
             <div className="bg-white p-6 rounded-[32px] border border-slate-100 shadow-sm">
               <div className="flex justify-between items-center mb-4">
                 <h3 className="font-bold text-charcoal flex items-center gap-2 text-lg">
@@ -626,10 +601,6 @@ const Profile = ({ session, onLogout }) => {
     </main>
 
       <FloatingDock />
-
-      {/* ================= MODALS ================= */}
-
-      {/* 1. Basic Info Modal */}
       {showBasicModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm p-4">
           <div className="bg-white rounded-3xl w-full max-w-lg p-6 shadow-xl border border-slate-100 flex flex-col max-h-[90vh]">
@@ -745,7 +716,6 @@ const Profile = ({ session, onLogout }) => {
         </div>
       )}
 
-      {/* 2. Project Modal */}
       {showProjectModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm p-4">
           <div className="bg-white rounded-3xl w-full max-w-lg p-6 shadow-xl border border-slate-100">
@@ -820,8 +790,6 @@ const Profile = ({ session, onLogout }) => {
           </div>
         </div>
       )}
-
-      {/* 3. Experience Modal */}
       {showExpModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm p-4">
           <div className="bg-white rounded-3xl w-full max-w-lg p-6 shadow-xl border border-slate-100 max-h-[90vh] flex flex-col">
@@ -958,8 +926,7 @@ const Profile = ({ session, onLogout }) => {
           </div>
         </div>
       )}
-
-      {/* 4. Education Modal */}
+      
       {showEduModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm p-4">
           <div className="bg-white rounded-3xl w-full max-w-lg p-6 shadow-xl border border-slate-100">

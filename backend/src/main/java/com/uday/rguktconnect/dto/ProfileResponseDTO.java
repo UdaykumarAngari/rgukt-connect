@@ -10,15 +10,13 @@ import java.util.List;
 @Data
 @Builder
 public class ProfileResponseDTO {
-    // Core database identifier
+
     private Long id;
 
-    // Core Identity info
     private String idNumber;
     private String name;
     private String universityEmail;
 
-    // Detailed Profile Section Info
     private String mobileNumber;
     private String personalEmail;
     private String branch;
@@ -29,7 +27,6 @@ public class ProfileResponseDTO {
     private String linkedinUrl;
     private Integer mentoredStudentsCount;
 
-    // Relational Collections Arrays
     private List<Project> projects;
     private List<UserExperiences> experiences;
     private List<EducationDetail> education;

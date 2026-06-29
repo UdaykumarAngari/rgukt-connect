@@ -8,5 +8,5 @@ import java.util.List;
 
 @Repository
 public interface UserExperienceRepository extends JpaRepository<UserExperiences, Long> {
-    List<UserExperiences> findByUser(User user); // 🔍 Pulls all work milestones
+    List<UserExperiences> findByUser(User user); 
 }

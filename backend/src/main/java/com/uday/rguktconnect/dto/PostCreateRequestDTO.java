@@ -8,7 +8,7 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @NoArgsConstructor
 public class PostCreateRequestDTO {
-    private String type; // "text", "code", "referral"
+    private String type; 
     private String content;
     private String codeSnippet;
     private String company;

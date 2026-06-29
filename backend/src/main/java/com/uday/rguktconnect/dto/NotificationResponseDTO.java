@@ -8,7 +8,7 @@ import java.time.LocalDateTime;
 @Builder
 public class NotificationResponseDTO {
     private Long id;
-    private String type; // CONNECTION_REQUEST, CONNECTION_ACCEPTED
+    private String type;  
     private Long senderId;
     private String senderName;
     private String senderPhoto;

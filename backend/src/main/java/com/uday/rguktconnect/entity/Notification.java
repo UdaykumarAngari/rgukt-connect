@@ -22,17 +22,16 @@ public class Notification {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "recipient_id", nullable = false)
-    private User recipient; // The user receiving the notification
+    private User recipient;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "sender_id", nullable = false)
-    private User sender; // The user who triggered the action
+    private User sender;  
 
     @Column(nullable = false, length = 50)
-    private String type; // CONNECTION_REQUEST, CONNECTION_ACCEPTED
-
+    private String type; 
     @Column(name = "related_id")
-    private Long relatedId; // The ID of the connection record
+    private Long relatedId;  
 
     @Builder.Default
     @Column(name = "is_read", nullable = false)

@@ -18,14 +18,13 @@ public class MyUserDetailsService implements UserDetailsService {
 
     @Override
     public UserDetails loadUserByUsername(String email) throws UsernameNotFoundException {
-        // Fetch the user from MySQL by their university email
         User user = userRepository.findByUniversityEmail(email)
                 .orElseThrow(() -> new UsernameNotFoundException("User not found with email: " + email));
 
         return new org.springframework.security.core.userdetails.User(
                 user.getUniversityEmail(),
                 user.getPassword(),
-                Collections.emptyList() // Pass empty authorities/roles list
+                Collections.emptyList() 
         );
     }
 }

@@ -138,9 +138,11 @@ public class ConnectionServiceImpl implements ConnectionService {
             map.put("name", u.getName());
             map.put("universityEmail", u.getUniversityEmail());
             
-            String photo = userDetailsRepository.findByUser(u)
-                    .map(com.uday.rguktconnect.entity.UserDetails::getProfilePhoto)
-                    .orElse(null);
+            String photo = null;
+            Optional<com.uday.rguktconnect.entity.UserDetails> detailsOpt = userDetailsRepository.findByUser(u);
+            if (detailsOpt.isPresent()) {
+                photo = detailsOpt.get().getProfilePhoto();
+            }
             map.put("profilePhoto", photo);
             result.add(map);
         }

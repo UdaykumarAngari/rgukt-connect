@@ -1,5 +1,4 @@
 package com.uday.rguktconnect.controller;
-
 import com.uday.rguktconnect.entity.ChatMessage;
 import com.uday.rguktconnect.entity.User;
 import com.uday.rguktconnect.repository.connection.ConnectionRepository;
@@ -46,7 +45,6 @@ public class MessageController {
             return ResponseEntity.status(403).body(Map.of("error", "You can only message connected members"));
         }
 
-        // Mark incoming messages from the target user as read
         chatMessageRepository.markThreadAsRead(targetUserId, currentUser.getId());
 
         List<ChatMessage> history = chatMessageRepository.findChatHistory(currentUser.getId(), targetUserId);
@@ -115,7 +113,7 @@ public class MessageController {
         String content = payload.get("content").toString();
 
         if (!connectionRepository.areUsersConnected(senderId, receiverId)) {
-            return; // Drop packet silently if connection is missing or severed
+            return;
         }
 
         User sender = userRepository.findById(senderId).orElse(null);

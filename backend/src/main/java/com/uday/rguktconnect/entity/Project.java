@@ -23,14 +23,14 @@ public class Project {
     private User user;
 
     @Column(nullable = false)
-    private String title; // e.g., QR Intern Logger, OneCode SaaS
+    private String title; 
 
     @Column(columnDefinition = "TEXT")
     private String description;
 
     @Column(name = "project_url")
-    private String projectUrl; // Live web preview URL
+    private String projectUrl; 
 
     @Column(name = "repo_url")
-    private String repoUrl; // GitHub codebase repository link
+    private String repoUrl; 
 }

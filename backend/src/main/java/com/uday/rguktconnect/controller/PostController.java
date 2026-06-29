@@ -37,7 +37,6 @@ public class PostController {
         ).getPrincipal();
     }
 
-    // Upload post attachment media (photo/video)
     @PostMapping("/media")
     public ResponseEntity<?> uploadMedia(@RequestParam("file") MultipartFile file) {
         try {
@@ -51,14 +50,12 @@ public class PostController {
         }
     }
 
-    // Get all posts for the community feed
     @GetMapping
     public ResponseEntity<List<PostResponseDTO>> getCommunityFeed() {
         List<PostResponseDTO> feed = postService.getAllPosts(getAuthenticatedEmail());
         return ResponseEntity.ok(feed);
     }
 
-    // Create a new community post
     @PostMapping
     public ResponseEntity<?> createPost(@RequestBody PostCreateRequestDTO requestDTO) {
         try {
@@ -70,7 +67,6 @@ public class PostController {
         }
     }
 
-    // Toggle like state on a post
     @PostMapping("/{postId}/like")
     public ResponseEntity<?> toggleLike(@PathVariable Long postId) {
         try {
@@ -82,7 +78,6 @@ public class PostController {
         }
     }
 
-    // Delete a post by ID
     @DeleteMapping("/{postId}")
     public ResponseEntity<?> deletePost(@PathVariable Long postId) {
         try {

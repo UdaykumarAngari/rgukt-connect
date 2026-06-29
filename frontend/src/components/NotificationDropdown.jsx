@@ -14,15 +14,12 @@ const NotificationDropdown = ({ isOpen, onClose }) => {
   if (!isOpen) return null;
 
   const handleNotificationClick = async (notif) => {
-    // Mark as read
     if (!notif.isRead) {
       await markNotificationAsRead(notif.id);
     }
     
-    // Close dropdown
     if (onClose) onClose();
 
-    // Redirect based on notification type
     if (notif.type === 'CONNECTION_REQUEST') {
       navigate('/network');
     } else if (notif.type === 'CONNECTION_ACCEPTED') {
@@ -51,7 +48,6 @@ const NotificationDropdown = ({ isOpen, onClose }) => {
 
   return (
     <div className="absolute top-12 right-0 w-80 sm:w-96 bg-white/95 backdrop-blur-md rounded-[24px] shadow-2xl border border-slate-100 z-[100] animate-in fade-in slide-in-from-top-5 duration-200 flex flex-col overflow-hidden">
-      {/* Header */}
       <div className="p-4 border-b border-slate-100 flex justify-between items-center bg-white/50">
         <h3 className="font-extrabold text-charcoal text-[14px]">Notifications</h3>
         {notificationsList.some(n => !n.isRead) && (
@@ -64,7 +60,6 @@ const NotificationDropdown = ({ isOpen, onClose }) => {
         )}
       </div>
 
-      {/* List */}
       <div className="max-h-[350px] overflow-y-auto custom-scrollbar flex-1">
         {notificationsList.length > 0 ? (
           notificationsList.map(notif => {
@@ -81,7 +76,7 @@ const NotificationDropdown = ({ isOpen, onClose }) => {
                   !notif.isRead ? 'bg-rgukt-maroon/[0.02]' : ''
                 }`}
               >
-                {/* Sender Avatar */}
+              
                 <div className="relative shrink-0">
                   <div className="w-10 h-10 bg-rgukt-slate rounded-full flex items-center justify-center font-bold text-rgukt-maroon text-xs border border-slate-100 overflow-hidden">
                     {notif.senderPhoto ? (
@@ -90,7 +85,7 @@ const NotificationDropdown = ({ isOpen, onClose }) => {
                       initials
                     )}
                   </div>
-                  {/* Small Type Badge Overlay */}
+                 
                   <div className={`absolute -bottom-1 -right-1 w-5 h-5 rounded-full flex items-center justify-center text-white border-2 border-white ${
                     isRequest ? 'bg-blue-500' : 'bg-emerald-500'
                   }`}>
@@ -98,7 +93,6 @@ const NotificationDropdown = ({ isOpen, onClose }) => {
                   </div>
                 </div>
 
-                {/* Content */}
                 <div className="flex-1 min-w-0 pr-4">
                   <p className={`text-xs leading-snug ${!notif.isRead ? 'font-bold text-charcoal' : 'text-slate-500'}`}>
                     <span className="font-extrabold text-charcoal">{notif.senderName}</span>
@@ -109,7 +103,6 @@ const NotificationDropdown = ({ isOpen, onClose }) => {
                   </span>
                 </div>
 
-                {/* Unread dot */}
                 {!notif.isRead && (
                   <span className="absolute right-4 w-2 h-2 bg-rgukt-maroon rounded-full"></span>
                 )}

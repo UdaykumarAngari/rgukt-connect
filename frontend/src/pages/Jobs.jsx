@@ -5,7 +5,7 @@ import FloatingDock from '../components/FloatingDock';
 import JobCard from '../components/JobCard';
 import CreatePostModal from '../components/CreatePostModal';
 
-// Data imports
+
 import { mockJobs } from '../data/jobs';
 
 const Jobs = ({ session, onLogout }) => {
@@ -13,7 +13,6 @@ const Jobs = ({ session, onLogout }) => {
   const [searchQuery, setSearchQuery] = useState("");
   const [isModalOpen, setIsModalOpen] = useState(false);
 
-  // Filter logic for Jobs (Search by Company or Role)
   const filteredJobs = mockJobs.filter(j => 
     j.company.toLowerCase().includes(searchQuery.toLowerCase()) || 
     j.role.toLowerCase().includes(searchQuery.toLowerCase())
@@ -21,7 +20,6 @@ const Jobs = ({ session, onLogout }) => {
 
   return (
     <div className="min-h-screen bg-rgukt-slate flex flex-col">
-      {/* Global Navbar */}
       <Navbar 
         isLanding={false} 
         searchQuery={searchQuery} 
@@ -31,7 +29,6 @@ const Jobs = ({ session, onLogout }) => {
       />
 
       <main className="flex-1 max-w-6xl mx-auto w-full px-4 pt-8 pb-60">
-        {/* Page Header */}
         <div className="flex justify-between items-end mb-8 px-2">
           <div>
             <h2 className="text-2xl font-bold text-charcoal tracking-tight">Career Opportunities</h2>
@@ -45,14 +42,12 @@ const Jobs = ({ session, onLogout }) => {
           </span>
         </div>
 
-        {/* Jobs Grid */}
         <section className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {filteredJobs.map(job => (
             <JobCard key={job.id} job={job} />
           ))}
         </section>
-
-        {/* Empty State */}
+ 
         {filteredJobs.length === 0 && (
           <div className="bg-white p-20 rounded-[32px] border border-slate-100 text-center shadow-sm">
              <div className="text-4xl mb-4 opacity-20">💼</div>
@@ -60,8 +55,7 @@ const Jobs = ({ session, onLogout }) => {
           </div>
         )}
       </main>
-
-      {/* Post Modal */}
+ 
       <CreatePostModal 
         isOpen={isModalOpen} 
         onClose={() => setIsModalOpen(false)} 

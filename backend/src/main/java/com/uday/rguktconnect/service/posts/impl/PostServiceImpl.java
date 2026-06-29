@@ -89,23 +89,19 @@ public class PostServiceImpl implements PostService {
         if (!post.getAuthor().getUniversityEmail().equalsIgnoreCase(email)) {
             throw new RuntimeException("Unauthorized deletion request");
         }
-
-        // Fetch all comments and replies for this post
+ 
         List<Comment> comments = commentRepository.findByPost(post);
-        
-        // Segregate nested replies from top-level comments
+  
         List<Comment> replies = comments.stream()
                 .filter(c -> c.getParentComment() != null)
                 .collect(Collectors.toList());
         List<Comment> topLevel = comments.stream()
                 .filter(c -> c.getParentComment() == null)
                 .collect(Collectors.toList());
-
-        // Delete nested replies first to clear parent_id references
+ 
         commentRepository.deleteAll(replies);
         commentRepository.flush();
-
-        // Delete top-level comments next
+ 
         commentRepository.deleteAll(topLevel);
         commentRepository.flush();
 
@@ -118,7 +114,7 @@ public class PostServiceImpl implements PostService {
         }
         Duration duration = Duration.between(dateTime, LocalDateTime.now());
         long seconds = duration.getSeconds();
-        if (seconds < 0) seconds = 0; // Handle small clock drifts
+        if (seconds < 0) seconds = 0; 
         if (seconds < 60) return "Just now";
         long minutes = seconds / 60;
         if (minutes < 60) return minutes + "m ago";

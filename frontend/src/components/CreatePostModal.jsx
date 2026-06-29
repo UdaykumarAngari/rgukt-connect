@@ -3,7 +3,7 @@ import { X, Code, Image as ImageIcon, Loader2 } from 'lucide-react';
 import axios from 'axios';
 
 const CreatePostModal = ({ isOpen, onClose, onSubmit, session }) => {
-  // 1. STATE MANAGEMENT
+
   const [postType, setPostType] = useState('text');
   const [content, setContent] = useState('');
   const [codeSnippet, setCodeSnippet] = useState('');
@@ -11,15 +11,13 @@ const CreatePostModal = ({ isOpen, onClose, onSubmit, session }) => {
   const [selectedFile, setSelectedFile] = useState(null);
   const [loading, setLoading] = useState(false);
   const fileInputRef = useRef(null);
-
-  // 2. LOGIC HANDLERS
+ 
   if (!isOpen) return null;
 
   const handleFileChange = (e) => {
     const file = e.target.files[0];
     if (file) {
       setSelectedFile(file);
-      // Create a temporary local URL for the preview
       setSelectedMedia(URL.createObjectURL(file));
     }
   };
@@ -31,7 +29,6 @@ const CreatePostModal = ({ isOpen, onClose, onSubmit, session }) => {
     try {
       let uploadedMediaUrl = null;
 
-      // 1. If a file was selected, upload it to AWS S3 first
       if (selectedFile) {
         const formData = new FormData();
         formData.append('file', selectedFile);
@@ -45,7 +42,6 @@ const CreatePostModal = ({ isOpen, onClose, onSubmit, session }) => {
         uploadedMediaUrl = mediaRes.data.mediaUrl;
       }
 
-      // 2. Send the post creation request to backend
       const res = await axios.post('/api/posts', {
         type: postType,
         content: content,
@@ -57,10 +53,8 @@ const CreatePostModal = ({ isOpen, onClose, onSubmit, session }) => {
         }
       });
 
-      // 3. Callback parent to update feed
       onSubmit(res.data);
-      
-      // Reset state for next time
+
       setContent('');
       setCodeSnippet('');
       setSelectedMedia(null);
@@ -75,13 +69,11 @@ const CreatePostModal = ({ isOpen, onClose, onSubmit, session }) => {
   };
 
   return (
-    /* OUTER OVERLAY: items-start + mt-20 ensures we don't cover the FloatingDock */
+    
     <div className="fixed inset-0 z-[60] flex items-start justify-center p-4 bg-charcoal/20 backdrop-blur-[2px]">
       
-      {/* MODAL CONTAINER: max-h-[65vh] keeps it short and professional */}
       <div className="mt-20 bg-white w-full max-w-lg rounded-[32px] shadow-2xl flex flex-col max-h-[65vh] overflow-hidden border border-slate-100 animate-in fade-in zoom-in duration-200">
-        
-        {/* A. HEADER (Pinned) */}
+       
         <div className="flex justify-between items-center px-6 py-4 border-b border-slate-100 shrink-0 bg-white">
           <h3 className="font-bold text-charcoal text-lg">Create Post</h3>
           <button 
@@ -91,8 +83,7 @@ const CreatePostModal = ({ isOpen, onClose, onSubmit, session }) => {
             <X size={18} className="text-slate-400" />
           </button>
         </div>
-
-        {/* B. SCROLLABLE CONTENT AREA */}
+ 
         <div className="flex-1 overflow-y-auto p-6 space-y-4">
           <textarea 
             placeholder="What's on your mind, Udaykumar?"
@@ -123,8 +114,7 @@ const CreatePostModal = ({ isOpen, onClose, onSubmit, session }) => {
             />
           )}
         </div>
-
-        {/* C. FOOTER (Pinned at the bottom of the modal) */}
+ 
         <div className="px-6 py-4 bg-slate-50/50 border-t border-slate-100 shrink-0">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-2">

@@ -4,7 +4,6 @@ import FloatingDock from '../components/FloatingDock';
 import UserCard from '../components/UserCard';
 import CreatePostModal from '../components/CreatePostModal';
 import axios from 'axios';
-// Removed mockUsers import to connect with live backend database
 
 const Network = ({ session, onLogout }) => {
   const [searchQuery, setSearchQuery] = useState("");
@@ -78,7 +77,6 @@ const Network = ({ session, onLogout }) => {
     setRefreshTrigger(prev => prev + 1);
   };
 
-  // Filter logic for Users (Search by Name, Email, Headline, Branch, or Company/Role Experience)
   const filteredUsers = users.filter(u => {
     const search = searchQuery.toLowerCase();
     
@@ -100,7 +98,6 @@ const Network = ({ session, onLogout }) => {
 
   return (
     <div className="min-h-screen bg-rgukt-slate flex flex-col font-sans">
-      {/* Global Navbar */}
       <Navbar 
         isLanding={false} 
         searchQuery={searchQuery} 
@@ -110,7 +107,6 @@ const Network = ({ session, onLogout }) => {
       />
 
       <main className="flex-1 max-w-6xl mx-auto w-full px-4 pt-8 pb-60">
-        {/* Page Header */}
         <div className="flex justify-between items-end mb-8 px-2">
           <div>
             <h2 className="text-2xl font-bold text-charcoal tracking-tight">Alumni Directory</h2>
@@ -123,8 +119,7 @@ const Network = ({ session, onLogout }) => {
             {filteredUsers.length} People
           </span>
         </div>
-
-        {/* Real Pending Invites Section */}
+ 
         {pendingInvites.length > 0 && (
           <div className="bg-white p-6 rounded-[32px] border border-slate-100 shadow-sm mb-8">
             <h3 className="font-bold text-charcoal mb-4 flex items-center gap-2 text-sm uppercase tracking-wider">
@@ -163,7 +158,6 @@ const Network = ({ session, onLogout }) => {
           </div>
         )}
 
-        {/* Directory Grid - 3 columns for a professional directory feel */}
         {loading ? (
           <section className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
             {[...Array(6)].map((_, i) => (
@@ -188,8 +182,6 @@ const Network = ({ session, onLogout }) => {
             ))}
           </section>
         )}
-
-        {/* Empty State */}
         {filteredUsers.length === 0 && (
           <div className="bg-white p-20 rounded-[32px] border border-slate-100 text-center shadow-sm">
              <div className="text-4xl mb-4 opacity-20">👥</div>
@@ -198,7 +190,6 @@ const Network = ({ session, onLogout }) => {
         )}
       </main>
 
-      {/* Modal - Kept here so the "+" button in the dock still works */}
       <CreatePostModal 
         isOpen={isModalOpen} 
         onClose={() => setIsModalOpen(false)} 

@@ -15,13 +15,11 @@ export const NotificationProvider = ({ session, children }) => {
   const stompClientRef = useRef(null);
   const messageListenersRef = useRef([]);
   const activeChatUserIdRef = useRef(null);
-
-  // Keep ref in sync to avoid stale closures in WebSocket handlers
+ 
   useEffect(() => {
     activeChatUserIdRef.current = activeChatUserId;
   }, [activeChatUserId]);
-
-  // Register/unregister callbacks for real-time messages (used by Messages.jsx)
+ 
   const registerMessageListener = (callback) => {
     messageListenersRef.current.push(callback);
   };
@@ -29,8 +27,7 @@ export const NotificationProvider = ({ session, children }) => {
   const unregisterMessageListener = (callback) => {
     messageListenersRef.current = messageListenersRef.current.filter(l => l !== callback);
   };
-
-  // Helper to publish messages over STOMP
+ 
   const sendStompMessage = (destination, payload) => {
     if (stompClientRef.current && stompClientRef.current.connected) {
       stompClientRef.current.publish({
@@ -41,8 +38,7 @@ export const NotificationProvider = ({ session, children }) => {
     }
     return false;
   };
-
-  // Fetch initial unread counts and notifications list
+ 
   const fetchUnreadCounts = async () => {
     if (!session) return;
     try {
@@ -58,8 +54,7 @@ export const NotificationProvider = ({ session, children }) => {
       console.error('Failed to fetch initial notifications / unread counts:', err);
     }
   };
-
-  // Mark a single notification as read
+ 
   const markNotificationAsRead = async (id) => {
     if (!session) return;
     try {
@@ -72,8 +67,7 @@ export const NotificationProvider = ({ session, children }) => {
       console.error('Failed to mark notification as read:', err);
     }
   };
-
-  // Mark all notifications as read
+ 
   const markAllNotificationsAsRead = async () => {
     if (!session) return;
     try {
@@ -86,11 +80,9 @@ export const NotificationProvider = ({ session, children }) => {
       console.error('Failed to mark all notifications as read:', err);
     }
   };
-
-  // Initialize WebSockets and load data
+ 
   useEffect(() => {
     if (!session) {
-      // Clear state on logout
       setUnreadMessages(0);
       setUnreadNotifications(0);
       setNotificationsList([]);
@@ -101,10 +93,8 @@ export const NotificationProvider = ({ session, children }) => {
       return;
     }
 
-    // Load initial counts
     fetchUnreadCounts();
-
-    // Configure STOMP Client
+ 
     const wsProtocol = window.location.protocol === 'https:' ? 'wss' : 'ws';
     const brokerURL = `${wsProtocol}://${window.location.host}/ws-chat/websocket`;
 
@@ -114,7 +104,6 @@ export const NotificationProvider = ({ session, children }) => {
         Authorization: `Bearer ${session.token}`
       },
       debug: (str) => {
-        // Subtle debug console logging
       },
       reconnectDelay: 5000,
       heartbeatIncoming: 4000,
@@ -122,14 +111,10 @@ export const NotificationProvider = ({ session, children }) => {
     });
 
     const handleIncomingMessage = (msg) => {
-      // If we are currently active in this chat thread, don't increment the global unread count
       if (activeChatUserIdRef.current === msg.sender.id || msg.sender.id === session.id) {
-        // Already read or sent by us
       } else {
         setUnreadMessages(prev => prev + 1);
       }
-
-      // Dispatch to all registered page listeners
       messageListenersRef.current.forEach(listener => {
         try {
           listener(msg);
@@ -140,13 +125,10 @@ export const NotificationProvider = ({ session, children }) => {
     };
 
     const handleIncomingNotification = (notif) => {
-      // Increment unread count
       setUnreadNotifications(prev => prev + 1);
       
-      // Prepend to list
       setNotificationsList(prev => [notif, ...prev]);
-
-      // Play a premium sound or trigger browser notification if allowed
+ 
       try {
         const audio = new Audio('https://assets.mixkit.co/active_storage/sfx/2869/2869-500.wav');
         audio.volume = 0.2;
@@ -157,7 +139,6 @@ export const NotificationProvider = ({ session, children }) => {
     client.onConnect = () => {
       console.log('[Global WS]: Connected successfully.');
 
-      // 1. Subscribe to live chat messages
       client.subscribe('/user/queue/messages', (message) => {
         try {
           handleIncomingMessage(JSON.parse(message.body));
@@ -165,8 +146,7 @@ export const NotificationProvider = ({ session, children }) => {
           console.error('Error parsing WS message:', e);
         }
       });
-
-      // 2. Subscribe to live notifications (connection requests, acceptances)
+ 
       client.subscribe('/user/queue/notifications', (message) => {
         try {
           handleIncomingNotification(JSON.parse(message.body));

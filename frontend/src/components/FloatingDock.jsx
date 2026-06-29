@@ -8,14 +8,12 @@ const FloatingDock = ({ onPlusClick }) => {
   const location = useLocation();
   const { unreadMessages } = useNotifications();
 
-  // Helper function to check if the current URL matches the button path
   const isActive = (path) => location.pathname === path;
 
   return (
     <div className="fixed bottom-8 left-0 right-0 flex justify-center z-50">
       <nav className="flex items-center gap-1.5 md:gap-2.5 bg-white/90 backdrop-blur-md px-6 py-2.5 rounded-full border border-slate-200 shadow-dock">
-        
-        {/* Home Button */}
+   
         <button 
           onClick={() => navigate('/home')}
           className={`p-2.5 rounded-full transition-colors cursor-pointer ${
@@ -25,7 +23,6 @@ const FloatingDock = ({ onPlusClick }) => {
           <Home size={22} fill={isActive('/home') ? "currentColor" : "none"} />
         </button>
  
-        {/* Network Button */}
         <button 
           onClick={() => navigate('/network')}
           className={`p-2.5 rounded-full transition-colors cursor-pointer ${
@@ -35,7 +32,6 @@ const FloatingDock = ({ onPlusClick }) => {
           <Users size={22} fill={isActive('/network') ? "currentColor" : "none"} />
         </button>
 
-        {/* Create Post Button */}
         <div className="relative px-2">
           <button 
             onClick={onPlusClick}
@@ -45,7 +41,6 @@ const FloatingDock = ({ onPlusClick }) => {
           </button>
         </div>
 
-        {/* Jobs Button */}
         <button 
           onClick={() => navigate('/jobs')}
           className={`p-2.5 rounded-full transition-colors cursor-pointer ${
@@ -54,8 +49,7 @@ const FloatingDock = ({ onPlusClick }) => {
         >
           <Briefcase size={22} fill={isActive('/jobs') ? "currentColor" : "none"} />
         </button>
-
-        {/* Messages Button */}
+ 
         <button 
           onClick={() => navigate('/messages')}
           className={`p-2.5 rounded-full transition-colors cursor-pointer relative ${

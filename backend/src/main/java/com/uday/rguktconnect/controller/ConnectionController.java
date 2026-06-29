@@ -1,7 +1,6 @@
 package com.uday.rguktconnect.controller;
 
 import com.uday.rguktconnect.entity.Connection;
-import com.uday.rguktconnect.entity.User;
 import com.uday.rguktconnect.service.connection.impl.ConnectionServiceImpl;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -44,8 +43,6 @@ public class ConnectionController {
         connectionService.rejectOrCancelConnection(getAuthenticatedEmail(), requestId);
         return ResponseEntity.ok(Map.of("message", "Connection link removed successfully"));
     }
-
-
 
     @GetMapping("/status/{targetUserId}")
     public ResponseEntity<?> getStatus(@PathVariable Long targetUserId) {

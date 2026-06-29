@@ -8,5 +8,5 @@ import java.util.List;
 
 @Repository
 public interface EducationDetailRepository extends JpaRepository<EducationDetail, Long> {
-    List<EducationDetail> findByUser(User user); // 🔍 Pulls all degrees/schools
+    List<EducationDetail> findByUser(User user); 
 }

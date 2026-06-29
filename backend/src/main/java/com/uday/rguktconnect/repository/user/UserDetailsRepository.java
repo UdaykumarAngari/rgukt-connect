@@ -9,6 +9,5 @@ import java.util.Optional;
 
 @Repository
 public interface UserDetailsRepository extends JpaRepository<UserDetails, Long> {
-    // 🔍 Find the profile details belonging to a specific User entity
     Optional<UserDetails> findByUser(User user);
 }

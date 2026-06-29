@@ -26,7 +26,6 @@ public class FileStorageService {
     }
 
     public String uploadProfilePhoto(MultipartFile file, String idNumber, String oldPhotoUrl) {
-        // Delete the old profile photo from S3 if it exists
         if (oldPhotoUrl != null && !oldPhotoUrl.isEmpty() && !oldPhotoUrl.contains("default-avatar")) {
             try {
                 String s3Key = oldPhotoUrl.substring(oldPhotoUrl.indexOf(".com/") + 5);

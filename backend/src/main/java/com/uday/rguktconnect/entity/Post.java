@@ -26,7 +26,7 @@ public class Post {
     private User author;
 
     @Column(nullable = false, length = 20)
-    private String type; // "text", "code", "referral"
+    private String type; 
 
     @Column(columnDefinition = "TEXT", nullable = false)
     private String content;

@@ -4,7 +4,6 @@ import com.uday.rguktconnect.dto.PostCreateRequestDTO;
 import com.uday.rguktconnect.dto.PostResponseDTO;
 
 import java.util.List;
-
 public interface PostService {
 
     PostResponseDTO createPost(String authorEmail, PostCreateRequestDTO requestDTO);

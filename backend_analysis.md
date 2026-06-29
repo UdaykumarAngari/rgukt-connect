@@ -8,7 +8,6 @@ This document provides a technical analysis of the backend implementations prese
 
 The repository features two distinct backend implementations side by side:
 1. **`backend/`**: A Java Spring Boot application (serving on port `4000`).
-2. **`backend-mern/`**: A Node.js / Express / MongoDB application (serving on port `5000`).
 
 Currently, the frontend points to the **Spring Boot backend** on port `4000` for authentication (registration and login), while other features like messaging and profiles currently rely on mock data on the frontend, even though the Spring Boot backend has implementations for them.
 

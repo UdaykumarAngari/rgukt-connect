@@ -1,4 +1,3 @@
-// src/components/JobCard.jsx
 import React from 'react';
 import { MapPin, Briefcase, DollarSign, Send } from 'lucide-react';
 
@@ -7,7 +6,7 @@ const JobCard = ({ job }) => {
     <div className="bg-white rounded-[32px] border border-slate-100 p-6 shadow-sm hover:shadow-md transition-all group">
       <div className="flex justify-between items-start mb-4">
         <div className="flex gap-4">
-          {/* Company Logo Placeholder */}
+         
           <div className="w-14 h-14 bg-slate-50 border border-slate-100 rounded-2xl flex items-center justify-center font-bold text-slate-400 text-xl">
             {job.logo}
           </div>

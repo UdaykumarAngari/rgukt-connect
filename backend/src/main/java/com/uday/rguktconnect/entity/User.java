@@ -5,8 +5,6 @@ import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import org.hibernate.annotations.AnyDiscriminatorImplicitValues;
-
 import java.time.LocalDateTime;
 
 @Entity
@@ -39,6 +37,4 @@ public class User{
     protected void onCreate() {
         this.createdAt = LocalDateTime.now();
     }
-
-
 }

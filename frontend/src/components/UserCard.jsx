@@ -41,7 +41,6 @@ const UserCard = ({ user, session, onStatusChange }) => {
   };
 
   const fetchStatus = async () => {
-    // Avoid querying ourselves
     if (session.id === user.id) {
       setStatus('SELF');
       return;
@@ -222,7 +221,6 @@ const UserCard = ({ user, session, onStatusChange }) => {
         {renderActionButton()}
       </div>
 
-      {/* Custom Confirmation Modal */}
       {showConfirm && (
         <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-slate-900/40 backdrop-blur-xs animate-in fade-in duration-200">
           <div className="bg-white w-full max-w-sm rounded-[32px] p-6 shadow-2xl border border-slate-100/80 animate-in zoom-in-95 duration-200 text-center">

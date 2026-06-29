@@ -16,7 +16,7 @@ import java.util.Map;
 import java.util.stream.Collectors;
 
 @Service
-@Transactional // Ensures transactional safety across all dynamic entity modifications
+@Transactional  
 public class ProfileServiceImpl implements ProfileService {
 
     @Autowired
@@ -36,8 +36,7 @@ public class ProfileServiceImpl implements ProfileService {
 
     @Autowired
     private FileStorageService fileStorageService;
-
-    // Fetch complete student portfolio payload tree
+ 
     @Override
     public ProfileResponseDTO getFullProfile(String email) {
         User user = userRepository.findByUniversityEmail(email)
@@ -112,13 +111,11 @@ public class ProfileServiceImpl implements ProfileService {
 
     @Override
     public List<ProfileResponseDTO> getAlumniDirectory(String currentEmail) {
-        // 1. Fetch all users
+        
         List<User> users = userRepository.findAll();
-        
-        // 2. Fetch all user details to avoid N+1 queries during iteration
+         
         List<UserDetails> allDetails = userDetailsRepository.findAll();
-        
-        // Map user details by user ID for O(1) in-memory lookup, filtering out any null or broken user associations safely
+    
         Map<Long, UserDetails> detailsMap = new java.util.HashMap<>();
         for (UserDetails ud : allDetails) {
             try {
@@ -126,11 +123,10 @@ public class ProfileServiceImpl implements ProfileService {
                     detailsMap.put(ud.getUser().getId(), ud);
                 }
             } catch (Exception e) {
-                // Ignore any lazy loading or EntityNotFoundException for broken/deleted user associations
+            
             }
         }
-
-        // 3. Fetch all experiences in a single query and group them by user ID in-memory
+ 
         List<UserExperiences> allExperiences = userExperienceRepository.findAll();
         Map<Long, List<UserExperiences>> experiencesMap = new java.util.HashMap<>();
         for (UserExperiences exp : allExperiences) {
@@ -139,11 +135,10 @@ public class ProfileServiceImpl implements ProfileService {
                     experiencesMap.computeIfAbsent(exp.getUser().getId(), k -> new java.util.ArrayList<>()).add(exp);
                 }
             } catch (Exception e) {
-                // Ignore broken associations
+                
             }
         }
-                
-        // 4. Map to DTOs, excluding the current logged-in user
+      
         return users.stream()
                 .filter(user -> !user.getUniversityEmail().equalsIgnoreCase(currentEmail))
                 .map(user -> {
@@ -167,8 +162,7 @@ public class ProfileServiceImpl implements ProfileService {
                 })
                 .collect(Collectors.toList());
     }
-
-    // Handles the smart initialize-and-patch strategy to prevent metadata loss
+ 
     @Override
     public void updateProfileDetails(String email, ProfileUpdateRequestDTO updateDTO) {
         User user = userRepository.findByUniversityEmail(email)
@@ -192,8 +186,7 @@ public class ProfileServiceImpl implements ProfileService {
 
         userDetailsRepository.save(userDetails);
     }
-
-    // Managing AWS S3 picture streams and purges legacy assets automatically
+ 
     @Override
     public ResponseEntity<?> uploadProfilePhoto(MultipartFile file, String email) {
         User user = userRepository.findByUniversityEmail(email)

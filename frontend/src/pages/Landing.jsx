@@ -10,11 +10,9 @@ const Landing = ({ session, onLogout }) => {
     <div className="min-h-screen bg-rgukt-slate flex flex-col font-sans">
       <Navbar isLanding={true} session={session} onLogout={onLogout} />
       
-      {/* HERO SECTION */}
       <main className="flex-1">
         <section className="relative overflow-hidden py-20 px-6 sm:py-32 bg-radial from-rgukt-maroon/5 via-transparent to-transparent">
           <div className="max-w-5xl mx-auto text-center relative z-10">
-            {/* Mission Badge */}
             <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-rgukt-maroon/10 border border-rgukt-maroon/20 text-rgukt-maroon text-xs font-bold uppercase tracking-wider mb-6">
               <Award size={14} /> The Official RGUKT Network
             </div>
@@ -56,13 +54,11 @@ const Landing = ({ session, onLogout }) => {
               )}
             </div>
           </div>
-
-          {/* Decorative shapes */}
+ 
           <div className="absolute top-1/2 left-0 -translate-y-1/2 w-72 h-72 bg-rgukt-maroon/5 rounded-full blur-3xl pointer-events-none"></div>
           <div className="absolute top-1/2 right-0 -translate-y-1/2 w-72 h-72 bg-rgukt-gold/5 rounded-full blur-3xl pointer-events-none"></div>
         </section>
-
-        {/* STATISTICS SECTION */}
+ 
         <section className="bg-white py-12 border-y border-slate-100">
           <div className="max-w-5xl mx-auto px-6 grid grid-cols-2 md:grid-cols-4 gap-8 text-center">
             <div>
@@ -83,8 +79,7 @@ const Landing = ({ session, onLogout }) => {
             </div>
           </div>
         </section>
-
-        {/* FEATURES GRID */}
+ 
         <section className="py-20 px-6 max-w-5xl mx-auto">
           <div className="text-center mb-16">
             <h2 className="text-sm font-bold text-rgukt-maroon uppercase tracking-widest">Key Core Features</h2>
@@ -92,7 +87,6 @@ const Landing = ({ session, onLogout }) => {
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-            {/* Feature 1 */}
             <div className="bg-white p-8 rounded-3xl border border-slate-100 shadow-xs hover:shadow-md transition-shadow flex gap-5">
               <div className="w-12 h-12 bg-rgukt-maroon/5 rounded-2xl flex-shrink-0 flex items-center justify-center text-rgukt-maroon">
                 <Users size={24} />
@@ -105,7 +99,6 @@ const Landing = ({ session, onLogout }) => {
               </div>
             </div>
 
-            {/* Feature 2 */}
             <div className="bg-white p-8 rounded-3xl border border-slate-100 shadow-xs hover:shadow-md transition-shadow flex gap-5">
               <div className="w-12 h-12 bg-rgukt-maroon/5 rounded-2xl flex-shrink-0 flex items-center justify-center text-rgukt-maroon">
                 <MessageSquare size={24} />
@@ -117,8 +110,7 @@ const Landing = ({ session, onLogout }) => {
                 </p>
               </div>
             </div>
-
-            {/* Feature 3 */}
+ 
             <div className="bg-white p-8 rounded-3xl border border-slate-100 shadow-xs hover:shadow-md transition-shadow flex gap-5">
               <div className="w-12 h-12 bg-rgukt-maroon/5 rounded-2xl flex-shrink-0 flex items-center justify-center text-rgukt-maroon">
                 <Briefcase size={24} />
@@ -131,7 +123,6 @@ const Landing = ({ session, onLogout }) => {
               </div>
             </div>
 
-            {/* Feature 4 */}
             <div className="bg-white p-8 rounded-3xl border border-slate-100 shadow-xs hover:shadow-md transition-shadow flex gap-5">
               <div className="w-12 h-12 bg-rgukt-maroon/5 rounded-2xl flex-shrink-0 flex items-center justify-center text-rgukt-maroon">
                 <GraduationCap size={24} />
@@ -145,8 +136,7 @@ const Landing = ({ session, onLogout }) => {
             </div>
           </div>
         </section>
-
-        {/* TRUST BANNER */}
+ 
         <section className="bg-rgukt-maroon text-white py-16 px-6 text-center">
           <div className="max-w-3xl mx-auto">
             <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-white/10 border border-white/20 text-xs font-bold uppercase tracking-wider mb-6">
@@ -178,8 +168,7 @@ const Landing = ({ session, onLogout }) => {
           </div>
         </section>
       </main>
-
-      {/* FOOTER */}
+ 
       <footer className="bg-white border-t border-slate-100 py-8 text-center text-slate-400 text-xs">
         <p>© {new Date().getFullYear()} RGUKT Connect. Rajiv Gandhi University of Knowledge Technologies. All rights reserved.</p>
       </footer>

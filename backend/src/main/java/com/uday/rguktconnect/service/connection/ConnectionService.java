@@ -1,7 +1,6 @@
 package com.uday.rguktconnect.service.connection;
 
 import com.uday.rguktconnect.entity.Connection;
-import com.uday.rguktconnect.entity.User;
 import java.util.List;
 import java.util.Map;
 
