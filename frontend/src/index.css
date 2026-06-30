@@ -6,6 +6,9 @@
   --color-rgukt-slate: #f9fafb;
   --color-charcoal: #111827;
   --shadow-dock: 0 20px 50px rgba(0, 0, 0, 0.1);
+  --font-sans: 'Inter', system-ui, sans-serif;
+  --font-display: 'Outfit', sans-serif;
+  --font-mono: 'Source Code Pro', monospace;
 }
 
 html, body {
@@ -18,6 +21,18 @@ html, body {
 body {
   background-color: var(--color-rgukt-slate);
   color: var(--color-charcoal);
-  font-family: 'Inter', system-ui, sans-serif;
+  font-family: var(--font-sans);
   padding-bottom: 250px; 
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* Premium Typography System */
+h1, h2, h3, h4, h5, h6, .font-display {
+  font-family: var(--font-display) !important;
+  letter-spacing: -0.02em;
+}
+
+code, pre, .font-code {
+  font-family: var(--font-mono) !important;
 }

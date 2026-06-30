@@ -452,8 +452,8 @@ const PostCard = ({ post, session, onLikeToggle, onDelete }) => {
         <p className="text-slate-800 text-[15px] leading-relaxed mb-4">{content}</p>
 
         {mediaUrl && (
-          <div className="rounded-2xl overflow-hidden border border-slate-100 mb-4 max-h-[360px] flex justify-center bg-slate-50">
-            <img src={mediaUrl} alt="Post Attachment" className="w-full h-auto object-cover max-h-[360px]" />
+          <div className="rounded-2xl overflow-hidden border border-slate-100 mb-4 max-h-[480px] flex justify-center items-center bg-slate-50">
+            <img src={mediaUrl} alt="Post Attachment" className="max-w-full h-auto max-h-[480px] object-contain" />
           </div>
         )}
  

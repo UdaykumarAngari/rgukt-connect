@@ -95,7 +95,7 @@ public class MailServiceImpl implements MailService {
             helper.setText(htmlContent, true);
             mailSender.send(mimeMessage);
         } catch (Exception e) {
-            System.err.println("[Registration OTP ERROR] Failed to send email to " + toEmail + ": " + e.getMessage());
+            System.err.println("Registration OTP ERROR Failed to send email to " + toEmail + ": " + e.getMessage());
         }
     }
 }

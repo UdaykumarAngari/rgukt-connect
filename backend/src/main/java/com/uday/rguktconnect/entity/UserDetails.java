@@ -33,7 +33,7 @@ public class UserDetails {
     @Column(length = 10)
     private String batch;
 
-    @Column(name = "profile_photo", columnDefinition = "LONGTEXT")
+    @Column(name = "profile_photo", columnDefinition = "TEXT")
     private String profilePhoto; 
 
     @Column(columnDefinition = "TEXT")
