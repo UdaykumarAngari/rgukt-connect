@@ -69,9 +69,7 @@ const CreatePostModal = ({ isOpen, onClose, onSubmit, session }) => {
   };
 
   return (
-    
     <div className="fixed inset-0 z-[60] flex items-start justify-center p-4 bg-charcoal/20 backdrop-blur-[2px]">
-      
       <div className="mt-20 bg-white w-full max-w-lg rounded-[32px] shadow-2xl flex flex-col max-h-[65vh] overflow-hidden border border-slate-100 animate-in fade-in zoom-in duration-200">
        
         <div className="flex justify-between items-center px-6 py-4 border-b border-slate-100 shrink-0 bg-white">
@@ -86,7 +84,7 @@ const CreatePostModal = ({ isOpen, onClose, onSubmit, session }) => {
  
         <div className="flex-1 overflow-y-auto p-6 space-y-4">
           <textarea 
-            placeholder="What's on your mind, Udaykumar?"
+            placeholder={`What's on your mind, ${session?.name || 'User'}?`}
             value={content}
             onChange={(e) => setContent(e.target.value)}
             className="w-full min-h-[100px] bg-transparent border-none text-charcoal text-lg placeholder:text-slate-400 outline-none resize-none"

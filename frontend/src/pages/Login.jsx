@@ -49,7 +49,8 @@ const Login = ({ onLoginSuccess }) => {
                     id: user.id, 
                     name: user.name, 
                     idNumber: user.idNumber, 
-                    universityEmail: user.universityEmail 
+                    universityEmail: user.universityEmail,
+                    role: user.role
                 };
                 localStorage.setItem('userSession', JSON.stringify(sessionData));
                 onLoginSuccess(sessionData);
