@@ -13,4 +13,6 @@ public interface UserService {
 
     void generateForgotPasswordOtp(String email);
     boolean verifyOtpAndResetPassword(String email, String otp, String newPassword);
+
+    void sendRegistrationOtp(String email, String idNumber);
 }

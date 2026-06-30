@@ -21,6 +21,21 @@ public class UserController {
     @Autowired
     private UserService userService;
 
+    @PostMapping("/register/send-otp")
+    public ResponseEntity<?> sendRegistrationOtp(@RequestBody Map<String, String> request) {
+        String email = request.get("email");
+        String idNumber = request.get("idNumber");
+        if (email == null || idNumber == null) {
+            return ResponseEntity.badRequest().body(Map.of("error", "Email and ID number are required"));
+        }
+        try {
+            userService.sendRegistrationOtp(email, idNumber);
+            return ResponseEntity.ok(Map.of("message", "OTP sent successfully to your university email."));
+        } catch (RuntimeException e) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(Map.of("error", e.getMessage()));
+        }
+    }
+
     @PostMapping("/register")
     public ResponseEntity<?> register(@RequestBody UserRegisterRequestDTO requestDTO){
         try{

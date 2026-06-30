@@ -55,4 +55,48 @@ public class MailServiceImpl implements MailService {
             System.err.println("[OTP ERROR] Failed to send email to " + toEmail + ": " + e.getMessage());
         }
     }
+
+    @Override
+    public void sendRegistrationOtp(String toEmail, String otp) {
+        System.out.println("Registration OTP " + toEmail + " -> " + otp);
+
+        if (mailSender == null) {
+            return;
+        }
+
+        try {
+            MimeMessage mimeMessage = mailSender.createMimeMessage();
+            MimeMessageHelper helper = new MimeMessageHelper(mimeMessage, true, "UTF-8");
+            
+            helper.setTo(toEmail);
+            helper.setSubject("RGUKT Connect - Verify Your Email");
+            
+            String htmlContent = "<div style=\"font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #f8fafc; padding: 40px 20px; color: #334155;\">" +
+                    "  <div style=\"max-width: 500px; margin: 0 auto; background-color: #ffffff; border-radius: 16px; overflow: hidden; box-shadow: 0 4px 12px rgba(0,0,0,0.05); border: 1px solid #e2e8f0;\">" +
+                    "    <div style=\"background-color: #800000; padding: 24px; text-align: center;\">" +
+                    "      <h1 style=\"color: #ffffff; margin: 0; font-size: 22px; font-weight: 800; letter-spacing: 0.5px;\">RGUKT Connect</h1>" +
+                    "    </div>" +
+                    "    <div style=\"padding: 32px 24px;\">" +
+                    "      <p style=\"margin-top: 0; font-size: 15px; line-height: 1.5; color: #475569;\">Dear User,</p>" +
+                    "      <p style=\"font-size: 15px; line-height: 1.5; color: #475569;\">Thank you for choosing our platform! To complete your registration, please use the following One-Time Password (OTP) to verify your email address:</p>" +
+                    "      <div style=\"margin: 28px 0; text-align: center;\">" +
+                    "        <div style=\"display: inline-block; background-color: #fff5f5; border: 1px solid #feb2b2; color: #800000; font-size: 32px; font-weight: 800; letter-spacing: 6px; padding: 12px 32px; border-radius: 12px; font-family: monospace;\">" +
+                    "          " + otp + "" +
+                    "        </div>" +
+                    "      </div>" +
+                    "      <p style=\"font-size: 13px; line-height: 1.5; color: #94a3b8;\">This OTP is valid for 5 minutes. If you did not request this verification, please ignore this email.</p>" +
+                    "    </div>" +
+                    "    <div style=\"background-color: #f8fafc; padding: 20px; text-align: center; border-top: 1px solid #f1f5f9;\">" +
+                    "      <p style=\"margin: 0; font-size: 12px; color: #94a3b8;\">&copy; 2026 RGUKT Connect. All rights reserved.</p>" +
+                    "    </div>" +
+                    "  </div>" +
+                    "</div>";
+                    
+            helper.setText(htmlContent, true);
+            mailSender.send(mimeMessage);
+        } catch (Exception e) {
+            System.err.println("[Registration OTP ERROR] Failed to send email to " + toEmail + ": " + e.getMessage());
+        }
+    }
 }
+

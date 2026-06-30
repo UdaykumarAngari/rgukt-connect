@@ -12,9 +12,12 @@ const Register = () => {
         password: '',
         role: 'STUDENT'
     });
+    const [step, setStep] = useState(1); // 1: Info, 2: OTP
+    const [otp, setOtp] = useState('');
     const [message, setMessage] = useState('');
     const [error, setError] = useState('');
     const [showPassword, setShowPassword] = useState(false);
+    const [loading, setLoading] = useState(false);
     const navigate = useNavigate();
 
     const getCurrentWeekDays = () => {
@@ -40,21 +43,48 @@ const Register = () => {
         setFormData({ ...formData, [e.target.name]: e.target.value });
     };
 
+    const handleSendOtp = async (e) => {
+        e.preventDefault();
+        setMessage('');
+        setError('');
+        if (!formData.universityEmail || !formData.idNumber || !formData.name || !formData.password) {
+            setError('Please fill in all fields.');
+            return;
+        }
+        setLoading(true);
+        try {
+            const response = await axios.post('/api/auth/register/send-otp', {
+                email: formData.universityEmail,
+                idNumber: formData.idNumber
+            });
+            setMessage(response.data.message || 'OTP sent successfully to your email!');
+            setStep(2);
+        } catch (err) {
+            setError(err.response?.data?.error || 'Failed to send OTP. Please check your inputs.');
+        } finally {
+            setLoading(false);
+        }
+    };
+
     const handleSubmit = async (e) => {
         e.preventDefault();
         setMessage('');
         setError('');
+        setLoading(true);
         try {
-            await axios.post('/api/auth/register', formData);
+            await axios.post('/api/auth/register', { ...formData, otp });
             
             setMessage('Registration successful! Redirecting to login...');
             setFormData({ name: '', idNumber: '', universityEmail: '', password: '', role: 'STUDENT' });
+            setOtp('');
  
             setTimeout(() => {
                 navigate('/login');
             }, 2000);
         } catch (err) {
-            setError(err.response?.data?.message || 'Registration failed. Check your inputs.');
+            setError(err.response?.data?.error || err.response?.data?.message || 'Registration failed. Check your OTP.');
+        } finally {
+            setLoading(false);
         }
     };
 
@@ -406,88 +436,125 @@ const Register = () => {
                         {message && <div className="auth-success">{message}</div>}
                         {error && <div className="auth-error">{error}</div>}
                         
-                        <form onSubmit={handleSubmit}>
-                            <div className="auth-form-row">
-                                <div className="auth-input-group">
-                                    <label className="auth-label">Full Name</label>
-                                    <input 
-                                        type="text" 
-                                        name="name" 
-                                        placeholder="Your Name" 
-                                        value={formData.name} 
-                                        onChange={handleChange} 
-                                        required 
-                                        className="auth-input"
-                                    />
-                                </div>
-                                
-                                <div className="auth-input-group">
-                                    <label className="auth-label">ID Number</label>
-                                    <input 
-                                        type="text" 
-                                        name="idNumber" 
-                                        placeholder="e.g., B211449" 
-                                        value={formData.idNumber} 
-                                        onChange={handleChange} 
-                                        required 
-                                        className="auth-input"
-                                    />
-                                </div>
-                            </div>
-
-                            <div className="auth-input-group">
-                                <label className="auth-label">University Email</label>
-                                <input 
-                                    type="email" 
-                                    name="universityEmail" 
-                                    placeholder="b21XXXX@rgukt.ac.in" 
-                                    value={formData.universityEmail} 
-                                    onChange={handleChange} 
-                                    required 
-                                    className="auth-input"
-                                />
-                            </div>
-
-                            <div className="auth-form-row">
-                                <div className="auth-input-group" style={{ flex: 1.2 }}>
-                                    <label className="auth-label">Password</label>
-                                    <div className="auth-input-wrapper">
+                        {step === 1 ? (
+                            <form onSubmit={handleSendOtp}>
+                                <div className="auth-form-row">
+                                    <div className="auth-input-group">
+                                        <label className="auth-label">Full Name</label>
                                         <input 
-                                            type={showPassword ? "text" : "password"} 
-                                            name="password" 
-                                            placeholder="••••••••" 
-                                            value={formData.password} 
+                                            type="text" 
+                                            name="name" 
+                                            placeholder="Your Name" 
+                                            value={formData.name} 
                                             onChange={handleChange} 
                                             required 
                                             className="auth-input"
+                                            disabled={loading}
                                         />
-                                        <button 
-                                            type="button" 
-                                            className="auth-password-toggle"
-                                            onClick={() => setShowPassword(!showPassword)}
-                                        >
-                                            {showPassword ? <EyeOff size={16} /> : <Eye size={16} />}
-                                        </button>
+                                    </div>
+                                    
+                                    <div className="auth-input-group">
+                                        <label className="auth-label">ID Number</label>
+                                        <input 
+                                            type="text" 
+                                            name="idNumber" 
+                                            placeholder="e.g., B211449" 
+                                            value={formData.idNumber} 
+                                            onChange={handleChange} 
+                                            required 
+                                            className="auth-input"
+                                            disabled={loading}
+                                        />
                                     </div>
                                 </div>
 
-                                <div className="auth-input-group" style={{ flex: 0.8 }}>
-                                    <label className="auth-label">Role</label>
-                                    <select 
-                                        name="role"
-                                        value={formData.role}
-                                        onChange={handleChange}
+                                <div className="auth-input-group">
+                                    <label className="auth-label">University Email</label>
+                                    <input 
+                                        type="email" 
+                                        name="universityEmail" 
+                                        placeholder="b21XXXX@rgukt.ac.in" 
+                                        value={formData.universityEmail} 
+                                        onChange={handleChange} 
+                                        required 
                                         className="auth-input"
-                                        style={{ appearance: 'none', cursor: 'pointer' }}
-                                    >
-                                        <option value="STUDENT">Student</option>
-                                        <option value="ALUMNI">Alumni</option>
-                                    </select>
+                                        disabled={loading}
+                                    />
                                 </div>
-                            </div>
 
-                            <button type="submit" className="auth-submit-btn">Register</button>
-                        </form>
+                                <div className="auth-form-row">
+                                    <div className="auth-input-group" style={{ flex: 1.2 }}>
+                                        <label className="auth-label">Password</label>
+                                        <div className="auth-input-wrapper">
+                                            <input 
+                                                type={showPassword ? "text" : "password"} 
+                                                name="password" 
+                                                placeholder="••••••••" 
+                                                value={formData.password} 
+                                                onChange={handleChange} 
+                                                required 
+                                                className="auth-input"
+                                                disabled={loading}
+                                            />
+                                            <button 
+                                                type="button" 
+                                                className="auth-password-toggle"
+                                                onClick={() => setShowPassword(!showPassword)}
+                                            >
+                                                {showPassword ? <EyeOff size={16} /> : <Eye size={16} />}
+                                            </button>
+                                        </div>
+                                    </div>
+
+                                    <div className="auth-input-group" style={{ flex: 0.8 }}>
+                                        <label className="auth-label">Role</label>
+                                        <select 
+                                            name="role"
+                                            value={formData.role}
+                                            onChange={handleChange}
+                                            className="auth-input"
+                                            style={{ appearance: 'none', cursor: 'pointer' }}
+                                            disabled={loading}
+                                        >
+                                            <option value="STUDENT">Student</option>
+                                            <option value="ALUMNI">Alumni</option>
+                                        </select>
+                                    </div>
+                                </div>
+
+                                <button type="submit" className="auth-submit-btn" disabled={loading}>
+                                    {loading ? 'Sending OTP...' : 'Send Verification OTP'}
+                                </button>
+                            </form>
+                        ) : (
+                            <form onSubmit={handleSubmit}>
+                                <div className="auth-input-group" style={{ marginBottom: '24px' }}>
+                                    <label className="auth-label">Verification OTP</label>
+                                    <input 
+                                        type="text" 
+                                        placeholder="Enter 6-digit OTP" 
+                                        value={otp} 
+                                        onChange={(e) => setOtp(e.target.value)} 
+                                        required 
+                                        maxLength={6}
+                                        className="auth-input"
+                                        disabled={loading}
+                                        style={{ textAlign: 'center', letterSpacing: '4px', fontSize: '18px', fontWeight: 'bold' }}
+                                    />
+                                </div>
+                                <button type="submit" className="auth-submit-btn" disabled={loading}>
+                                    {loading ? 'Verifying...' : 'Verify & Register'}
+                                </button>
+                                <div style={{ textAlign: 'center', marginTop: '16px' }}>
+                                    <span 
+                                        onClick={() => setStep(1)} 
+                                        style={{ fontSize: '13px', color: '#7a766e', cursor: 'pointer', fontWeight: '600', textDecoration: 'underline' }}
+                                    >
+                                        Go Back / Edit Details
+                                    </span>
+                                </div>
+                            </form>
+                        )}
                     </div>
                     
                     <div className="auth-footer">

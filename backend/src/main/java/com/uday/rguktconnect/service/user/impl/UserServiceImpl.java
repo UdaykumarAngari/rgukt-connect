@@ -37,9 +37,23 @@ public class UserServiceImpl implements UserService {
     private final java.util.Map<String, String> otpStorage = new java.util.concurrent.ConcurrentHashMap<>();
     private final java.util.Map<String, java.time.LocalDateTime> otpExpiry = new java.util.concurrent.ConcurrentHashMap<>();
 
+    private final java.util.Map<String, String> registrationOtpStorage = new java.util.concurrent.ConcurrentHashMap<>();
+    private final java.util.Map<String, java.time.LocalDateTime> registrationOtpExpiry = new java.util.concurrent.ConcurrentHashMap<>();
+
     @Override
     @Transactional
     public UserResponseDTO registerUser(UserRegisterRequestDTO requestDTO){
+
+        String storedOtp = registrationOtpStorage.get(requestDTO.getUniversityEmail());
+        java.time.LocalDateTime expiry = registrationOtpExpiry.get(requestDTO.getUniversityEmail());
+
+        if (storedOtp == null || expiry == null || expiry.isBefore(java.time.LocalDateTime.now())) {
+            throw new RuntimeException("OTP expired or not requested. Please request a new OTP.");
+        }
+
+        if (!storedOtp.equals(requestDTO.getOtp())) {
+            throw new RuntimeException("Invalid registration OTP.");
+        }
 
         if(userRepository.existsByIdNumberOrUniversityEmail(requestDTO.getIdNumber(), requestDTO.getUniversityEmail())){
             throw new RuntimeException("User with this ID number or UniversityEmail already Exists");
@@ -72,6 +86,9 @@ public class UserServiceImpl implements UserService {
         blankDetails.setMobileNumber("9876543210");
         blankDetails.setMentoredStudentsCount(0);
         userDetailsRepository.save(blankDetails);
+
+        registrationOtpStorage.remove(requestDTO.getUniversityEmail());
+        registrationOtpExpiry.remove(requestDTO.getUniversityEmail());
 
         return UserResponseDTO.builder()
                 .id(savedUser.getId())
@@ -155,4 +172,18 @@ public class UserServiceImpl implements UserService {
 
         return true;
     }
+
+    @Override
+    public void sendRegistrationOtp(String email, String idNumber) {
+        if(userRepository.existsByIdNumberOrUniversityEmail(idNumber, email)){
+            throw new RuntimeException("User with this ID number or University Email already exists.");
+        }
+
+        String otp = String.format("%06d", new java.util.Random().nextInt(1000000));
+        registrationOtpStorage.put(email, otp);
+        registrationOtpExpiry.put(email, java.time.LocalDateTime.now().plusMinutes(5));
+
+        mailService.sendRegistrationOtp(email, otp);
+    }
 }
+

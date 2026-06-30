@@ -9,4 +9,5 @@ public class UserRegisterRequestDTO {
     private String universityEmail; 
     private String password;
     private String role;
+    private String otp;
 }
