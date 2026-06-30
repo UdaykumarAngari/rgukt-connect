@@ -8,6 +8,7 @@ import Messages from './pages/Messages';
 import Profile from './pages/Profile';
 import Login from './pages/Login';
 import Register from './pages/Register';
+import ForgotPassword from './pages/ForgotPassword';
 
 import Landing from './pages/Landing';
 
@@ -56,6 +57,10 @@ function App() {
         <Route 
           path="/register" 
           element={!session ? <Register /> : <Navigate to="/home" replace />} 
+        />
+        <Route 
+          path="/forgot-password" 
+          element={!session ? <ForgotPassword /> : <Navigate to="/home" replace />} 
         />
  
         <Route path="/home" element={

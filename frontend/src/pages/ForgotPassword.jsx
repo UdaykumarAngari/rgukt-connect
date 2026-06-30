@@ -1,89 +1,98 @@
 import React, { useState } from 'react';
-import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
-import { X, Eye, EyeOff, Network, Users, Globe, Share2, MessageSquare } from 'lucide-react';
+import { X, Eye, EyeOff, KeyRound, Mail, ShieldAlert, CheckCircle, Network, Users, Globe, Share2, MessageSquare } from 'lucide-react';
+import axios from 'axios';
 import rguktBg from '../assets/rgukt_bg.png';
 
-const Login = ({ onLoginSuccess }) => {
-    const [credentials, setCredentials] = useState({
-        universityEmail: '',
-        password: ''
-    });
-    const [error, setError] = useState('');
-    const [showPassword, setShowPassword] = useState(false);
+const ForgotPassword = () => {
     const navigate = useNavigate();
+    const [step, setStep] = useState(1); // 1: Email, 2: OTP & New Password
+    const [email, setEmail] = useState('');
+    const [otp, setOtp] = useState('');
+    const [newPassword, setNewPassword] = useState('');
+    const [confirmPassword, setConfirmPassword] = useState('');
+    const [showPassword, setShowPassword] = useState(false);
+    
+    const [loading, setLoading] = useState(false);
+    const [error, setError] = useState('');
+    const [successMessage, setSuccessMessage] = useState('');
+
+    const handleSendOtp = async (e) => {
+        e.preventDefault();
+        if (!email.trim()) return;
+        setLoading(true);
+        setError('');
+        try {
+            const response = await axios.post('/api/auth/forgot-password', { email });
+            setSuccessMessage(response.data.message || 'OTP sent successfully!');
+            setStep(2);
+        } catch (err) {
+            setError(err.response?.data?.error || 'Failed to send OTP. Please check your email.');
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    const handleResetPassword = async (e) => {
+        e.preventDefault();
+        if (!otp.trim() || !newPassword.trim() || !confirmPassword.trim()) return;
+        if (newPassword !== confirmPassword) {
+            setError('Passwords do not match.');
+            return;
+        }
+        setLoading(true);
+        setError('');
+        try {
+            await axios.post('/api/auth/reset-password', {
+                email,
+                otp,
+                newPassword
+            });
+            setSuccessMessage('Password reset successfully. Redirecting to login...');
+            setTimeout(() => {
+                navigate('/login');
+            }, 3000);
+        } catch (err) {
+            setError(err.response?.data?.error || 'Failed to reset password. Please check the OTP.');
+        } finally {
+            setLoading(false);
+        }
+    };
 
     const getCurrentWeekDays = () => {
-        const today = new Date();
-        const currentDay = today.getDay();
-        const sunday = new Date(today);
-        sunday.setDate(today.getDate() - currentDay);
-        
         const days = [];
+        const today = new Date();
+        const currentDayOfWeek = today.getDay();
+        const startOfWeek = new Date(today);
+        startOfWeek.setDate(today.getDate() - currentDayOfWeek);
+
         for (let i = 0; i < 7; i++) {
-            const tempDate = new Date(sunday);
-            tempDate.setDate(sunday.getDate() + i);
+            const date = new Date(startOfWeek);
+            date.setDate(startOfWeek.getDate() + i);
             days.push({
-                dayNum: tempDate.getDate(),
-                isToday: tempDate.toDateString() === today.toDateString(),
-                isPast: i < currentDay
+                dayNum: date.getDate(),
+                isToday: date.toDateString() === today.toDateString(),
+                isPast: date < today && date.toDateString() !== today.toDateString()
             });
         }
         return days;
     };
 
-    const handleChange = (e) => {
-        setCredentials({ ...credentials, [e.target.name]: e.target.value });
-    };
-
-    const handleSubmit = async (e) => {
-        e.preventDefault();
-        setError('');
-        try {
-            const response = await axios.post('/api/auth/login', credentials);
-            const { user, accessToken } = response.data;
-
-            if (accessToken && user) {
-                const sessionData = { 
-                    token: accessToken, 
-                    id: user.id, 
-                    name: user.name, 
-                    idNumber: user.idNumber, 
-                    universityEmail: user.universityEmail 
-                };
-                localStorage.setItem('userSession', JSON.stringify(sessionData));
-                onLoginSuccess(sessionData);
-                navigate('/home');
-            }
-        } catch (err) {
-            setError(err.response?.data?.message || 'Invalid email or password. Please try again.');
-        }
-    };
-
     return (
-        <div className="auth-container">
+        <div style={{
+            minHeight: '100vh',
+            backgroundColor: '#0f172a',
+            backgroundImage: `url(${rguktBg})`,
+            backgroundSize: 'cover',
+            backgroundPosition: 'center',
+            display: 'flex',
+            justifyContent: 'center',
+            alignItems: 'center',
+            fontFamily: "'Outfit', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif",
+            padding: '20px',
+            boxSizing: 'border-box'
+        }}>
             <style>{`
-                @import url('https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800&display=swap');
-                
-                .auth-container {
-                    display: flex;
-                    justify-content: center;
-                    align-items: center;
-                    height: 100vh;
-                    width: 100vw;
-                    position: fixed;
-                    top: 0;
-                    left: 0;
-                    overflow: hidden;
-                    background-image: linear-gradient(rgba(15, 23, 42, 0.4), rgba(15, 23, 42, 0.4)), url(${rguktBg});
-                    background-size: cover;
-                    background-position: center;
-                    font-family: 'Outfit', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-                    padding: 20px;
-                    box-sizing: border-box;
-                    z-index: 9999;
-                }
-                
                 @keyframes cardEntrance {
                     from {
                         opacity: 0;
@@ -269,6 +278,21 @@ const Login = ({ onLoginSuccess }) => {
                     border-radius: 16px;
                     font-size: 12px;
                     margin-bottom: 12px;
+                    display: flex;
+                    align-items: center;
+                    gap: 6px;
+                }
+                .auth-success {
+                    background-color: #def7ec;
+                    border: 1px solid #bcf0da;
+                    color: #03543f;
+                    padding: 10px 14px;
+                    border-radius: 16px;
+                    font-size: 12px;
+                    margin-bottom: 12px;
+                    display: flex;
+                    align-items: center;
+                    gap: 6px;
                 }
 
                 /* Floating Widgets & Animations */
@@ -322,128 +346,174 @@ const Login = ({ onLoginSuccess }) => {
                     position: absolute;
                     bottom: 32px;
                     right: 32px;
-                    background: rgba(255, 255, 255, 0.25);
+                    background: rgba(255, 255, 255, 0.15);
                     backdrop-filter: blur(16px);
                     -webkit-backdrop-filter: blur(16px);
-                    border: 1px solid rgba(255, 255, 255, 0.3);
-                    padding: 16px 20px;
-                    border-radius: 20px;
+                    border: 1px solid rgba(255, 255, 255, 0.2);
+                    padding: 16px;
+                    border-radius: 24px;
+                    box-shadow: 0 20px 40px rgba(0,0,0,0.1);
                     color: white;
-                    box-shadow: 0 16px 32px rgba(0,0,0,0.1);
-                    animation: fadeInUp 0.8s ease 0.4s forwards, floatFast 5s ease-in-out infinite 1.2s;
+                    animation: fadeInUp 0.8s ease 0.4s forwards, floatFast 5s ease-in-out infinite 1.5s;
                     opacity: 0;
                     z-index: 5;
                 }
 
-                @media (max-width: 900px) {
-                    .auth-card {
-                        height: auto;
-                        max-height: 90vh;
-                        max-width: 440px;
-                        flex-direction: column;
-                        padding: 24px;
-                        overflow-y: auto;
-                    }
-                    .auth-right {
-                        display: none;
-                    }
-                    .auth-left {
-                        padding: 10px 0;
-                    }
+                /* Floating Icon styling */
+                .floating-bg-icon {
+                    position: absolute;
+                    color: white;
+                    z-index: 3;
+                    pointer-events: none;
                 }
 
                 @keyframes dash {
                     to {
-                        stroke-dashoffset: -40;
+                        stroke-dashoffset: 0;
                     }
                 }
+                @keyframes pulseOpacity {
+                    0%, 100% { opacity: 0.15; }
+                    50% { opacity: 0.35; }
+                }
                 .network-line-anim {
-                    stroke-dasharray: 6, 6;
-                    animation: dash 8s linear infinite;
+                    stroke-dasharray: 1000;
+                    stroke-dashoffset: 1000;
+                    animation: dash 5s linear infinite;
                 }
                 .network-line-anim-reverse {
-                    stroke-dasharray: 8, 8;
-                    animation: dash 12s linear infinite reverse;
-                }
-                @keyframes pulseOpacity {
-                    0%, 100% { opacity: 0.4; }
-                    50% { opacity: 1; }
+                    stroke-dasharray: 1000;
+                    stroke-dashoffset: -1000;
+                    animation: dash 6s linear infinite;
                 }
                 .network-node-glow {
                     animation: pulseOpacity 3s ease-in-out infinite;
-                }
-                .floating-bg-icon {
-                    position: absolute;
-                    color: white;
-                    pointer-events: none;
-                    z-index: 3;
-                    transition: all 0.3s ease;
                 }
             `}</style>
 
             <div className="auth-card">
                 <div className="auth-left">
-                    <div className="logo-pill">RGUKT Connect</div>
+                    <button className="logo-pill">RGUKT Connect</button>
                     
                     <div className="auth-form-container">
-                        <h2 className="auth-title">Login to account</h2>
-                        <p className="auth-subtitle">Enter your university credentials to access the portal</p>
-                        
-                        {error && <div className="auth-error">{error}</div>}
-                        
-                        <form onSubmit={handleSubmit}>
-                            <div className="auth-input-group">
-                                <label className="auth-label">University Email</label>
-                                <input 
-                                    type="email" 
-                                    name="universityEmail" 
-                                    placeholder="b21XXXX@rgukt.ac.in" 
-                                    value={credentials.universityEmail} 
-                                    onChange={handleChange} 
-                                    required 
-                                    className="auth-input"
-                                />
-                            </div>
+                        <h2 className="auth-title">
+                            {step === 1 ? 'Reset Password' : 'Verify OTP'}
+                        </h2>
+                        <p className="auth-subtitle">
+                            {step === 1 
+                                ? 'Enter your university email to receive a password reset OTP.' 
+                                : `We have sent a 6-digit OTP to ${email}.`}
+                        </p>
 
-                            <div className="auth-input-group">
-                                <label className="auth-label">Password</label>
-                                <div className="auth-input-wrapper">
-                                    <input 
-                                        type={showPassword ? "text" : "password"} 
-                                        name="password" 
-                                        placeholder="••••••••" 
-                                        value={credentials.password} 
-                                        onChange={handleChange} 
-                                        required 
-                                        className="auth-input"
-                                    />
-                                    <button 
-                                        type="button" 
-                                        className="auth-password-toggle"
-                                        onClick={() => setShowPassword(!showPassword)}
-                                    >
-                                        {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
-                                    </button>
+                        {error && (
+                            <div className="auth-error">
+                                <ShieldAlert size={16} />
+                                <span>{error}</span>
+                            </div>
+                        )}
+
+                        {successMessage && (
+                            <div className="auth-success">
+                                <CheckCircle size={16} />
+                                <span>{successMessage}</span>
+                            </div>
+                        )}
+
+                        {step === 1 ? (
+                            <form onSubmit={handleSendOtp}>
+                                <div className="auth-input-group">
+                                    <label className="auth-label">University Email</label>
+                                    <div className="auth-input-wrapper">
+                                        <input 
+                                            type="email" 
+                                            placeholder="b21XXXX@rgukt.ac.in"
+                                            value={email}
+                                            onChange={(e) => setEmail(e.target.value)}
+                                            className="auth-input"
+                                            required
+                                            disabled={loading}
+                                        />
+                                    </div>
                                 </div>
-                            </div>
-
-                            <div style={{ display: 'flex', justifyContent: 'flex-end', marginTop: '6px', marginBottom: '14px' }}>
-                                <span 
-                                    onClick={() => navigate('/forgot-password')} 
-                                    style={{ fontSize: '12px', color: '#7a766e', cursor: 'pointer', fontWeight: '600', textDecoration: 'underline' }}
+                                <button 
+                                    type="submit" 
+                                    className="auth-submit-btn"
+                                    disabled={loading}
                                 >
-                                    Forgot Password?
-                                </span>
-                            </div>
-                            <button type="submit" className="auth-submit-btn">Sign In</button>
-                        </form>
+                                    {loading ? 'Sending OTP...' : 'Send OTP'}
+                                </button>
+                            </form>
+                        ) : (
+                            <form onSubmit={handleResetPassword}>
+                                <div className="auth-input-group">
+                                    <label className="auth-label">Verification OTP</label>
+                                    <div className="auth-input-wrapper">
+                                        <input 
+                                            type="text" 
+                                            placeholder="Enter 6-digit OTP"
+                                            value={otp}
+                                            onChange={(e) => setOtp(e.target.value)}
+                                            className="auth-input"
+                                            maxLength={6}
+                                            required
+                                            disabled={loading}
+                                        />
+                                    </div>
+                                </div>
+
+                                <div className="auth-input-group">
+                                    <label className="auth-label">New Password</label>
+                                    <div className="auth-input-wrapper">
+                                        <input 
+                                            type={showPassword ? 'text' : 'password'} 
+                                            placeholder="Enter new password"
+                                            value={newPassword}
+                                            onChange={(e) => setNewPassword(e.target.value)}
+                                            className="auth-input"
+                                            required
+                                            disabled={loading}
+                                        />
+                                        <button 
+                                            type="button" 
+                                            className="auth-password-toggle"
+                                            onClick={() => setShowPassword(!showPassword)}
+                                        >
+                                            {showPassword ? <EyeOff size={16} /> : <Eye size={16} />}
+                                        </button>
+                                    </div>
+                                </div>
+
+                                <div className="auth-input-group">
+                                    <label className="auth-label">Confirm New Password</label>
+                                    <div className="auth-input-wrapper">
+                                        <input 
+                                            type={showPassword ? 'text' : 'password'} 
+                                            placeholder="Confirm new password"
+                                            value={confirmPassword}
+                                            onChange={(e) => setConfirmPassword(e.target.value)}
+                                            className="auth-input"
+                                            required
+                                            disabled={loading}
+                                        />
+                                    </div>
+                                </div>
+
+                                <button 
+                                    type="submit" 
+                                    className="auth-submit-btn"
+                                    disabled={loading}
+                                >
+                                    {loading ? 'Resetting Password...' : 'Reset Password'}
+                                </button>
+                            </form>
+                        )}
                     </div>
                     
                     <div className="auth-footer">
                         <p className="auth-toggle-text">
-                            New to the platform?{' '}
-                            <span onClick={() => navigate('/register')} className="auth-link">
-                                Create an account
+                            Remember your password?{' '}
+                            <span onClick={() => navigate('/login')} className="auth-link">
+                                Back to login
                             </span>
                         </p>
                         <span style={{ fontSize: '12px', color: '#7a766e', textDecoration: 'underline', cursor: 'pointer' }}>Terms & Conditions</span>
@@ -561,4 +631,4 @@ const Login = ({ onLoginSuccess }) => {
     );
 };
 
-export default Login;
+export default ForgotPassword;

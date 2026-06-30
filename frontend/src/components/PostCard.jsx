@@ -1,9 +1,11 @@
 import React, { useState, useEffect } from 'react';
 import { Heart, MessageCircle, ShieldCheck, MoreHorizontal, Loader2, Share2, X } from 'lucide-react';
 import axios from 'axios';
+import { useNavigate } from 'react-router-dom';
 import { mockUsers } from '../data/users';
  
 const CommentItem = ({ comment, session, onLikeComment, onAddReply }) => {
+  const navigate = useNavigate();
   const [showReplyForm, setShowReplyForm] = useState(false);
   const [replyContent, setReplyContent] = useState('');
   const [submittingReply, setSubmittingReply] = useState(false);
@@ -71,7 +73,10 @@ const CommentItem = ({ comment, session, onLikeComment, onAddReply }) => {
   return (
     <div className="mt-4 first:mt-0">
       <div className="flex gap-3 items-start">
-        <div className="w-8 h-8 rounded-full bg-slate-200 shrink-0 overflow-hidden mt-0.5">
+        <div 
+          onClick={() => comment.authorId && navigate(`/profile?userId=${comment.authorId}`)}
+          className="w-8 h-8 rounded-full bg-slate-200 shrink-0 overflow-hidden mt-0.5 cursor-pointer hover:scale-105 transition-transform"
+        >
           {comment.authorAvatar ? (
             <img src={comment.authorAvatar} alt={comment.author} className="w-full h-full object-cover" />
           ) : (
@@ -83,7 +88,12 @@ const CommentItem = ({ comment, session, onLikeComment, onAddReply }) => {
         <div className="flex-1 bg-slate-50/70 rounded-2xl px-4 py-2.5 border border-slate-100/50">
           <div className="flex justify-between items-start">
             <div>
-              <h5 className="font-bold text-charcoal text-[11px] leading-none">{comment.author}</h5>
+              <h5 
+                onClick={() => comment.authorId && navigate(`/profile?userId=${comment.authorId}`)}
+                className="font-bold text-charcoal text-[11px] leading-none cursor-pointer hover:text-rgukt-maroon hover:underline transition-colors"
+              >
+                {comment.author}
+              </h5>
               <p className="text-[9px] text-slate-400 mt-1">{comment.authorTitle}</p>
             </div>
             <span className="text-[9px] text-slate-400">{comment.timestamp}</span>
@@ -163,6 +173,7 @@ const CommentItem = ({ comment, session, onLikeComment, onAddReply }) => {
 };
 
 const PostCard = ({ post, session, onLikeToggle, onDelete }) => {
+  const navigate = useNavigate();
   const { 
     id, authorId, author, authorTitle, authorAvatar, authorBio, timestamp, content, type, 
     codeSnippet, company, role, isVerified, likes, likedByMe, comments, mediaUrl
@@ -378,7 +389,10 @@ const PostCard = ({ post, session, onLikeToggle, onDelete }) => {
     <div className="bg-white rounded-3xl border border-slate-100 shadow-sm overflow-visible mb-6 relative">
       <div className="p-5 flex justify-between items-start">
         <div className="flex gap-3">
-          <div className="w-11 h-11 rounded-full bg-slate-200 shrink-0 overflow-hidden">
+          <div 
+            onClick={() => authorId && navigate(`/profile?userId=${authorId}`)}
+            className="w-11 h-11 rounded-full bg-slate-200 shrink-0 overflow-hidden cursor-pointer hover:scale-105 transition-transform"
+          >
             {authorAvatar ? (
               <img src={authorAvatar} alt={author} className="w-full h-full object-cover" />
             ) : (
@@ -389,7 +403,12 @@ const PostCard = ({ post, session, onLikeToggle, onDelete }) => {
           </div>
           <div>
             <div className="flex items-center gap-1.5">
-              <h4 className="font-bold text-charcoal leading-none">{author}</h4>
+              <h4 
+                onClick={() => authorId && navigate(`/profile?userId=${authorId}`)}
+                className="font-bold text-charcoal leading-none cursor-pointer hover:text-rgukt-maroon hover:underline transition-colors"
+              >
+                {author}
+              </h4>
               {isVerified && <ShieldCheck size={16} className="text-rgukt-gold fill-rgukt-gold/10" />}
             </div>
             {authorBio && <p className="text-[11px] text-slate-400 mt-1 max-w-[320px] line-clamp-1">{authorBio}</p>}

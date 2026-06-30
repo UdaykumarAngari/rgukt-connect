@@ -31,6 +31,12 @@ public class UserServiceImpl implements UserService {
     @Autowired
     private JwtUtil jwtUtil;
 
+    @Autowired
+    private com.uday.rguktconnect.service.MailService mailService;
+
+    private final java.util.Map<String, String> otpStorage = new java.util.concurrent.ConcurrentHashMap<>();
+    private final java.util.Map<String, java.time.LocalDateTime> otpExpiry = new java.util.concurrent.ConcurrentHashMap<>();
+
     @Override
     @Transactional
     public UserResponseDTO registerUser(UserRegisterRequestDTO requestDTO){
@@ -110,5 +116,43 @@ public class UserServiceImpl implements UserService {
     @Override
     public boolean isUserSessionValid(String email) {
         return userRepository.findByUniversityEmail(email).isPresent();
+    }
+
+    @Override
+    public void generateForgotPasswordOtp(String email) {
+        User user = userRepository.findByUniversityEmail(email)
+                .orElseThrow(() -> new RuntimeException("No user registered with this university email."));
+
+        String otp = String.format("%06d", new java.util.Random().nextInt(1000000));
+        otpStorage.put(email, otp);
+        otpExpiry.put(email, java.time.LocalDateTime.now().plusMinutes(5));
+
+        mailService.sendOtp(email, otp);
+    }
+
+    @Override
+    @Transactional
+    public boolean verifyOtpAndResetPassword(String email, String otp, String newPassword) {
+        String storedOtp = otpStorage.get(email);
+        java.time.LocalDateTime expiry = otpExpiry.get(email);
+
+        if (storedOtp == null || expiry == null || expiry.isBefore(java.time.LocalDateTime.now())) {
+            return false;
+        }
+
+        if (!storedOtp.equals(otp)) {
+            return false;
+        }
+
+        User user = userRepository.findByUniversityEmail(email)
+                .orElseThrow(() -> new RuntimeException("User not found"));
+
+        user.setPassword(passwordEncoder.encode(newPassword));
+        userRepository.save(user);
+
+        otpStorage.remove(email);
+        otpExpiry.remove(email);
+
+        return true;
     }
 }

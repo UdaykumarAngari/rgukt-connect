@@ -10,4 +10,7 @@ public interface UserService {
     AuthResponseDTO loginUser(AuthRequestDTO loginRequest);
 
     boolean isUserSessionValid(String email);
+
+    void generateForgotPasswordOtp(String email);
+    boolean verifyOtpAndResetPassword(String email, String otp, String newPassword);
 }

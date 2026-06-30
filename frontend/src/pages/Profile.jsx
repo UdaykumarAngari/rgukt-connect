@@ -16,7 +16,11 @@ import {
   X, 
   Upload, 
   Briefcase, 
-  GraduationCap 
+  GraduationCap,
+  UserCheck,
+  UserPlus,
+  Clock,
+  UserMinus
 } from 'lucide-react';
 
 const Profile = ({ session, onLogout }) => {
@@ -31,6 +35,72 @@ const Profile = ({ session, onLogout }) => {
   const [showProjectModal, setShowProjectModal] = useState(false);
   const [showExpModal, setShowExpModal] = useState(false);
   const [showEduModal, setShowEduModal] = useState(false);
+
+  const [connectionStatus, setConnectionStatus] = useState('NOT_CONNECTED');
+  const [connectionId, setConnectionId] = useState(null);
+  const [connectionLoading, setConnectionLoading] = useState(false);
+  const [showConfirm, setShowConfirm] = useState(false);
+
+  const fetchConnectionStatus = async () => {
+    if (isOwnProfile || !userId) return;
+    try {
+      const res = await axios.get(`/api/connections/status/${userId}`, {
+        headers: { Authorization: `Bearer ${session.token}` }
+      });
+      setConnectionStatus(res.data.status);
+      setConnectionId(res.data.connectionId || null);
+    } catch (err) {
+      console.error('Error fetching connection status:', err);
+    }
+  };
+
+  const handleConnect = async () => {
+    setConnectionLoading(true);
+    try {
+      await axios.post(`/api/connections/request/${userId}`, {}, {
+        headers: { Authorization: `Bearer ${session.token}` }
+      });
+      await fetchConnectionStatus();
+    } catch (err) {
+      console.error(err);
+      alert(err.response?.data?.error || 'Failed to send connection request.');
+    } finally {
+      setConnectionLoading(false);
+    }
+  };
+
+  const handleAccept = async () => {
+    if (!connectionId) return;
+    setConnectionLoading(true);
+    try {
+      await axios.put(`/api/connections/accept/${connectionId}`, {}, {
+        headers: { Authorization: `Bearer ${session.token}` }
+      });
+      await fetchConnectionStatus();
+    } catch (err) {
+      console.error(err);
+      alert('Failed to accept connection request.');
+    } finally {
+      setConnectionLoading(false);
+    }
+  };
+
+  const handleCancelOrDisconnect = async () => {
+    if (!connectionId) return;
+    setShowConfirm(false);
+    setConnectionLoading(true);
+    try {
+      await axios.delete(`/api/connections/reject/${connectionId}`, {
+        headers: { Authorization: `Bearer ${session.token}` }
+      });
+      await fetchConnectionStatus();
+    } catch (err) {
+      console.error(err);
+      alert('Failed to remove connection.');
+    } finally {
+      setConnectionLoading(false);
+    }
+  };
 
   const [basicForm, setBasicForm] = useState({
     mobileNumber: '',
@@ -110,6 +180,7 @@ const Profile = ({ session, onLogout }) => {
 
   useEffect(() => {
     fetchProfile();
+    fetchConnectionStatus();
   }, [session, userId]);
 
   const handleBasicSubmit = async (e) => {
@@ -379,13 +450,61 @@ const Profile = ({ session, onLogout }) => {
                   </label>
                 )}
               </div>
-              {isOwnProfile && (
+              {isOwnProfile ? (
                 <button 
                   onClick={() => setShowBasicModal(true)}
                   className="bg-white border border-slate-200 px-6 py-2 rounded-xl font-bold text-sm hover:bg-slate-50 transition-all cursor-pointer flex items-center gap-2 text-charcoal"
                 >
                   <Edit size={14} className="text-rgukt-maroon"/> Edit Profile
                 </button>
+              ) : (
+                <div className="flex gap-2">
+                  {connectionStatus === 'ACCEPTED' && (
+                    <button 
+                      onClick={() => setShowConfirm(true)}
+                      disabled={connectionLoading}
+                      className="bg-slate-100 hover:bg-red-50 hover:text-red-600 text-charcoal border border-slate-200 px-6 py-2.5 rounded-xl font-bold text-sm transition-all cursor-pointer flex items-center gap-2"
+                    >
+                      <UserCheck size={16} /> Connected
+                    </button>
+                  )}
+                  {connectionStatus === 'PENDING_SENT' && (
+                    <button 
+                      onClick={() => setShowConfirm(true)}
+                      disabled={connectionLoading}
+                      className="bg-white border border-slate-200 hover:bg-red-50 hover:text-red-600 text-slate-500 px-6 py-2.5 rounded-xl font-bold text-sm transition-all cursor-pointer flex items-center gap-2"
+                    >
+                      <Clock size={16} /> Pending Cancel
+                    </button>
+                  )}
+                  {connectionStatus === 'PENDING_RECEIVED' && (
+                    <div className="flex gap-2">
+                      <button 
+                        onClick={handleAccept}
+                        disabled={connectionLoading}
+                        className="bg-rgukt-maroon text-white px-6 py-2.5 rounded-xl font-bold text-sm hover:scale-[1.02] transition-transform cursor-pointer"
+                      >
+                        Accept
+                      </button>
+                      <button 
+                        onClick={() => setShowConfirm(true)}
+                        disabled={connectionLoading}
+                        className="border border-slate-200 text-slate-600 px-6 py-2.5 rounded-xl font-bold text-sm hover:bg-slate-50 transition-all cursor-pointer"
+                      >
+                        Ignore
+                      </button>
+                    </div>
+                  )}
+                  {connectionStatus === 'NOT_CONNECTED' && (
+                    <button 
+                      onClick={handleConnect}
+                      disabled={connectionLoading}
+                      className="border border-rgukt-maroon text-rgukt-maroon hover:bg-rgukt-maroon hover:text-white px-6 py-2.5 rounded-xl font-bold text-sm transition-all cursor-pointer flex items-center gap-2"
+                    >
+                      <UserPlus size={16} /> Connect
+                    </button>
+                  )}
+                </div>
               )}
             </div>
             
@@ -1026,6 +1145,41 @@ const Profile = ({ session, onLogout }) => {
                 </button>
               </div>
             </form>
+          </div>
+        </div>
+      )}
+
+      {showConfirm && (
+        <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-slate-900/40 backdrop-blur-xs animate-in fade-in duration-200">
+          <div className="bg-white w-full max-w-sm rounded-[32px] p-6 shadow-2xl border border-slate-100/80 animate-in zoom-in-95 duration-200 text-center">
+            <div className="mx-auto w-12 h-12 rounded-2xl bg-red-50 text-red-500 flex items-center justify-center mb-4">
+              <UserMinus size={24} />
+            </div>
+            
+            <h3 className="text-base font-bold text-charcoal mb-2">
+              {connectionStatus === 'ACCEPTED' ? 'Remove Connection?' : 'Cancel Connection Request?'}
+            </h3>
+            
+            <p className="text-xs text-slate-500 leading-relaxed mb-6">
+              {connectionStatus === 'ACCEPTED' 
+                ? `Are you sure you want to disconnect from ${profile.name}? You will no longer be able to message them directly.` 
+                : `Do you want to cancel your connection request to ${profile.name}?`}
+            </p>
+            
+            <div className="flex gap-3">
+              <button
+                onClick={() => setShowConfirm(false)}
+                className="flex-1 py-2.5 border border-slate-200 text-slate-600 font-bold rounded-xl hover:bg-slate-50 transition-colors text-xs cursor-pointer"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={handleCancelOrDisconnect}
+                className="flex-1 py-2.5 bg-red-600 text-white font-bold rounded-xl hover:bg-red-700 transition-colors text-xs cursor-pointer shadow-sm shadow-red-100"
+              >
+                {connectionStatus === 'ACCEPTED' ? 'Disconnect' : 'Cancel Request'}
+              </button>
+            </div>
           </div>
         </div>
       )}

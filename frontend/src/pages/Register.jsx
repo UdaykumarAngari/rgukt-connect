@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
-import { X, Eye, EyeOff } from 'lucide-react';
+import { X, Eye, EyeOff, Network, Users, Globe, Share2, MessageSquare } from 'lucide-react';
 import rguktBg from '../assets/rgukt_bg.png';
 
 const Register = () => {
@@ -16,6 +16,25 @@ const Register = () => {
     const [error, setError] = useState('');
     const [showPassword, setShowPassword] = useState(false);
     const navigate = useNavigate();
+
+    const getCurrentWeekDays = () => {
+        const today = new Date();
+        const currentDay = today.getDay();
+        const sunday = new Date(today);
+        sunday.setDate(today.getDate() - currentDay);
+        
+        const days = [];
+        for (let i = 0; i < 7; i++) {
+            const tempDate = new Date(sunday);
+            tempDate.setDate(sunday.getDate() + i);
+            days.push({
+                dayNum: tempDate.getDate(),
+                isToday: tempDate.toDateString() === today.toDateString(),
+                isPast: i < currentDay
+            });
+        }
+        return days;
+    };
 
     const handleChange = (e) => {
         setFormData({ ...formData, [e.target.name]: e.target.value });
@@ -346,6 +365,34 @@ const Register = () => {
                         padding: 10px 0;
                     }
                 }
+
+                @keyframes dash {
+                    to {
+                        stroke-dashoffset: -40;
+                    }
+                }
+                .network-line-anim {
+                    stroke-dasharray: 6, 6;
+                    animation: dash 8s linear infinite;
+                }
+                .network-line-anim-reverse {
+                    stroke-dasharray: 8, 8;
+                    animation: dash 12s linear infinite reverse;
+                }
+                @keyframes pulseOpacity {
+                    0%, 100% { opacity: 0.4; }
+                    50% { opacity: 1; }
+                }
+                .network-node-glow {
+                    animation: pulseOpacity 3s ease-in-out infinite;
+                }
+                .floating-bg-icon {
+                    position: absolute;
+                    color: white;
+                    pointer-events: none;
+                    z-index: 3;
+                    transition: all 0.3s ease;
+                }
             `}</style>
 
             <div className="auth-card">
@@ -393,7 +440,7 @@ const Register = () => {
                                 <input 
                                     type="email" 
                                     name="universityEmail" 
-                                    placeholder="b21XXXX@rguktbasar.ac.in" 
+                                    placeholder="b21XXXX@rgukt.ac.in" 
                                     value={formData.universityEmail} 
                                     onChange={handleChange} 
                                     required 
@@ -461,6 +508,63 @@ const Register = () => {
                     
                     <img src={rguktBg} alt="RGUKT Campus" className="auth-bg-img" />
                     
+                    {/* Dark gradient overlay for contrast */}
+                    <div style={{
+                        position: 'absolute',
+                        top: 0,
+                        left: 0,
+                        width: '100%',
+                        height: '100%',
+                        background: 'linear-gradient(135deg, rgba(15, 23, 42, 0.3) 0%, rgba(15, 23, 42, 0.55) 100%)',
+                        zIndex: 1,
+                        pointerEvents: 'none'
+                    }} />
+
+                    {/* Animated SVG Network Connections */}
+                    <svg className="network-svg" viewBox="0 0 400 600" fill="none" xmlns="http://www.w3.org/2000/svg" style={{
+                        position: 'absolute',
+                        top: 0,
+                        left: 0,
+                        width: '100%',
+                        height: '100%',
+                        pointerEvents: 'none',
+                        zIndex: 2
+                    }}>
+                        <path d="M50,120 L150,90 L220,220 L100,320 L50,120 Z" stroke="rgba(255, 203, 69, 0.35)" strokeWidth="1.5" className="network-line-anim" />
+                        <path d="M150,90 L300,130 L350,270 L220,220 Z" stroke="rgba(255, 255, 255, 0.25)" strokeWidth="1.5" />
+                        <path d="M100,320 L260,370 L350,270 L220,220 Z" stroke="rgba(255, 203, 69, 0.25)" strokeWidth="1.5" />
+                        <path d="M260,370 L310,520 L160,560 L100,320 Z" stroke="rgba(255, 255, 255, 0.2)" strokeWidth="1.5" className="network-line-anim-reverse" />
+                        <path d="M300,130 L380,230 L350,270 Z" stroke="rgba(255, 255, 255, 0.15)" strokeWidth="1" />
+                        
+                        <circle cx="50" cy="120" r="4" fill="#ffcb45" className="network-node-glow" />
+                        <circle cx="150" cy="90" r="3.5" fill="#ffffff" />
+                        <circle cx="300" cy="130" r="5" fill="#ffcb45" className="network-node-glow" />
+                        <circle cx="220" cy="220" r="4" fill="#ffffff" />
+                        <circle cx="100" cy="320" r="5" fill="#ffcb45" className="network-node-glow" />
+                        <circle cx="350" cy="270" r="3.5" fill="#ffffff" />
+                        <circle cx="260" cy="370" r="4.5" fill="#ffcb45" className="network-node-glow" />
+                        <circle cx="310" cy="520" r="3.5" fill="#ffffff" />
+                        <circle cx="160" cy="560" r="5" fill="#ffcb45" className="network-node-glow" />
+                        <circle cx="380" cy="230" r="3.5" fill="#ffffff" />
+                    </svg>
+
+                    {/* Floating Community/Networking Icons */}
+                    <div className="floating-bg-icon" style={{ top: '18%', right: '22%', animation: 'floatSlow 6s ease-in-out infinite' }}>
+                        <Network size={24} style={{ opacity: 0.35 }} />
+                    </div>
+                    <div className="floating-bg-icon" style={{ top: '45%', right: '8%', animation: 'floatMedium 7s ease-in-out infinite 1s' }}>
+                        <Users size={20} style={{ opacity: 0.3 }} />
+                    </div>
+                    <div className="floating-bg-icon" style={{ top: '28%', left: '38%', animation: 'floatFast 5s ease-in-out infinite 0.5s' }}>
+                        <Globe size={22} style={{ opacity: 0.3 }} />
+                    </div>
+                    <div className="floating-bg-icon" style={{ bottom: '38%', left: '12%', animation: 'floatSlow 8s ease-in-out infinite 1.5s' }}>
+                        <Share2 size={18} style={{ opacity: 0.35 }} />
+                    </div>
+                    <div className="floating-bg-icon" style={{ bottom: '25%', right: '35%', animation: 'floatMedium 6s ease-in-out infinite 2s' }}>
+                        <MessageSquare size={20} style={{ opacity: 0.25 }} />
+                    </div>
+                    
                     <div className="widget-task">
                         <div style={{ fontSize: '10px', color: '#8d6e00', textTransform: 'uppercase', fontWeight: '800', letterSpacing: '0.5px', marginBottom: '2px' }}>Upcoming Event</div>
                         <div style={{ fontSize: '13px', fontWeight: '800', color: '#1a1a1a' }}>Alumni Meet 2026</div>
@@ -480,18 +584,26 @@ const Register = () => {
                         </div>
                     </div>
 
-                    <div className="widget-calendar">
-                        <div style={{ display: 'flex', gap: '12px', fontSize: '10px', fontWeight: '700', opacity: 0.8, marginBottom: '6px' }}>
+                    <div className="widget-calendar" style={{ width: '180px', boxSizing: 'border-box' }}>
+                        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(7, 1fr)', textAlign: 'center', fontSize: '10px', fontWeight: '700', opacity: 0.8, marginBottom: '6px' }}>
                             <span>S</span><span>M</span><span>T</span><span>W</span><span>T</span><span>F</span><span>S</span>
                         </div>
-                        <div style={{ display: 'flex', gap: '12px', fontSize: '12px', fontWeight: '800' }}>
-                            <span style={{ opacity: 0.5 }}>22</span>
-                            <span style={{ opacity: 0.5 }}>23</span>
-                            <span style={{ opacity: 0.5 }}>24</span>
-                            <span style={{ color: '#ffcb45', borderBottom: '2px solid #ffcb45' }}>25</span>
-                            <span>26</span>
-                            <span>27</span>
-                            <span>28</span>
+                        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(7, 1fr)', textAlign: 'center', fontSize: '12px', fontWeight: '800', alignItems: 'center' }}>
+                            {getCurrentWeekDays().map((day, idx) => (
+                                <span 
+                                    key={idx} 
+                                    style={day.isToday ? { 
+                                        color: '#ffcb45', 
+                                        borderBottom: '2px solid #ffcb45', 
+                                        paddingBottom: '2px',
+                                        display: 'inline-block'
+                                    } : { 
+                                        opacity: day.isPast ? 0.5 : 1
+                                    }}
+                                >
+                                    {day.dayNum}
+                                </span>
+                            ))}
                         </div>
                     </div>
                 </div>

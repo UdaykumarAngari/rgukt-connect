@@ -151,7 +151,7 @@ const Landing = ({ session, onLogout }) => {
               Ready to Join the RGUKT Network?
             </h3>
             <p className="mt-4 text-white/80 max-w-xl mx-auto text-sm sm:text-base leading-relaxed">
-              Membership requires a valid RGUKT email (`@rgukt.ac.in` or `@rguktbasar.ac.in`) to ensure absolute platform authenticity.
+              Membership requires a valid RGUKT email (`@rgukt.ac.in`) to ensure absolute platform authenticity.
             </p>
             <div className="mt-8 flex justify-center">
               {session ? (
