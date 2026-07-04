@@ -3,6 +3,7 @@ import Navbar from '../components/Navbar';
 import FloatingDock from '../components/FloatingDock';
 import axios from 'axios';
 import { useSearchParams } from 'react-router-dom';
+import { usePrompt } from '../context/PromptContext';
 import { 
   MapPin, 
   Link as LinkIcon, 
@@ -24,6 +25,7 @@ import {
 } from 'lucide-react';
 
 const Profile = ({ session, onLogout }) => {
+  const { showPrompt } = usePrompt();
   const [searchParams] = useSearchParams();
   const userId = searchParams.get('userId');
   const isOwnProfile = !userId || Number(userId) === Number(session.id);
@@ -63,7 +65,7 @@ const Profile = ({ session, onLogout }) => {
       await fetchConnectionStatus();
     } catch (err) {
       console.error(err);
-      alert(err.response?.data?.error || 'Failed to send connection request.');
+      showPrompt({ type: 'error', message: err.response?.data?.error || 'Failed to send connection request.' });
     } finally {
       setConnectionLoading(false);
     }
@@ -79,7 +81,7 @@ const Profile = ({ session, onLogout }) => {
       await fetchConnectionStatus();
     } catch (err) {
       console.error(err);
-      alert('Failed to accept connection request.');
+      showPrompt({ type: 'error', message: 'Failed to accept connection request.' });
     } finally {
       setConnectionLoading(false);
     }
@@ -96,7 +98,7 @@ const Profile = ({ session, onLogout }) => {
       await fetchConnectionStatus();
     } catch (err) {
       console.error(err);
-      alert('Failed to remove connection.');
+      showPrompt({ type: 'error', message: 'Failed to remove connection.' });
     } finally {
       setConnectionLoading(false);
     }
@@ -193,7 +195,7 @@ const Profile = ({ session, onLogout }) => {
       fetchProfile();
     } catch (err) {
       console.error(err);
-      alert('Failed to update basic details.');
+      showPrompt({ type: 'error', message: 'Failed to update basic details.' });
     }
   };
 
@@ -215,7 +217,7 @@ const Profile = ({ session, onLogout }) => {
       fetchProfile();
     } catch (err) {
       console.error(err);
-      alert('Failed to upload profile photo.');
+      showPrompt({ type: 'error', message: 'Failed to upload profile photo.' });
     } finally {
       setPhotoUploading(false);
     }
@@ -252,21 +254,28 @@ const Profile = ({ session, onLogout }) => {
       fetchProfile();
     } catch (err) {
       console.error(err);
-      alert('Failed to save project.');
+      showPrompt({ type: 'error', message: 'Failed to save project.' });
     }
   };
 
-  const handleProjectDelete = async (id) => {
-    if (!window.confirm('Delete this project?')) return;
-    try {
-      await axios.delete(`/api/users/profile/projects/${id}`, {
-        headers: { Authorization: `Bearer ${session.token}` }
-      });
-      fetchProfile();
-    } catch (err) {
-      console.error(err);
-      alert('Failed to delete project.');
-    }
+  const handleProjectDelete = (id) => {
+    showPrompt({
+      type: 'confirm',
+      title: 'Delete Project',
+      message: 'Are you sure you want to delete this project?',
+      confirmText: 'Delete',
+      onConfirm: async () => {
+        try {
+          await axios.delete(`/api/users/profile/projects/${id}`, {
+            headers: { Authorization: `Bearer ${session.token}` }
+          });
+          fetchProfile();
+        } catch (err) {
+          console.error(err);
+          showPrompt({ type: 'error', message: 'Failed to delete project.' });
+        }
+      }
+    });
   };
 
   const openExpModal = (exp = null) => {
@@ -320,21 +329,28 @@ const Profile = ({ session, onLogout }) => {
       fetchProfile();
     } catch (err) {
       console.error(err);
-      alert('Failed to save experience.');
+      showPrompt({ type: 'error', message: 'Failed to save experience.' });
     }
   };
 
-  const handleExpDelete = async (id) => {
-    if (!window.confirm('Delete this experience?')) return;
-    try {
-      await axios.delete(`/api/users/profile/experiences/${id}`, {
-        headers: { Authorization: `Bearer ${session.token}` }
-      });
-      fetchProfile();
-    } catch (err) {
-      console.error(err);
-      alert('Failed to delete experience.');
-    }
+  const handleExpDelete = (id) => {
+    showPrompt({
+      type: 'confirm',
+      title: 'Delete Experience',
+      message: 'Are you sure you want to delete this experience?',
+      confirmText: 'Delete',
+      onConfirm: async () => {
+        try {
+          await axios.delete(`/api/users/profile/experiences/${id}`, {
+            headers: { Authorization: `Bearer ${session.token}` }
+          });
+          fetchProfile();
+        } catch (err) {
+          console.error(err);
+          showPrompt({ type: 'error', message: 'Failed to delete experience.' });
+        }
+      }
+    });
   };
 
   const openEduModal = (edu = null) => {
@@ -378,21 +394,28 @@ const Profile = ({ session, onLogout }) => {
       fetchProfile();
     } catch (err) {
       console.error(err);
-      alert('Failed to save education.');
+      showPrompt({ type: 'error', message: 'Failed to save education.' });
     }
   };
 
-  const handleEduDelete = async (id) => {
-    if (!window.confirm('Delete this education entry?')) return;
-    try {
-      await axios.delete(`/api/users/profile/education/${id}`, {
-        headers: { Authorization: `Bearer ${session.token}` }
-      });
-      fetchProfile();
-    } catch (err) {
-      console.error(err);
-      alert('Failed to delete education entry.');
-    }
+  const handleEduDelete = (id) => {
+    showPrompt({
+      type: 'confirm',
+      title: 'Delete Education',
+      message: 'Are you sure you want to delete this education entry?',
+      confirmText: 'Delete',
+      onConfirm: async () => {
+        try {
+          await axios.delete(`/api/users/profile/education/${id}`, {
+            headers: { Authorization: `Bearer ${session.token}` }
+          });
+          fetchProfile();
+        } catch (err) {
+          console.error(err);
+          showPrompt({ type: 'error', message: 'Failed to delete education entry.' });
+        }
+      }
+    });
   };
 
   if (loading) {

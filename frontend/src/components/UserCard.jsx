@@ -2,9 +2,11 @@ import React, { useState, useEffect } from 'react';
 import { ShieldCheck, UserCheck, UserPlus, Clock, UserMinus } from 'lucide-react';
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
+import { usePrompt } from '../context/PromptContext';
 
 const UserCard = ({ user, session, onStatusChange }) => {
   const navigate = useNavigate();
+  const { showPrompt } = usePrompt();
   const [status, setStatus] = useState('NOT_CONNECTED');
   const [connectionId, setConnectionId] = useState(null);
   const [loading, setLoading] = useState(false);
@@ -70,7 +72,7 @@ const UserCard = ({ user, session, onStatusChange }) => {
       if (onStatusChange) onStatusChange();
     } catch (err) {
       console.error(err);
-      alert(err.response?.data?.error || 'Failed to send connection request.');
+      showPrompt({ type: 'error', message: err.response?.data?.error || 'Failed to send connection request.' });
     } finally {
       setLoading(false);
     }
@@ -87,7 +89,7 @@ const UserCard = ({ user, session, onStatusChange }) => {
       if (onStatusChange) onStatusChange();
     } catch (err) {
       console.error(err);
-      alert('Failed to accept connection request.');
+      showPrompt({ type: 'error', message: 'Failed to accept connection request.' });
     } finally {
       setLoading(false);
     }
@@ -105,7 +107,7 @@ const UserCard = ({ user, session, onStatusChange }) => {
       if (onStatusChange) onStatusChange();
     } catch (err) {
       console.error(err);
-      alert('Failed to remove connection.');
+      showPrompt({ type: 'error', message: 'Failed to remove connection.' });
     } finally {
       setLoading(false);
     }

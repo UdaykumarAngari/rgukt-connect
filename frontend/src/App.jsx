@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { NotificationProvider } from './context/NotificationContext';
+import { PromptProvider } from './context/PromptContext';
 import Home from './pages/Home';
 import Network from './pages/Network';
 import Jobs from './pages/Jobs';
@@ -46,7 +47,8 @@ function App() {
 
   return (
     <NotificationProvider session={session}>
-      <BrowserRouter>
+      <PromptProvider>
+        <BrowserRouter>
       <Routes>
         <Route path="/" element={<Landing session={session} onLogout={handleLogout} />} />
  
@@ -95,6 +97,7 @@ function App() {
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
       </BrowserRouter>
+      </PromptProvider>
     </NotificationProvider>
   );
 }

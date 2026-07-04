@@ -1,8 +1,10 @@
 import React, { useState, useRef } from 'react';
 import { X, Code, Image as ImageIcon, Loader2 } from 'lucide-react';
 import axios from 'axios';
+import { usePrompt } from '../context/PromptContext';
 
 const CreatePostModal = ({ isOpen, onClose, onSubmit, session }) => {
+  const { showPrompt } = usePrompt();
 
   const [postType, setPostType] = useState('text');
   const [content, setContent] = useState('');
@@ -62,7 +64,7 @@ const CreatePostModal = ({ isOpen, onClose, onSubmit, session }) => {
       setPostType('text');
     } catch (err) {
       console.error('Error creating post:', err);
-      alert(err.response?.data?.error || 'Failed to create post. Please try again.');
+      showPrompt({ type: 'error', message: err.response?.data?.error || 'Failed to create post. Please try again.' });
     } finally {
       setLoading(false);
     }

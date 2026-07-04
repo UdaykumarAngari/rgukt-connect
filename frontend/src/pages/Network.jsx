@@ -4,8 +4,10 @@ import FloatingDock from '../components/FloatingDock';
 import UserCard from '../components/UserCard';
 import CreatePostModal from '../components/CreatePostModal';
 import axios from 'axios';
+import { usePrompt } from '../context/PromptContext';
 
 const Network = ({ session, onLogout }) => {
+  const { showPrompt } = usePrompt();
   const [searchQuery, setSearchQuery] = useState("");
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [pendingInvites, setPendingInvites] = useState([]);
@@ -54,22 +56,29 @@ const Network = ({ session, onLogout }) => {
       setRefreshTrigger(prev => prev + 1);
     } catch (err) {
       console.error(err);
-      alert('Failed to accept request.');
+      showPrompt({ type: 'error', message: 'Failed to accept request.' });
     }
   };
 
   const handleRejectInvite = async (requestId) => {
-    if (!window.confirm('Ignore this request?')) return;
-    try {
-      await axios.delete(`/api/connections/reject/${requestId}`, {
-        headers: { Authorization: `Bearer ${session.token}` }
-      });
-      fetchPendingInvites();
-      setRefreshTrigger(prev => prev + 1);
-    } catch (err) {
-      console.error(err);
-      alert('Failed to decline request.');
-    }
+    showPrompt({
+      type: 'confirm',
+      title: 'Ignore Request',
+      message: 'Are you sure you want to ignore this connection request?',
+      confirmText: 'Ignore',
+      onConfirm: async () => {
+        try {
+          await axios.delete(`/api/connections/reject/${requestId}`, {
+            headers: { Authorization: `Bearer ${session.token}` }
+          });
+          fetchPendingInvites();
+          setRefreshTrigger(prev => prev + 1);
+        } catch (err) {
+          console.error(err);
+          showPrompt({ type: 'error', message: 'Failed to decline request.' });
+        }
+      }
+    });
   };
 
   const handleStatusChange = () => {

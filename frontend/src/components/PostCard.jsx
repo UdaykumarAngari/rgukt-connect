@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Heart, MessageCircle, ShieldCheck, MoreHorizontal, Loader2, Share2, X } from 'lucide-react';
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
+import { usePrompt } from '../context/PromptContext';
 import { mockUsers } from '../data/users';
  
 const CommentItem = ({ comment, session, onLikeComment, onAddReply }) => {
@@ -174,6 +175,7 @@ const CommentItem = ({ comment, session, onLikeComment, onAddReply }) => {
 
 const PostCard = ({ post, session, onLikeToggle, onDelete }) => {
   const navigate = useNavigate();
+  const { showPrompt } = usePrompt();
   const { 
     id, authorId, author, authorTitle, authorAvatar, authorBio, timestamp, content, type, 
     codeSnippet, company, role, isVerified, likes, likedByMe, comments, mediaUrl
@@ -213,21 +215,28 @@ const PostCard = ({ post, session, onLikeToggle, onDelete }) => {
     }
   };
 
-  const handleDelete = async () => {
-    if (!window.confirm("Are you sure you want to delete this post?")) return;
-    try {
-      await axios.delete(`/api/posts/${id}`, {
-        headers: { Authorization: `Bearer ${session?.token}` }
-      });
-      if (onDelete) {
-        onDelete(id);
+  const handleDelete = () => {
+    showPrompt({
+      type: 'confirm',
+      title: 'Delete Post',
+      message: 'Are you sure you want to delete this post? This action cannot be undone.',
+      confirmText: 'Delete',
+      onConfirm: async () => {
+        try {
+          await axios.delete(`/api/posts/${id}`, {
+            headers: { Authorization: `Bearer ${session?.token}` }
+          });
+          if (onDelete) {
+            onDelete(id);
+          }
+        } catch (err) {
+          console.error('Error deleting post:', err);
+          showPrompt({ type: 'error', message: 'Failed to delete post.' });
+        } finally {
+          setShowMenu(false);
+        }
       }
-    } catch (err) {
-      console.error('Error deleting post:', err);
-      alert('Failed to delete post.');
-    } finally {
-      setShowMenu(false);
-    }
+    });
   };
  
   const loadComments = async () => {
@@ -347,7 +356,7 @@ const PostCard = ({ post, session, onLikeToggle, onDelete }) => {
   const copyPostLink = () => {
     const postUrl = `${window.location.origin}/post/${id}`;
     navigator.clipboard.writeText(postUrl);
-    alert("Post link copied to clipboard!");
+    showPrompt({ type: 'success', message: "Post link copied to clipboard!" });
     setShowShareMenu(false);
   };
 
@@ -381,7 +390,7 @@ const PostCard = ({ post, session, onLikeToggle, onDelete }) => {
       setSentStatus(prev => ({ ...prev, [connectionId]: true }));
     } catch (err) {
       console.error('Failed to send in-app message:', err);
-      alert('Failed to send message.');
+      showPrompt({ type: 'error', message: 'Failed to send message.' });
     }
   };
 
@@ -435,7 +444,7 @@ const PostCard = ({ post, session, onLikeToggle, onDelete }) => {
               ) : (
                 <button 
                   onClick={() => {
-                    alert("Reported successfully!");
+                    showPrompt({ type: 'success', message: "Reported successfully!" });
                     setShowMenu(false);
                   }}
                   className="w-full text-left px-4 py-2 text-sm text-slate-600 hover:bg-slate-50 cursor-pointer transition-colors"
