@@ -57,6 +57,8 @@ public class DatabaseConfig {
             }
         }
 
+        System.out.println("Connecting to Database URL: " + dbUrl);
+
         return DataSourceBuilder.create()
                 .type(HikariDataSource.class)
                 .url(dbUrl)
