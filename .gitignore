@@ -28,3 +28,7 @@ dist-ssr
 # Maven
 target/
 backend/target/
+
+.gitignore
+backend_analysis.md
+rules.md
