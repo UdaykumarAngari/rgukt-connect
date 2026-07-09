@@ -22,13 +22,7 @@ dist-ssr
 *.njsproj
 *.sln
 *.sw?
-.backend_analysis.md 
-.rules.md
 
 # Maven
 target/
 backend/target/
-
-.gitignore
-backend_analysis.md
-rules.md
