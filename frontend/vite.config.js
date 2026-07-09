@@ -1,6 +1,6 @@
 import { defineConfig } from 'vite'
 import react from '@vitejs/plugin-react'
-import tailwindcss from '@tailwindcss/vite' 
+import tailwindcss from '@tailwindcss/vite'
 
 export default defineConfig({
   plugins: [
@@ -10,12 +10,12 @@ export default defineConfig({
   server: {
     proxy: {
       '/api': {
-        target: 'http://localhost:4000',
+        target: 'http://localhost:8000',
         changeOrigin: true,
         secure: false,
       },
       '/ws-chat': {
-        target: 'ws://localhost:4000',
+        target: 'ws://localhost:8000',
         ws: true,
         changeOrigin: true,
       }

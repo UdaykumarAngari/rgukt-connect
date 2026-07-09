@@ -7,18 +7,9 @@ pipeline {
     }
 
     stages {
-
         stage('Checkout') {
             steps {
                 checkout scm
-            }
-        }
-
-        stage('Build Backend') {
-            steps {
-                dir('backend') {
-                    sh 'mvn clean package -DskipTests'
-                }
             }
         }
 
@@ -45,12 +36,37 @@ pipeline {
                     sh '''
                     docker run -d \
                       --name ${CONTAINER_NAME} \
+                      --restart unless-stopped \
                       --env-file "$ENV_FILE" \
                       -p 8000:8000 \
                       ${IMAGE_NAME}:latest
                     '''
                 }
             }
+        }
+
+        stage('Health Check') {
+            steps {
+                sh '''
+                echo "Waiting for application..."
+                sleep 15
+                curl --fail http://localhost:8000/actuator/health || exit 1
+                '''
+            }
+        }
+    }
+
+    post {
+        success {
+            echo 'Deployment Successful'
+        }
+
+        failure {
+            echo 'Deployment Failed x'
+        }
+
+        always {
+            sh 'docker image prune -f || true'
         }
     }
 }
