@@ -1,8 +1,20 @@
 pipeline {
     agent any
 
+    environment {
+        IMAGE_NAME = "rgukt-connect-backend"
+        CONTAINER_NAME = "rgukt-connect-backend"
+    }
+
     stages {
-        stage('Build & Package') {
+
+        stage('Checkout') {
+            steps {
+                checkout scm
+            }
+        }
+
+        stage('Build Backend') {
             steps {
                 dir('backend') {
                     sh 'mvn clean package -DskipTests'
@@ -10,10 +22,33 @@ pipeline {
             }
         }
 
-        stage('Docker Build') {
+        stage('Build Docker Image') {
             steps {
                 dir('backend') {
-                    sh 'docker build -t rgukt-connect-backend:latest .'
+                    sh "docker build -t ${IMAGE_NAME}:latest ."
+                }
+            }
+        }
+
+        stage('Stop Old Container') {
+            steps {
+                sh '''
+                docker stop ${CONTAINER_NAME} || true
+                docker rm ${CONTAINER_NAME} || true
+                '''
+            }
+        }
+
+        stage('Run Backend') {
+            steps {
+                withCredentials([file(credentialsId: 'rgukt-connect-env', variable: 'ENV_FILE')]) {
+                    sh '''
+                    docker run -d \
+                      --name ${CONTAINER_NAME} \
+                      --env-file "$ENV_FILE" \
+                      -p 8000:8000 \
+                      ${IMAGE_NAME}:latest
+                    '''
                 }
             }
         }
