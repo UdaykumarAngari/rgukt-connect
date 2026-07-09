@@ -48,10 +48,24 @@ pipeline {
         stage('Health Check') {
             steps {
                 sh '''
-                echo "Waiting for application..."
-                sleep 15
-                curl --fail http://localhost:8000/actuator/health || exit 1
-                '''
+                echo "Waiting for application to become healthy..."
+
+                for i in $(seq 1 30); do
+                    if curl -fs http://localhost:8000/actuator/health > /dev/null; then
+                        echo "Application is healthy!"
+                    exit 0
+                fi
+
+                echo "Attempt $i/30: Application not ready yet..."
+                sleep 2
+            done
+
+            echo "Application failed to become healthy within 60 seconds."
+
+            docker logs ${CONTAINER_NAME}
+
+            exit 1
+            '''
             }
         }
     }
