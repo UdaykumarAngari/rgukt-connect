@@ -1,21 +1,73 @@
 pipeline {
     agent any
 
+    environment {
+        IMAGE_NAME = "rgukt-connect-backend"
+        CONTAINER_NAME = "rgukt-connect-backend"
+    }
+
     stages {
-        stage('Build & Package') {
+
+        stage('Checkout') {
+            steps {
+                echo "repo added in jenkins scm option"
+            }
+        }
+
+        stage('Build Docker Image') {
             steps {
                 dir('backend') {
-                    sh 'mvn clean package -DskipTests'
+                    sh '''
+                    docker build -t ${IMAGE_NAME}:latest .
+                    '''
                 }
             }
         }
 
-        stage('Docker Build') {
+        stage('Stop Old Container') {
             steps {
-                dir('backend') {
-                    sh 'docker build -t rgukt-connect-backend:latest .'
-                }
+                sh '''
+                docker stop ${CONTAINER_NAME} || true
+                docker rm ${CONTAINER_NAME} || true
+                '''
             }
+        }
+
+        stage('Run New Container') {
+            steps {
+                sh '''
+                docker run -d \
+                    --name ${CONTAINER_NAME} \
+                    --restart unless-stopped \
+                    --env-file rgukt-connect/.env \
+                    -p 8000:8000 \
+                    ${IMAGE_NAME}:latest
+                '''
+            }
+        }
+
+        stage('Health Check') {
+            steps {
+                sh '''
+                echo "Waiting for application..."
+                sleep 15
+                curl --fail http://localhost:8000/actuator/health || exit 1
+                '''
+            }
+        }
+    }
+
+    post {
+        success {
+            echo 'Deployment Successful'
+        }
+
+        failure {
+            echo 'Deployment Failed x'
+        }
+
+        always {
+            sh 'docker image prune -f || true'
         }
     }
 }
