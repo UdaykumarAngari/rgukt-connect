@@ -5,7 +5,7 @@ import { Search, ChevronLeft, Send, Image as ImageIcon, Paperclip, Smile, MoreHo
 import { useNotifications } from '../context/NotificationContext';
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
-import { formatMessageDate } from '../utils/dateUtils';
+import { formatMessageDate, formatMessageTime, groupMessagesByDate } from '../utils/dateUtils';
 
 const Messages = ({ session, onLogout }) => {
   const navigate = useNavigate();
@@ -376,51 +376,64 @@ const Messages = ({ session, onLogout }) => {
                   </div>
  
                   {messagesList.length > 0 ? (
-                    messagesList.map(msg => {
-                      const isMe = msg.sender.id === session.id;
-                      const initials = isMe ? getInitials(session.name) : getInitials(selectedChat.name);
-                      const displayName = isMe ? session.name : selectedChat.name;
-                      const timeStr = formatMessageDate(msg.timestamp || new Date().toISOString());
-
-                      return (
-                        <div key={msg.id} className="flex gap-4">
-                          <div 
-                            onClick={() => navigate(`/profile?userId=${msg.sender.id}`)}
-                            className="w-10 h-10 bg-rgukt-slate rounded-full flex-shrink-0 flex items-center justify-center text-rgukt-maroon text-xs font-bold border border-slate-100 overflow-hidden cursor-pointer hover:scale-105 transition-transform"
-                          >
-                            {isMe ? (
-                              myProfilePhoto ? (
-                                <img src={myProfilePhoto} alt={session.name} className="w-full h-full object-cover" />
-                              ) : (
-                                initials
-                              )
-                            ) : (
-                              selectedChat.profilePhoto ? (
-                                <img src={selectedChat.profilePhoto} alt={selectedChat.name} className="w-full h-full object-cover" />
-                              ) : (
-                                initials
-                              )
-                            )}
-                          </div>
-                          <div>
-                            <div className="flex items-baseline gap-2">
-                              <span 
-                                onClick={() => navigate(`/profile?userId=${msg.sender.id}`)}
-                                className="text-charcoal font-bold text-[14px] cursor-pointer hover:text-rgukt-maroon hover:underline transition-colors"
-                              >
-                                {displayName}
-                              </span>
-                              <span className="text-slate-400 text-[10px] font-medium uppercase tracking-wider">
-                                {timeStr}
-                              </span>
-                            </div>
-                            <div className="text-slate-600 text-[14px] mt-1 leading-relaxed whitespace-pre-wrap">
-                              {msg.content}
-                            </div>
-                          </div>
+                    groupMessagesByDate(messagesList).map(group => (
+                      <div key={group.dateLabel} className="flex flex-col gap-6 w-full">
+                        <div className="flex justify-center my-2">
+                          <span className="bg-slate-100 text-slate-500 text-[11px] font-bold px-4 py-1.5 rounded-full tracking-wider shadow-sm border border-slate-200/50">
+                            {group.dateLabel}
+                          </span>
                         </div>
-                      );
-                    })
+                        {group.messages.map(msg => {
+                          const isMe = msg.sender.id === session.id;
+                          const initials = isMe ? getInitials(session.name) : getInitials(selectedChat.name);
+                          const displayName = isMe ? session.name : selectedChat.name;
+                          const timeStr = formatMessageTime(msg.timestamp);
+
+                          return (
+                            <div key={msg.id} className={`flex gap-3 w-full ${isMe ? 'flex-row-reverse' : 'flex-row'}`}>
+                              <div 
+                                onClick={() => navigate(`/profile?userId=${msg.sender.id}`)}
+                                className="w-8 h-8 bg-rgukt-slate rounded-full flex-shrink-0 flex items-center justify-center text-rgukt-maroon text-[10px] font-bold border border-slate-100 overflow-hidden cursor-pointer hover:scale-105 transition-transform mt-auto"
+                              >
+                                {isMe ? (
+                                  myProfilePhoto ? (
+                                    <img src={myProfilePhoto} alt={session.name} className="w-full h-full object-cover" />
+                                  ) : (
+                                    initials
+                                  )
+                                ) : (
+                                  selectedChat.profilePhoto ? (
+                                    <img src={selectedChat.profilePhoto} alt={selectedChat.name} className="w-full h-full object-cover" />
+                                  ) : (
+                                    initials
+                                  )
+                                )}
+                              </div>
+                              <div className={`flex flex-col max-w-[70%] ${isMe ? 'items-end' : 'items-start'}`}>
+                                <div className={`flex items-baseline gap-2 mb-1 px-1 ${isMe ? 'flex-row-reverse' : ''}`}>
+                                  <span 
+                                    onClick={() => navigate(`/profile?userId=${msg.sender.id}`)}
+                                    className="text-slate-600 font-semibold text-[11px] cursor-pointer hover:text-rgukt-maroon hover:underline transition-colors"
+                                  >
+                                    {displayName}
+                                  </span>
+                                </div>
+                                <div className={`text-[14px] leading-relaxed whitespace-pre-wrap px-4 py-2 shadow-sm ${
+                                  isMe 
+                                  ? 'bg-rgukt-maroon text-white rounded-2xl rounded-br-sm' 
+                                  : 'bg-white border border-slate-100 text-charcoal rounded-2xl rounded-bl-sm'
+                                }`}>
+                                  {msg.content}
+                                </div>
+                                <span className={`text-slate-400 text-[9px] font-medium mt-1 px-1 ${isMe ? 'text-right' : 'text-left'}`}>
+                                  {timeStr}
+                                </span>
+                              </div>
+                            </div>
+                          );
+                        })}
+                      </div>
+                    ))
                   ) : (
                     <div className="text-center py-8 text-slate-400 text-xs italic">
                       No messages yet. Say hello!
