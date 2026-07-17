@@ -3,7 +3,6 @@ import { Heart, MessageCircle, ShieldCheck, MoreHorizontal, Loader2, Share2, X }
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
 import { usePrompt } from '../context/PromptContext';
-import { mockUsers } from '../data/users';
  
 const CommentItem = ({ comment, session, onLikeComment, onAddReply }) => {
   const navigate = useNavigate();
@@ -21,7 +20,7 @@ const CommentItem = ({ comment, session, onLikeComment, onAddReply }) => {
     const lastWord = val.split(/\s+/).pop();
     if (lastWord && lastWord.startsWith('@')) {
       const query = lastWord.slice(1).toLowerCase();
-      const filtered = mockUsers.filter(u => 
+      const filtered = [].filter(u => 
         u.name.toLowerCase().includes(query)
       );
       setFilteredReplySuggestions(filtered);
@@ -287,7 +286,7 @@ const PostCard = ({ post, session, onLikeToggle, onDelete }) => {
     const lastWord = val.split(/\s+/).pop();
     if (lastWord && lastWord.startsWith('@')) {
       const query = lastWord.slice(1).toLowerCase();
-      const filtered = mockUsers.filter(u => 
+      const filtered = [].filter(u => 
         u.name.toLowerCase().includes(query)
       );
       setFilteredSuggestions(filtered);
