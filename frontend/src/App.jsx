@@ -12,6 +12,7 @@ import Register from './pages/Register';
 import ForgotPassword from './pages/ForgotPassword';
 
 import Landing from './pages/Landing';
+import { Analytics } from '@vercel/analytics/react';
 
 function App() {
   const [session, setSession] = useState(null);
@@ -98,6 +99,7 @@ function App() {
       </Routes>
       </BrowserRouter>
       </PromptProvider>
+      <Analytics />
     </NotificationProvider>
   );
 }

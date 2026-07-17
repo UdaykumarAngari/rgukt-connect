@@ -5,6 +5,7 @@ import { Search, ChevronLeft, Send, Image as ImageIcon, Paperclip, Smile, MoreHo
 import { useNotifications } from '../context/NotificationContext';
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
+import { formatMessageDate } from '../utils/dateUtils';
 
 const Messages = ({ session, onLogout }) => {
   const navigate = useNavigate();
@@ -56,9 +57,16 @@ const Messages = ({ session, onLogout }) => {
         ...conn,
         avatar: conn.name.split(' ').map(n => n[0]).join('').substring(0, 2).toUpperCase(),
         role: 'Verified RGUKT Member',
-        lastMessage: 'Select this chat to see messages',
-        time: ''
+        lastMessage: conn.lastMessage || 'Select this chat to see messages',
+        time: conn.lastMessageTime || ''
       }));
+
+      // Sort connections by time (latest first)
+      formattedConnections.sort((a, b) => {
+        const timeA = a.time ? new Date(a.time).getTime() : 0;
+        const timeB = b.time ? new Date(b.time).getTime() : 0;
+        return timeB - timeA;
+      });
       setConnections(formattedConnections);
 
       if (formattedConnections.length > 0 && !selectedChat) {
@@ -151,19 +159,28 @@ const Messages = ({ session, onLogout }) => {
         }));
       }
 
-      setConnections(prev => prev.map(conn => {
-        if (conn.id === msg.sender.id || conn.id === msg.receiver.id) {
-          const matchId = msg.sender.id === session.id ? msg.receiver.id : msg.sender.id;
-          if (conn.id === matchId) {
-            return {
-              ...conn,
-              lastMessage: msg.content,
-              time: 'Just now'
-            };
+      setConnections(prev => {
+        let updatedConnections = prev.map(conn => {
+          if (conn.id === msg.sender.id || conn.id === msg.receiver.id) {
+            const matchId = msg.sender.id === session.id ? msg.receiver.id : msg.sender.id;
+            if (conn.id === matchId) {
+              return {
+                ...conn,
+                lastMessage: msg.content,
+                time: msg.timestamp || new Date().toISOString()
+              };
+            }
           }
-        }
-        return conn;
-      }));
+          return conn;
+        });
+
+        // Reorder conversations, moving the updated one to the top
+        return updatedConnections.sort((a, b) => {
+          const timeA = a.time ? new Date(a.time).getTime() : 0;
+          const timeB = b.time ? new Date(b.time).getTime() : 0;
+          return timeB - timeA;
+        });
+      });
     };
 
     registerMessageListener(handleIncomingMessage);
@@ -192,16 +209,25 @@ const Messages = ({ session, onLogout }) => {
 
     setMessagesList(prev => [...prev, localMsg]);
 
-    setConnections(prev => prev.map(conn => {
-      if (conn.id === selectedChat.id) {
-        return {
-          ...conn,
-          lastMessage: messageText.trim(),
-          time: 'Just now'
-        };
-      }
-      return conn;
-    }));
+    setConnections(prev => {
+      let updatedConnections = prev.map(conn => {
+        if (conn.id === selectedChat.id) {
+          return {
+            ...conn,
+            lastMessage: messageText.trim(),
+            time: localMsg.timestamp
+          };
+        }
+        return conn;
+      });
+
+      // Reorder conversations
+      return updatedConnections.sort((a, b) => {
+        const timeA = a.time ? new Date(a.time).getTime() : 0;
+        const timeB = b.time ? new Date(b.time).getTime() : 0;
+        return timeB - timeA;
+      });
+    });
 
     setMessageText("");
   };
@@ -273,7 +299,9 @@ const Messages = ({ session, onLogout }) => {
                            {chat.name}
                          </h4>
                          <div className="flex flex-col items-end gap-1 shrink-0">
-                           <span className="text-[10px] font-medium text-slate-400 uppercase">{chat.time}</span>
+                           <span className="text-[10px] font-medium text-slate-400 uppercase">
+                             {formatMessageDate(chat.time)}
+                           </span>
                            {unreadCounts[chat.id] > 0 && selectedChat?.id !== chat.id && (
                              <span className="bg-rgukt-maroon text-white text-[9px] font-black h-4.5 w-4.5 rounded-full flex items-center justify-center border border-white shadow-sm shadow-rgukt-maroon/10">
                                {unreadCounts[chat.id]}
@@ -352,9 +380,7 @@ const Messages = ({ session, onLogout }) => {
                       const isMe = msg.sender.id === session.id;
                       const initials = isMe ? getInitials(session.name) : getInitials(selectedChat.name);
                       const displayName = isMe ? session.name : selectedChat.name;
-                      const timeStr = msg.timestamp 
-                        ? new Date(msg.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) 
-                        : 'Just now';
+                      const timeStr = formatMessageDate(msg.timestamp || new Date().toISOString());
 
                       return (
                         <div key={msg.id} className="flex gap-4">
