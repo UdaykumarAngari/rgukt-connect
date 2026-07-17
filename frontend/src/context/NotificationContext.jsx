@@ -95,8 +95,8 @@ export const NotificationProvider = ({ session, children }) => {
 
     fetchUnreadCounts();
  
-    const wsProtocol = window.location.protocol === 'https:' ? 'wss' : 'ws';
-    const brokerURL = `${wsProtocol}://${window.location.host}/ws-chat/websocket`;
+    const apiBase = import.meta.env.VITE_API_URL || window.location.origin;
+    const brokerURL = `${apiBase.replace(/^http/, 'ws')}/ws-chat/websocket`;
 
     const client = new Client({
       brokerURL,
