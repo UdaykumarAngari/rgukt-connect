@@ -26,3 +26,5 @@ dist-ssr
 # Maven
 target/
 backend/target/
+
+/frontend/.env
