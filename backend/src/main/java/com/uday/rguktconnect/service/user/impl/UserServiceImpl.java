@@ -42,6 +42,9 @@ public class UserServiceImpl implements UserService {
     @Override
     @Transactional
     public UserResponseDTO registerUser(UserRegisterRequestDTO requestDTO){
+        if (requestDTO.getUniversityEmail() == null || !requestDTO.getUniversityEmail().toLowerCase().endsWith("@rgukt.ac.in")) {
+            throw new RuntimeException("Only @rgukt.ac.in university email domain is permitted.");
+        }
 
         String storedOtp = registrationOtpStorage.get(requestDTO.getUniversityEmail());
         java.time.LocalDateTime expiry = registrationOtpExpiry.get(requestDTO.getUniversityEmail());
@@ -101,6 +104,9 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public AuthResponseDTO loginUser(AuthRequestDTO loginRequest){
+        if (loginRequest.getUniversityEmail() == null || !loginRequest.getUniversityEmail().toLowerCase().endsWith("@rgukt.ac.in")) {
+            throw new RuntimeException("Only @rgukt.ac.in university email domain is permitted.");
+        }
         User user = userRepository.findByUniversityEmail(loginRequest.getUniversityEmail())
                 .orElseThrow(()-> new RuntimeException("User not found with this Email"));
 
@@ -136,6 +142,9 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public void generateForgotPasswordOtp(String email) {
+        if (email == null || !email.toLowerCase().endsWith("@rgukt.ac.in")) {
+            throw new RuntimeException("Only @rgukt.ac.in university email domain is permitted.");
+        }
         User user = userRepository.findByUniversityEmail(email)
                 .orElseThrow(() -> new RuntimeException("No user registered with this university email."));
 
@@ -174,6 +183,9 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public void sendRegistrationOtp(String email, String idNumber) {
+        if (email == null || !email.toLowerCase().endsWith("@rgukt.ac.in")) {
+            throw new RuntimeException("Only @rgukt.ac.in university email domain is permitted.");
+        }
         if(userRepository.existsByIdNumberOrUniversityEmail(idNumber, email)){
             throw new RuntimeException("User with this ID number or University Email already exists.");
         }
