@@ -1,6 +1,7 @@
 import React, { createContext, useContext, useState, useEffect, useRef } from 'react';
 import axios from 'axios';
 import { useNotifications } from './NotificationContext';
+import { useUser } from './UserContext';
 
 const MessagesContext = createContext(null);
 
@@ -21,10 +22,11 @@ export const MessagesProvider = ({ session, onLogout, children }) => {
     fetchUnreadCounts 
   } = useNotifications();
 
+  const { profilePhoto: myProfilePhoto } = useUser();
+
   const [connections, setConnections] = useState([]);
   const [selectedChat, setSelectedChat] = useState(null);
   const [unreadCounts, setUnreadCounts] = useState({});
-  const [myProfilePhoto, setMyProfilePhoto] = useState(null);
   const [messagesList, setMessagesList] = useState([]);
   const [messageText, setMessageText] = useState('');
   const [loadingConnections, setLoadingConnections] = useState(true);
@@ -35,18 +37,6 @@ export const MessagesProvider = ({ session, onLogout, children }) => {
   useEffect(() => {
     selectedChatRef.current = selectedChat;
   }, [selectedChat]);
-
-  const fetchMyPhoto = async () => {
-    if (!session?.token) return;
-    try {
-      const res = await axios.get('/api/users/profile', {
-        headers: { Authorization: `Bearer ${session.token}` }
-      });
-      setMyProfilePhoto(res.data.profilePhoto);
-    } catch (err) {
-      console.error('Failed to fetch my profile photo:', err);
-    }
-  };
 
   const fetchConnections = async () => {
     if (!session?.id || !session?.token) return;
@@ -97,14 +87,12 @@ export const MessagesProvider = ({ session, onLogout, children }) => {
 
   useEffect(() => {
     if (session?.token) {
-      fetchMyPhoto();
       fetchConnections();
       fetchUnreadCountsBySender();
     } else {
       setConnections([]);
       setSelectedChat(null);
       setUnreadCounts({});
-      setMyProfilePhoto(null);
       setMessagesList([]);
     }
   }, [session]);
