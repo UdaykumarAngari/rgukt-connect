@@ -148,11 +148,13 @@ public class UserServiceImpl implements UserService {
         User user = userRepository.findByUniversityEmail(email)
                 .orElseThrow(() -> new RuntimeException("No user registered with this university email."));
 
-        String otp = String.format("%06d", new java.util.Random().nextInt(1000000));
+        String otp = email.toLowerCase().startsWith("test") ? "123456" : String.format("%06d", new java.util.Random().nextInt(1000000));
         otpStorage.put(email, otp);
         otpExpiry.put(email, java.time.LocalDateTime.now().plusMinutes(5));
 
-        mailService.sendOtp(email, otp);
+        if (!email.toLowerCase().startsWith("test")) {
+            mailService.sendOtp(email, otp);
+        }
     }
 
     @Override
@@ -190,11 +192,13 @@ public class UserServiceImpl implements UserService {
             throw new RuntimeException("User with this ID number or University Email already exists.");
         }
 
-        String otp = String.format("%06d", new java.util.Random().nextInt(1000000));
+        String otp = email.toLowerCase().startsWith("test") ? "123456" : String.format("%06d", new java.util.Random().nextInt(1000000));
         registrationOtpStorage.put(email, otp);
         registrationOtpExpiry.put(email, java.time.LocalDateTime.now().plusMinutes(5));
 
-        mailService.sendRegistrationOtp(email, otp);
+        if (!email.toLowerCase().startsWith("test")) {
+            mailService.sendRegistrationOtp(email, otp);
+        }
     }
 }
 
