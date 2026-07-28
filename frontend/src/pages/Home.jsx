@@ -1,54 +1,21 @@
-import React, { useState, useEffect } from 'react';
+import React from 'react';
 import Navbar from '../components/Navbar';
 import FloatingDock from '../components/FloatingDock';
 import PostCard from '../components/PostCard';
 import CreatePostModal from '../components/CreatePostModal';
-import axios from 'axios';
+import { useHome } from '../context/HomeContext';
 
 const Home = ({ session, onLogout }) => {
-
-  const [posts, setPosts] = useState([]);
-  const [searchQuery, setSearchQuery] = useState("");
-  const [isModalOpen, setIsModalOpen] = useState(false);
-
-  useEffect(() => {
-    const fetchFeed = async () => {
-      try {
-        const res = await axios.get('/api/posts', {
-          headers: { Authorization: `Bearer ${session?.token}` }
-        });
-        setPosts(res.data);
-      } catch (err) {
-        console.error("Failed to fetch feed:", err);
-        if (err.response?.status === 401 || err.response?.status === 403) {
-          onLogout();
-        }
-      }
-    };
-
-    if (session?.token) {
-      fetchFeed();
-    }
-  }, [session, onLogout]);
-
-  const handleCreatePost = (newPost) => {
-    setPosts(prevPosts => [newPost, ...prevPosts]);
-    setIsModalOpen(false);
-  };
-
-  const handleLikeToggle = (updatedPost) => {
-    setPosts(prevPosts => prevPosts.map(p => p.id === updatedPost.id ? updatedPost : p));
-  };
-
-  const handleDeletePost = (deletedPostId) => {
-    setPosts(prevPosts => prevPosts.filter(p => p.id !== deletedPostId));
-  };
-
-
-  const filteredPosts = posts.filter(p =>
-    (p.author && p.author.toLowerCase().includes(searchQuery.toLowerCase())) ||
-    (p.content && p.content.toLowerCase().includes(searchQuery.toLowerCase()))
-  );
+  const {
+    searchQuery,
+    setSearchQuery,
+    isModalOpen,
+    setIsModalOpen,
+    handleCreatePost,
+    handleLikeToggle,
+    handleDeletePost,
+    filteredPosts,
+  } = useHome();
 
   return (
     <div className="min-h-screen bg-rgukt-slate flex flex-col">
