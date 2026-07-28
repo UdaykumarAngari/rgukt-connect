@@ -51,6 +51,10 @@ const Register = () => {
             setError('Please fill in all fields.');
             return;
         }
+        if (!formData.universityEmail.toLowerCase().endsWith('@rgukt.ac.in')) {
+            setError('Only @rgukt.ac.in university email domain is permitted.');
+            return;
+        }
         setLoading(true);
         try {
             const response = await axios.post('/api/auth/register/send-otp', {
