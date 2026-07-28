@@ -71,10 +71,10 @@ export const PromptProvider = ({ children }) => {
                 promptConfig.type === 'error' ? 'bg-rose-50 text-rose-600' :
                 'bg-rgukt-maroon/5 text-rgukt-maroon'
               }`}>
-                {promptConfig.type === 'confirm' && <span className="text-2xl">⚠️</span>}
-                {promptConfig.type === 'success' && <span className="text-2xl">✨</span>}
-                {promptConfig.type === 'error' && <span className="text-2xl">❌</span>}
-                {promptConfig.type === 'alert' && <span className="text-2xl">ℹ️</span>}
+                {promptConfig.type === 'confirm' && <span className="text-2xl"></span>}
+                {promptConfig.type === 'success' && <span className="text-2xl"></span>}
+                {promptConfig.type === 'error' && <span className="text-2xl"></span>}
+                {promptConfig.type === 'alert' && <span className="text-2xl">!!!</span>}
               </div>
 
               <h3 className="text-lg font-bold text-charcoal mb-2 font-display">
