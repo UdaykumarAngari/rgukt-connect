@@ -39,6 +39,10 @@ const Login = ({ onLoginSuccess }) => {
     const handleSubmit = async (e) => {
         e.preventDefault();
         setError('');
+        if (!credentials.universityEmail.toLowerCase().endsWith('@rgukt.ac.in')) {
+            setError('Only @rgukt.ac.in university email domain is permitted.');
+            return;
+        }
         try {
             const response = await axios.post('/api/auth/login', credentials);
             const { user, accessToken } = response.data;
