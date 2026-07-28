@@ -3,32 +3,17 @@ import { useNavigate } from 'react-router-dom';
 import logo from '../assets/rgukt.png'; 
 import { Bell, Search } from 'lucide-react';
 import NotificationDropdown from './NotificationDropdown';
-import axios from 'axios';
 import { useNotifications } from '../context/NotificationContext';
+import { useUser } from '../context/UserContext';
 
 const Navbar = ({ isLanding = false, searchQuery, setSearchQuery, session, onLogout }) => {
   const navigate = useNavigate();
   const [showNotifications, setShowNotifications] = useState(false);
   const [showProfileDropdown, setShowProfileDropdown] = useState(false);
-  const [profilePhoto, setProfilePhoto] = useState(null);
+  const { profilePhoto } = useUser();
   const notificationRef = useRef(null);
   const profileDropdownRef = useRef(null);
   const { unreadNotifications } = useNotifications();
-
-  useEffect(() => {
-    if (!session?.token) return;
-    const fetchPhoto = async () => {
-      try {
-        const res = await axios.get('/api/users/profile', {
-          headers: { Authorization: `Bearer ${session.token}` }
-        });
-        setProfilePhoto(res.data.profilePhoto);
-      } catch (err) {
-        console.error('Failed to load profile photo in navbar:', err);
-      }
-    };
-    fetchPhoto();
-  }, [session]);
 
   // Close dropdowns when clicking outside
   useEffect(() => {
