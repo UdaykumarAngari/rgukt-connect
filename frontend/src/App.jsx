@@ -17,6 +17,7 @@ import { HomeProvider } from './context/HomeContext';
 import { JobsProvider } from './context/JobsContext';
 import { MessagesProvider } from './context/MessagesContext';
 import { NetworkProvider } from './context/NetworkContext';
+import { UserProvider } from './context/UserContext';
 
 function App() {
   const [session, setSession] = useState(null);
@@ -53,63 +54,65 @@ function App() {
   return (
     <NotificationProvider session={session}>
       <PromptProvider>
-        <HomeProvider session={session} onLogout={handleLogout}>
-          <JobsProvider session={session} onLogout={handleLogout}>
-            <NetworkProvider session={session} onLogout={handleLogout}>
-              <MessagesProvider session={session} onLogout={handleLogout}>
-                <BrowserRouter>
-                  <Routes>
-                    <Route path="/" element={<Landing session={session} onLogout={handleLogout} />} />
-             
-                    <Route 
-                      path="/login" 
-                      element={!session ? <Login onLoginSuccess={handleLoginSuccess} /> : <Navigate to="/home" replace />} 
-                    />
-                    <Route 
-                      path="/register" 
-                      element={!session ? <Register /> : <Navigate to="/home" replace />} 
-                    />
-                    <Route 
-                      path="/forgot-password" 
-                      element={!session ? <ForgotPassword /> : <Navigate to="/home" replace />} 
-                    />
-             
-                    <Route path="/home" element={
-                      <ProtectedRoute>
-                        <Home session={session} onLogout={handleLogout} />
-                      </ProtectedRoute>
-                    } />
-                    
-                    <Route path="/network" element={
-                      <ProtectedRoute>
-                        <Network session={session} onLogout={handleLogout} />
-                      </ProtectedRoute>
-                    } />
-                    
-                    <Route path="/jobs" element={
-                      <ProtectedRoute>
-                        <Jobs session={session} onLogout={handleLogout} />
-                      </ProtectedRoute>
-                    } />
-                    
-                    <Route path="/messages" element={
-                      <ProtectedRoute>
-                        <Messages session={session} onLogout={handleLogout} />
-                      </ProtectedRoute>
-                    } />
-                    
-                    <Route path="/profile" element={
-                      <ProtectedRoute>
-                        <Profile session={session} onLogout={handleLogout} />
-                      </ProtectedRoute>
-                    } />
-                    <Route path="*" element={<Navigate to="/" replace />} />
-                  </Routes>
-                </BrowserRouter>
-              </MessagesProvider>
-            </NetworkProvider>
-          </JobsProvider>
-        </HomeProvider>
+        <UserProvider session={session}>
+          <HomeProvider session={session} onLogout={handleLogout}>
+            <JobsProvider session={session} onLogout={handleLogout}>
+              <NetworkProvider session={session} onLogout={handleLogout}>
+                <MessagesProvider session={session} onLogout={handleLogout}>
+                  <BrowserRouter>
+                    <Routes>
+                      <Route path="/" element={<Landing session={session} onLogout={handleLogout} />} />
+               
+                      <Route 
+                        path="/login" 
+                        element={!session ? <Login onLoginSuccess={handleLoginSuccess} /> : <Navigate to="/home" replace />} 
+                      />
+                      <Route 
+                        path="/register" 
+                        element={!session ? <Register /> : <Navigate to="/home" replace />} 
+                      />
+                      <Route 
+                        path="/forgot-password" 
+                        element={!session ? <ForgotPassword /> : <Navigate to="/home" replace />} 
+                      />
+               
+                      <Route path="/home" element={
+                        <ProtectedRoute>
+                          <Home session={session} onLogout={handleLogout} />
+                        </ProtectedRoute>
+                      } />
+                      
+                      <Route path="/network" element={
+                        <ProtectedRoute>
+                          <Network session={session} onLogout={handleLogout} />
+                        </ProtectedRoute>
+                      } />
+                      
+                      <Route path="/jobs" element={
+                        <ProtectedRoute>
+                          <Jobs session={session} onLogout={handleLogout} />
+                        </ProtectedRoute>
+                      } />
+                      
+                      <Route path="/messages" element={
+                        <ProtectedRoute>
+                          <Messages session={session} onLogout={handleLogout} />
+                        </ProtectedRoute>
+                      } />
+                      
+                      <Route path="/profile" element={
+                        <ProtectedRoute>
+                          <Profile session={session} onLogout={handleLogout} />
+                        </ProtectedRoute>
+                      } />
+                      <Route path="*" element={<Navigate to="/" replace />} />
+                    </Routes>
+                  </BrowserRouter>
+                </MessagesProvider>
+              </NetworkProvider>
+            </JobsProvider>
+          </HomeProvider>
+        </UserProvider>
       </PromptProvider>
       <Analytics />
     </NotificationProvider>
