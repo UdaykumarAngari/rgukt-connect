@@ -1,41 +1,25 @@
-import React, { useState, useEffect } from 'react';
+import React from 'react';
 import { useNavigate } from 'react-router-dom';
-import axios from 'axios';
 import Navbar from '../components/Navbar';
 import FloatingDock from '../components/FloatingDock';
 import JobCard from '../components/JobCard';
 import CreateJobModal from '../components/CreateJobModal';
 import { usePrompt } from '../context/PromptContext';
+import { useJobs } from '../context/JobsContext';
 
 const Jobs = ({ session, onLogout }) => {
   const navigate = useNavigate();
-  const [searchQuery, setSearchQuery] = useState("");
-  const [isModalOpen, setIsModalOpen] = useState(false);
-  const [jobs, setJobs] = useState([]);
-  
   const { showPrompt } = usePrompt();
-
-  useEffect(() => {
-    const fetchJobs = async () => {
-      try {
-        const res = await axios.get('/api/jobs', {
-          headers: {
-            Authorization: `Bearer ${session?.token}`
-          }
-        });
-        setJobs(res.data);
-      } catch (err) {
-        console.error("Error fetching jobs from API:", err);
-        setJobs([]);
-      }
-    };
-    fetchJobs();
-  }, [session]);
-
-  const filteredJobs = jobs.filter(j => 
-    j.company?.toLowerCase().includes(searchQuery.toLowerCase()) || 
-    j.role?.toLowerCase().includes(searchQuery.toLowerCase())
-  );
+  
+  const {
+    searchQuery,
+    setSearchQuery,
+    isModalOpen,
+    setIsModalOpen,
+    handleJobCreated,
+    handleJobDelete,
+    filteredJobs,
+  } = useJobs();
 
   const isAlumniOrAdmin = session?.role === 'ALUMNI' || session?.role === 'ADMIN';
 
@@ -47,27 +31,6 @@ const Jobs = ({ session, onLogout }) => {
       return;
     }
     setIsModalOpen(true);
-  };
-
-  const handleJobCreated = (newJob) => {
-    setIsModalOpen(false);
-    setJobs(prevJobs => [newJob, ...prevJobs]);
-  };
-
-  const handleJobDelete = async (jobId) => {
-    try {
-      await axios.delete(`/api/jobs/${jobId}`, {
-        headers: {
-          Authorization: `Bearer ${session?.token}`
-        }
-      });
-      setJobs(prevJobs => prevJobs.filter(job => job.id !== jobId));
-    } catch (err) {
-      console.error("Error deleting job:", err);
-      showPrompt({
-        message: err.response?.data?.error || "Failed to delete job posting. Please try again."
-      });
-    }
   };
 
   return (
@@ -101,7 +64,7 @@ const Jobs = ({ session, onLogout }) => {
               job={job} 
               session={session}
               showPrompt={showPrompt}
-              onDelete={handleJobDelete} 
+              onDelete={(jobId) => handleJobDelete(jobId, showPrompt)} 
             />
           ))}
         </section>
