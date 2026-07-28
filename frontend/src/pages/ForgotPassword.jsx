@@ -20,6 +20,10 @@ const ForgotPassword = () => {
     const handleSendOtp = async (e) => {
         e.preventDefault();
         if (!email.trim()) return;
+        if (!email.toLowerCase().endsWith('@rgukt.ac.in')) {
+            setError('Only @rgukt.ac.in university email domain is permitted.');
+            return;
+        }
         setLoading(true);
         setError('');
         try {
