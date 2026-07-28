@@ -1,109 +1,26 @@
-import React, { useState, useEffect } from 'react';
+import React from 'react';
 import Navbar from '../components/Navbar';
 import FloatingDock from '../components/FloatingDock';
 import UserCard from '../components/UserCard';
 import CreatePostModal from '../components/CreatePostModal';
-import axios from 'axios';
 import { usePrompt } from '../context/PromptContext';
+import { useNetwork } from '../context/NetworkContext';
 
 const Network = ({ session, onLogout }) => {
   const { showPrompt } = usePrompt();
-  const [searchQuery, setSearchQuery] = useState("");
-  const [isModalOpen, setIsModalOpen] = useState(false);
-  const [pendingInvites, setPendingInvites] = useState([]);
-  const [refreshTrigger, setRefreshTrigger] = useState(0);
-  const [users, setUsers] = useState([]);
-  const [loading, setLoading] = useState(true);
-
-  const fetchDirectory = async () => {
-    try {
-      const res = await axios.get('/api/users/directory', {
-        headers: { Authorization: `Bearer ${session.token}` }
-      });
-      setUsers(res.data);
-    } catch (err) {
-      console.error('Error fetching alumni directory:', err);
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const fetchPendingInvites = async () => {
-    try {
-      const res = await axios.get('/api/connections/pending-received', {
-        headers: { Authorization: `Bearer ${session.token}` }
-      });
-      setPendingInvites(res.data);
-    } catch (err) {
-      console.error('Error fetching pending invites:', err);
-      if (err.response && (err.response.status === 401 || err.response.status === 403)) {
-        onLogout();
-      }
-    }
-  };
-
-  useEffect(() => {
-    fetchPendingInvites();
-    fetchDirectory();
-  }, [session, refreshTrigger]);
-
-  const handleAcceptInvite = async (requestId) => {
-    try {
-      await axios.put(`/api/connections/accept/${requestId}`, {}, {
-        headers: { Authorization: `Bearer ${session.token}` }
-      });
-      fetchPendingInvites();
-      setRefreshTrigger(prev => prev + 1);
-    } catch (err) {
-      console.error(err);
-      showPrompt({ type: 'error', message: 'Failed to accept request.' });
-    }
-  };
-
-  const handleRejectInvite = async (requestId) => {
-    showPrompt({
-      type: 'confirm',
-      title: 'Ignore Request',
-      message: 'Are you sure you want to ignore this connection request?',
-      confirmText: 'Ignore',
-      onConfirm: async () => {
-        try {
-          await axios.delete(`/api/connections/reject/${requestId}`, {
-            headers: { Authorization: `Bearer ${session.token}` }
-          });
-          fetchPendingInvites();
-          setRefreshTrigger(prev => prev + 1);
-        } catch (err) {
-          console.error(err);
-          showPrompt({ type: 'error', message: 'Failed to decline request.' });
-        }
-      }
-    });
-  };
-
-  const handleStatusChange = () => {
-    fetchPendingInvites();
-    setRefreshTrigger(prev => prev + 1);
-  };
-
-  const filteredUsers = users.filter(u => {
-    const search = searchQuery.toLowerCase();
-    
-    const matchesBasic = 
-      u.name?.toLowerCase().includes(search) || 
-      u.universityEmail?.toLowerCase().includes(search) || 
-      u.idNumber?.toLowerCase().includes(search) || 
-      u.description?.toLowerCase().includes(search) ||
-      u.role?.toLowerCase().includes(search) ||
-      u.branch?.toLowerCase().includes(search);
-      
-    const matchesExperience = u.experiences?.some(exp => 
-      exp.companyName?.toLowerCase().includes(search) ||
-      exp.title?.toLowerCase().includes(search)
-    ) || false;
-
-    return matchesBasic || matchesExperience;
-  });
+  
+  const {
+    searchQuery,
+    setSearchQuery,
+    isModalOpen,
+    setIsModalOpen,
+    pendingInvites,
+    loading,
+    handleAcceptInvite,
+    handleRejectInvite,
+    handleStatusChange,
+    filteredUsers,
+  } = useNetwork();
 
   return (
     <div className="min-h-screen bg-rgukt-slate flex flex-col font-sans">
@@ -149,13 +66,13 @@ const Network = ({ session, onLogout }) => {
                   </div>
                   <div className="flex gap-2 shrink-0">
                     <button 
-                      onClick={() => handleAcceptInvite(invite.id)} 
+                      onClick={() => handleAcceptInvite(invite.id, showPrompt)} 
                       className="bg-rgukt-maroon text-white px-3 py-1.5 rounded-lg text-xs font-bold hover:scale-[1.02] transition-transform cursor-pointer"
                     >
                       Accept
                     </button>
                     <button 
-                      onClick={() => handleRejectInvite(invite.id)} 
+                      onClick={() => handleRejectInvite(invite.id, showPrompt)} 
                       className="border border-slate-200 text-slate-600 px-3 py-1.5 rounded-lg text-xs font-bold hover:bg-white transition-all cursor-pointer"
                     >
                       Ignore
