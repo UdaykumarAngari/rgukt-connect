@@ -4,6 +4,7 @@ import FloatingDock from '../components/FloatingDock';
 import axios from 'axios';
 import { useSearchParams } from 'react-router-dom';
 import { usePrompt } from '../context/PromptContext';
+import { useUser } from '../context/UserContext';
 import { 
   MapPin, 
   Link as LinkIcon, 
@@ -26,6 +27,7 @@ import {
 
 const Profile = ({ session, onLogout }) => {
   const { showPrompt } = usePrompt();
+  const { setProfilePhoto } = useUser();
   const [searchParams] = useSearchParams();
   const userId = searchParams.get('userId');
   const isOwnProfile = !userId || Number(userId) === Number(session.id);
@@ -208,12 +210,15 @@ const Profile = ({ session, onLogout }) => {
 
     try {
       setPhotoUploading(true);
-      await axios.put('/api/users/profile/photo', formData, {
+      const res = await axios.put('/api/users/profile/photo', formData, {
         headers: { 
           Authorization: `Bearer ${session.token}`,
           'Content-Type': 'multipart/form-data'
         }
       });
+      if (res.data?.profilePhoto) {
+        setProfilePhoto(res.data.profilePhoto);
+      }
       fetchProfile();
     } catch (err) {
       console.error(err);
