@@ -1,7 +1,7 @@
 package com.uday.rguktconnect.controller;
 
 import com.uday.rguktconnect.entity.Connection;
-import com.uday.rguktconnect.service.connection.impl.ConnectionServiceImpl;
+import com.uday.rguktconnect.service.connection.ConnectionService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -17,7 +17,7 @@ import java.util.Map;
 public class ConnectionController {
 
     @Autowired
-    private ConnectionServiceImpl connectionService;
+    private ConnectionService connectionService;
 
     private String getAuthenticatedEmail() {
         return (String) SecurityContextHolder.getContext()

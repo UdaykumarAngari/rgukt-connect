@@ -1,6 +1,6 @@
 package com.uday.rguktconnect.security;
 
-import com.uday.rguktconnect.service.user.impl.UserServiceImpl;
+import com.uday.rguktconnect.service.user.UserService;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -22,7 +22,7 @@ public class JwtFilter extends OncePerRequestFilter {
     private JwtUtil jwtUtil;
 
     @Autowired
-    private UserServiceImpl userService;
+    private UserService userService;
 
     @Override
     protected void doFilterInternal(HttpServletRequest request,

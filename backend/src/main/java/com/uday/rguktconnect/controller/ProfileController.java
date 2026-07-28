@@ -5,7 +5,7 @@ import com.uday.rguktconnect.dto.ProfileUpdateRequestDTO;
 import com.uday.rguktconnect.entity.EducationDetail;
 import com.uday.rguktconnect.entity.Project;
 import com.uday.rguktconnect.entity.UserExperiences;
-import com.uday.rguktconnect.service.user.impl.ProfileServiceImpl; // Consider changing to the interface ProfileService if applicable
+import com.uday.rguktconnect.service.user.ProfileService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -23,7 +23,7 @@ import java.util.Objects;
 public class ProfileController {
 
     @Autowired
-    private ProfileServiceImpl profileService;
+    private ProfileService profileService;
 
     private String getAuthenticatedEmail() {
         return (String) Objects.requireNonNull(
