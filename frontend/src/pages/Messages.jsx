@@ -1,245 +1,45 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useEffect, useRef } from 'react';
 import Navbar from '../components/Navbar';
 import FloatingDock from '../components/FloatingDock';
-import { Search, ChevronLeft, Send, Image as ImageIcon, Paperclip, Smile, MoreHorizontal, Edit, Star } from 'lucide-react';
-import { useNotifications } from '../context/NotificationContext';
-import axios from 'axios';
+import { Search, ChevronLeft, Image as ImageIcon, Paperclip, Smile, MoreHorizontal, Edit, Star } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { formatMessageDate, formatMessageTime, groupMessagesByDate } from '../utils/dateUtils';
+import { useMessages } from '../context/MessagesContext';
 
 const Messages = ({ session, onLogout }) => {
   const navigate = useNavigate();
-  const { 
-    registerMessageListener, 
-    unregisterMessageListener, 
-    setActiveChatUserId, 
-    sendStompMessage,
-    fetchUnreadCounts 
-  } = useNotifications();
 
-  const [connections, setConnections] = useState([]);
-  const [selectedChat, setSelectedChat] = useState(null);
-  const [unreadCounts, setUnreadCounts] = useState({});
-  const [myProfilePhoto, setMyProfilePhoto] = useState(null);
+  const {
+    connections,
+    selectedChat,
+    setSelectedChat,
+    unreadCounts,
+    myProfilePhoto,
+    messagesList,
+    messageText,
+    setMessageText,
+    loadingConnections,
+    searchQuery,
+    setSearchQuery,
+    handleSendMessage,
+    filteredConnections,
+  } = useMessages();
 
-  useEffect(() => {
-    const fetchMyPhoto = async () => {
-      try {
-        const res = await axios.get('/api/users/profile', {
-          headers: { Authorization: `Bearer ${session.token}` }
-        });
-        setMyProfilePhoto(res.data.profilePhoto);
-      } catch (err) {
-        console.error("Failed to fetch my profile photo:", err);
-      }
-    };
-    fetchMyPhoto();
-  }, [session]);
-  const [messagesList, setMessagesList] = useState([]);
-  const [messageText, setMessageText] = useState("");
-  const [loadingConnections, setLoadingConnections] = useState(true);
-  const [searchQuery, setSearchQuery] = useState("");
-
-  const selectedChatRef = useRef(null);
   const messagesContainerRef = useRef(null);
-
-  useEffect(() => {
-    selectedChatRef.current = selectedChat;
-  }, [selectedChat]);
-
-  const fetchConnections = async () => {
-    try {
-      setLoadingConnections(true);
-      const res = await axios.get(`/api/connections/list/${session.id}`, {
-        headers: { Authorization: `Bearer ${session.token}` }
-      }); 
-      const formattedConnections = res.data.map(conn => ({
-        ...conn,
-        avatar: conn.name.split(' ').map(n => n[0]).join('').substring(0, 2).toUpperCase(),
-        role: 'Verified RGUKT Member',
-        lastMessage: conn.lastMessage || 'Select this chat to see messages',
-        time: conn.lastMessageTime || ''
-      }));
-
-      // Sort connections by time (latest first)
-      formattedConnections.sort((a, b) => {
-        const timeA = a.time ? new Date(a.time).getTime() : 0;
-        const timeB = b.time ? new Date(b.time).getTime() : 0;
-        return timeB - timeA;
-      });
-      setConnections(formattedConnections);
-
-      if (formattedConnections.length > 0 && !selectedChat) {
-        setSelectedChat(formattedConnections[0]);
-      }
-    } catch (err) {
-      console.error('Failed to load active connections:', err);
-      if (err.response && (err.response.status === 401 || err.response.status === 403)) {
-        onLogout();
-      }
-    } finally {
-      setLoadingConnections(false);
-    }
-  };
-
-  const fetchUnreadCountsBySender = async () => {
-    try {
-      const res = await axios.get('/api/chat/unread-by-sender', {
-        headers: { Authorization: `Bearer ${session.token}` }
-      });
-      setUnreadCounts(res.data);
-    } catch (err) {
-      console.error("Failed to load unread counts by sender:", err);
-    }
-  };
-
-  useEffect(() => {
-    fetchConnections();
-    fetchUnreadCountsBySender();
-  }, [session]);
-
-  useEffect(() => {
-    if (!selectedChat) return;
-
-    const fetchHistory = async () => {
-      try {
-        const res = await axios.get(`/api/chat/history/${selectedChat.id}`, {
-          headers: { Authorization: `Bearer ${session.token}` }
-        });
-        setMessagesList(res.data);
- 
-        fetchUnreadCounts();
-
-        setUnreadCounts(prev => ({
-          ...prev,
-          [selectedChat.id]: 0
-        }));
-      } catch (err) {
-        console.error('Failed to load chat history:', err);
-        setMessagesList([]);
-        if (err.response && (err.response.status === 401 || err.response.status === 403)) {
-          onLogout();
-        }
-      }
-    };
-
-    fetchHistory();
-  }, [selectedChat, session]);
- 
-  useEffect(() => {
-    if (selectedChat) {
-      setActiveChatUserId(selectedChat.id);
-    } else {
-      setActiveChatUserId(null);
-    }
-    return () => setActiveChatUserId(null);
-  }, [selectedChat]);
 
   useEffect(() => {
     if (messagesContainerRef.current) {
       messagesContainerRef.current.scrollTo({
         top: messagesContainerRef.current.scrollHeight,
-        behavior: 'smooth'
+        behavior: 'smooth',
       });
     }
   }, [messagesList]);
 
-  useEffect(() => {
-    const handleIncomingMessage = (msg) => {
-      const activeChat = selectedChatRef.current;
-      if (activeChat && (msg.sender.id === activeChat.id || msg.sender.id === session.id)) {
-        setMessagesList(prev => {
-          if (prev.some(m => m.id === msg.id)) return prev;
-          return [...prev, msg];
-        });
-      } else {
-        setUnreadCounts(prev => ({
-          ...prev,
-          [msg.sender.id]: (prev[msg.sender.id] || 0) + 1
-        }));
-      }
-
-      setConnections(prev => {
-        let updatedConnections = prev.map(conn => {
-          if (conn.id === msg.sender.id || conn.id === msg.receiver.id) {
-            const matchId = msg.sender.id === session.id ? msg.receiver.id : msg.sender.id;
-            if (conn.id === matchId) {
-              return {
-                ...conn,
-                lastMessage: msg.content,
-                time: msg.timestamp || new Date().toISOString()
-              };
-            }
-          }
-          return conn;
-        });
-
-        // Reorder conversations, moving the updated one to the top
-        return updatedConnections.sort((a, b) => {
-          const timeA = a.time ? new Date(a.time).getTime() : 0;
-          const timeB = b.time ? new Date(b.time).getTime() : 0;
-          return timeB - timeA;
-        });
-      });
-    };
-
-    registerMessageListener(handleIncomingMessage);
-    return () => unregisterMessageListener(handleIncomingMessage);
-  }, [session]);
-
-  const handleSendMessage = (e) => {
-    if (e) e.preventDefault();
-    if (!messageText.trim() || !selectedChat) return;
-
-    const payload = {
-      senderId: session.id,
-      receiverId: selectedChat.id,
-      content: messageText.trim()
-    };
- 
-    sendStompMessage('/app/chat.sendMessage', payload);
-
-    const localMsg = {
-      id: Date.now() + Math.random(), 
-      sender: { id: session.id, name: session.name },
-      receiver: { id: selectedChat.id, name: selectedChat.name },
-      content: messageText.trim(),
-      timestamp: new Date().toISOString()
-    };
-
-    setMessagesList(prev => [...prev, localMsg]);
-
-    setConnections(prev => {
-      let updatedConnections = prev.map(conn => {
-        if (conn.id === selectedChat.id) {
-          return {
-            ...conn,
-            lastMessage: messageText.trim(),
-            time: localMsg.timestamp
-          };
-        }
-        return conn;
-      });
-
-      // Reorder conversations
-      return updatedConnections.sort((a, b) => {
-        const timeA = a.time ? new Date(a.time).getTime() : 0;
-        const timeB = b.time ? new Date(b.time).getTime() : 0;
-        return timeB - timeA;
-      });
-    });
-
-    setMessageText("");
-  };
-
   const getInitials = (name) => {
     if (!name) return 'U';
-    return name.split(' ').map(n => n[0]).join('').substring(0, 2).toUpperCase();
+    return name.split(' ').map((n) => n[0]).join('').substring(0, 2).toUpperCase();
   };
-
-  const filteredConnections = connections.filter(conn =>
-    conn.name.toLowerCase().includes(searchQuery.toLowerCase())
-  );
 
   return (
     <div className="h-screen w-screen overflow-hidden bg-rgukt-slate flex flex-col font-sans">
