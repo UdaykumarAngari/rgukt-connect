@@ -36,3 +36,8 @@ backend/.env
 backend/mvnw
 backend/mvnw.cmd
 backend/.dockerignore
+
+# Environment Files
+.env
+.env.*
+
