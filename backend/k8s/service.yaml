@@ -7,12 +7,13 @@ metadata:
     app.kubernetes.io/name: rgukt-connect-backend
 
 spec:
+  type: NodePort
+
   selector:
     app.kubernetes.io/name: rgukt-connect-backend
 
   ports:
-    - port: 8000
+    - protocol: TCP
+      port: 8000
       targetPort: 8000
-      protocol: TCP
-
-  type: ClusterIP
+      nodePort: 32001

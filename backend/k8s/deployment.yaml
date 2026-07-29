@@ -27,8 +27,8 @@ spec:
     spec:
       containers:
         - name: backend
-          image: rgukt-connect-backend:v1
-          imagePullPolicy: IfNotPresent
+          image: udayangari/rgukt-connect-backend:v2
+          imagePullPolicy: Always
 
           ports:
             - containerPort: 8000
