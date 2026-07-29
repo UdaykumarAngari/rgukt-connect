@@ -21,6 +21,11 @@ public class UserController {
     @Autowired
     private UserService userService;
 
+    @GetMapping("/health")
+    public ResponseEntity<?> healthCheck() {
+        return org.springframework.http.ResponseEntity.ok(java.util.Map.of("status", "UP", "message", "RGUKT-CONNECT Backend is running."));
+    }
+
     @PostMapping("/register/send-otp")
     public ResponseEntity<?> sendRegistrationOtp(@RequestBody Map<String, String> request) {
         String email = request.get("email");

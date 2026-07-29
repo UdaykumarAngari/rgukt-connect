@@ -55,6 +55,10 @@ const Register = () => {
             setError('Only @rgukt.ac.in university email domain is permitted.');
             return;
         }
+        // if (formData.idNumber.trim().length() !== 7) {
+        //     setError('ID Number must be exactly 7 characters (e.g., B211449).');
+        //     return;
+        // }
         setLoading(true);
         try {
             const response = await axios.post('/api/auth/register/send-otp', {

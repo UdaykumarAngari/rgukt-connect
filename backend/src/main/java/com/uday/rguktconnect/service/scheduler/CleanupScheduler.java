@@ -30,14 +30,12 @@ public class CleanupScheduler {
 
     @Autowired
     private NotificationRepository notificationRepository;
-
-    // Run every 5 minutes to clean up expired data for test users
+ 
     @Scheduled(fixedRate = 300000)
     @Transactional
     public void cleanupTestUserData() {
         LocalDateTime cutoff = LocalDateTime.now().minusDays(2);
-
-        // 1. Cleanup expired posts by test users
+ 
         List<Post> allPosts = postRepository.findAll();
         List<Post> expiredPosts = allPosts.stream()
                 .filter(post -> post.getAuthor().getUniversityEmail().toLowerCase().startsWith("test")
@@ -60,8 +58,7 @@ public class CleanupScheduler {
 
             postRepository.delete(post);
         }
-
-        // 2. Cleanup expired connection requests (PENDING status) involving test users
+ 
         List<Connection> allConnections = connectionRepository.findAll();
         List<Connection> expiredInvites = allConnections.stream()
                 .filter(conn -> "PENDING".equalsIgnoreCase(conn.getStatus())
@@ -71,11 +68,11 @@ public class CleanupScheduler {
                 .collect(Collectors.toList());
 
         for (Connection conn : expiredInvites) {
-            // Delete related notifications
+             
             try {
                 notificationRepository.deleteByRelatedIdAndType(conn.getId(), "CONNECTION_REQUEST");
             } catch (Exception e) {
-                // ignore
+                
             }
             connectionRepository.delete(conn);
         }

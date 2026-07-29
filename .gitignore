@@ -27,4 +27,12 @@ dist-ssr
 target/
 backend/target/
 
-/frontend/.env
+frontend/.env
+
+# Kubernetes Secrets
+k8s/backend-secret.yaml
+
+backend/.env
+backend/mvnw
+backend/mvnw.cmd
+backend/.dockerignore

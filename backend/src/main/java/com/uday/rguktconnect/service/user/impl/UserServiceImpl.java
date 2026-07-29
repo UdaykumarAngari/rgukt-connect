@@ -45,6 +45,9 @@ public class UserServiceImpl implements UserService {
         if (requestDTO.getUniversityEmail() == null || !requestDTO.getUniversityEmail().toLowerCase().endsWith("@rgukt.ac.in")) {
             throw new RuntimeException("Only @rgukt.ac.in university email domain is permitted.");
         }
+        if (requestDTO.getIdNumber() == null || requestDTO.getIdNumber().trim().length() != 7) {
+            throw new RuntimeException("ID Number must be exactly 7 characters (e.g., B211449).");
+        }
 
         String storedOtp = registrationOtpStorage.get(requestDTO.getUniversityEmail());
         java.time.LocalDateTime expiry = registrationOtpExpiry.get(requestDTO.getUniversityEmail());
@@ -187,6 +190,9 @@ public class UserServiceImpl implements UserService {
     public void sendRegistrationOtp(String email, String idNumber) {
         if (email == null || !email.toLowerCase().endsWith("@rgukt.ac.in")) {
             throw new RuntimeException("Only @rgukt.ac.in university email domain is permitted.");
+        }
+        if (idNumber == null || idNumber.trim().length() != 7) {
+            throw new RuntimeException("ID Number must be exactly 7 characters (e.g., B211449).");
         }
         if(userRepository.existsByIdNumberOrUniversityEmail(idNumber, email)){
             throw new RuntimeException("User with this ID number or University Email already exists.");

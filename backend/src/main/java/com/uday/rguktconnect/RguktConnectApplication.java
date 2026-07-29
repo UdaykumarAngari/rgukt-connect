@@ -25,7 +25,7 @@ public class RguktConnectApplication {
 		return args -> {
 			if (!userRepository.findByUniversityEmail("test@rgukt.ac.in").isPresent()) {
 				User user = new User();
-				user.setIdNumber("TEST0001");
+				user.setIdNumber("TST0001");
 				user.setName("Test User");
 				user.setUniversityEmail("test@rgukt.ac.in");
 				user.setRole("STUDENT");
