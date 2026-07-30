@@ -2,22 +2,61 @@ pipeline {
     agent any
 
     environment {
-        IMAGE_NAME = "rgukt-connect-backend"
+        IMAGE_NAME = "udayangari/rgukt-connect-backend"
+        IMAGE_TAG = "latest"
         CONTAINER_NAME = "rgukt-connect-backend"
+        ENV_FILE = "/opt/rgukt-connect/.env"
     }
 
     stages {
+
         stage('Checkout') {
             steps {
                 checkout scm
             }
         }
 
+        stage('Verify Environment File') {
+            steps {
+                sh '''
+                if [ ! -f "${ENV_FILE}" ]; then
+                    echo "ERROR: Environment file not found!"
+                    exit 1
+                fi
+                '''
+            }
+        }
+
+        stage('Docker Hub Login') {
+            steps {
+                withCredentials([usernamePassword(
+                    credentialsId: 'dockerhub-creds',
+                    usernameVariable: 'DOCKER_USER',
+                    passwordVariable: 'DOCKER_PASSWORD'
+                )]) {
+                    sh '''
+                    echo "$DOCKER_PASSWORD" | docker login -u "$DOCKER_USER" --password-stdin
+                    '''
+                }
+            }
+        }
+
         stage('Build Docker Image') {
             steps {
                 dir('backend') {
-                    sh "docker build -t ${IMAGE_NAME}:latest ."
+                    sh '''
+                    docker build \
+                        -t ${IMAGE_NAME}:${IMAGE_TAG} .
+                    '''
                 }
+            }
+        }
+
+        stage('Push Image to Docker Hub') {
+            steps {
+                sh '''
+                docker push ${IMAGE_NAME}:${IMAGE_TAG}
+                '''
             }
         }
 
@@ -29,58 +68,78 @@ pipeline {
                 '''
             }
         }
+        stage('Remove Old Image') {
+            steps {
+                sh '''
+                docker rmi ${IMAGE_NAME}:${IMAGE_TAG} || true
+                '''
+            }
+        }
+        stage('Pull Latest Image') {
+            steps {
+                sh '''
+                docker pull ${IMAGE_NAME}:${IMAGE_TAG}
+                '''
+            }
+        }
 
         stage('Run Backend') {
             steps {
-                withCredentials([file(credentialsId: 'rgukt-connect-env', variable: 'ENV_FILE')]) {
-                    sh '''
-                    docker run -d \
-                      --name ${CONTAINER_NAME} \
-                      --restart unless-stopped \
-                      --env-file "$ENV_FILE" \
-                      -p 8000:8000 \
-                      ${IMAGE_NAME}:latest
-                    '''
-                }
+                sh '''
+                docker run -d \
+                    --name ${CONTAINER_NAME} \
+                    --restart unless-stopped \
+                    --env-file ${ENV_FILE} \
+                    -p 8000:8000 \
+                    ${IMAGE_NAME}:${IMAGE_TAG}
+                '''
             }
         }
 
         stage('Health Check') {
             steps {
                 sh '''
-                echo "Waiting for application to become healthy..."
+                echo "Waiting for application..."
 
                 for i in $(seq 1 30); do
-                    if curl -fs http://localhost:8000/actuator/health > /dev/null; then
-                        echo "Application is healthy!"
-                    exit 0
-                fi
+                    if curl -fs http://localhost:8000/health > /dev/null; then
+                        echo "Application is healthy."
+                        exit 0
+                    fi
 
-                echo "Attempt $i/30: Application not ready yet..."
-                sleep 2
-            done
+                    echo "Attempt $i/30..."
+                    sleep 2
+                done
 
-            echo "Application failed to become healthy within 60 seconds."
+                echo "Health check failed."
 
-            docker logs ${CONTAINER_NAME}
+                echo "========== Running Containers =========="
+                docker ps -a
 
-            exit 1
-            '''
+                echo "========== Container Logs =========="
+                docker logs --tail=200 ${CONTAINER_NAME}
+
+                exit 1
+                '''
             }
         }
     }
 
     post {
+
         success {
-            echo 'Deployment Successful'
+            echo "Deployment Successful"
         }
 
         failure {
-            echo 'Deployment Failed x'
+            echo "Deployment Failed"
         }
 
         always {
-            sh 'docker image prune -f || true'
+            sh '''
+            docker logout || true
+            docker image prune -f || true
+            '''
         }
     }
 }
