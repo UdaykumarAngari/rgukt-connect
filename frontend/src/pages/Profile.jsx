@@ -437,10 +437,10 @@ const Profile = ({ session, onLogout }) => {
   };
 
   return (
-    <div className="min-h-screen bg-rgukt-slate flex flex-col font-sans">
+    <div className="h-screen md:min-h-screen md:h-auto bg-rgukt-slate flex flex-col font-sans overflow-hidden md:overflow-visible">
       <Navbar isLanding={false} session={session} onLogout={onLogout} />
 
-      <main className="flex-1 max-w-5xl mx-auto w-full pt-8 pb-60 px-4">
+      <main className="flex-1 overflow-y-auto md:overflow-visible min-h-0 md:min-h-auto w-full max-w-5xl mx-auto pt-8 pb-32 md:pb-60 px-4">
         {error || !profile ? (
           <div className="bg-white p-12 rounded-[32px] border border-slate-100 shadow-sm text-center max-w-md mx-auto mt-12">
             <div className="text-red-600 font-black text-xl mb-3">Error Loading Profile</div>

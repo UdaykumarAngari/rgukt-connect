@@ -16,6 +16,7 @@ html, body {
   min-height: 100% !important;
   overflow-y: auto !important;
   overflow-x: hidden;
+  scrollbar-gutter: stable;
 }
 
 body {
@@ -35,4 +36,9 @@ h1, h2, h3, h4, h5, h6, .font-display {
 
 code, pre, .font-code {
   font-family: var(--font-mono) !important;
+}
+
+/* Prevent text caret/cursor blinking on non-editable elements */
+*:not(input):not(textarea):not([contenteditable="true"]) {
+  caret-color: transparent;
 }

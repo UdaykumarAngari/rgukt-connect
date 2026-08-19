@@ -34,16 +34,17 @@ const Jobs = ({ session, onLogout }) => {
   };
 
   return (
-    <div className="min-h-screen bg-rgukt-slate flex flex-col">
+    <div className="h-screen md:min-h-screen md:h-auto bg-rgukt-slate flex flex-col overflow-hidden md:overflow-visible">
       <Navbar 
         isLanding={false} 
         searchQuery={searchQuery} 
         setSearchQuery={setSearchQuery} 
         session={session}
         onLogout={onLogout}
+        onPlusClick={handlePlusClick}
       />
 
-      <main className="flex-1 max-w-6xl mx-auto w-full px-4 pt-8 pb-60">
+      <main className="flex-1 overflow-y-auto md:overflow-visible min-h-0 md:min-h-auto w-full max-w-6xl mx-auto px-4 pt-8 pb-32 md:pb-60">
         <div className="flex justify-between items-end mb-8 px-2">
           <div>
             <h2 className="text-2xl font-bold text-charcoal tracking-tight">Career Opportunities</h2>

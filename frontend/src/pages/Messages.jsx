@@ -45,12 +45,11 @@ const Messages = ({ session, onLogout }) => {
     <div className="h-screen w-screen overflow-hidden bg-rgukt-slate flex flex-col font-sans">
       <Navbar isLanding={false} session={session} onLogout={onLogout} />
 
-      <main className="flex-1 min-h-0 w-full max-w-[1400px] mx-auto px-4 pt-4 pb-28 flex flex-col">
-        <div className="bg-white rounded-[32px] border border-slate-200 flex-1 min-h-0 flex overflow-hidden shadow-xl">
+      <main className="flex-1 min-h-0 w-full flex flex-row bg-white">
     
           <div className={`${selectedChat ? 'hidden md:flex' : 'flex'} flex-col w-full md:w-[380px] border-r border-slate-100 h-full min-h-0`}>
             <div className="p-5 border-b border-slate-50 flex justify-between items-center bg-white">
-              <h2 className="text-charcoal font-bold text-xl">Messaging</h2>
+              <h2 className="text-charcoal font-bold text-xl">Chats</h2>
               <div className="flex gap-3">
                 <MoreHorizontal size={20} className="text-slate-400 cursor-pointer hover:text-rgukt-maroon" />
                 <Edit size={20} className="text-slate-400 cursor-pointer hover:text-rgukt-maroon" />
@@ -70,7 +69,7 @@ const Messages = ({ session, onLogout }) => {
               </div>
             </div>
 
-            <div className="flex-1 overflow-y-auto min-h-0">
+            <div className="flex-1 overflow-y-auto min-h-0 pb-24 md:pb-0">
               {loadingConnections ? (
                 <div className="text-center py-8 text-xs font-bold text-slate-400 animate-pulse">
                   Loading chats...
@@ -241,7 +240,7 @@ const Messages = ({ session, onLogout }) => {
                   )}
                 </div>
  
-                <div className="px-6 py-4 bg-white border-t border-slate-100">
+                <div className="px-6 pt-4 pb-20 md:pb-4 bg-white border-t border-slate-100">
                   <form onSubmit={handleSendMessage} className="bg-slate-50 rounded-2xl border border-slate-200 overflow-hidden focus-within:border-rgukt-maroon/30 transition-all">
                     <textarea 
                       placeholder="Write a message..."
@@ -289,7 +288,6 @@ const Messages = ({ session, onLogout }) => {
               </div>
             )}
           </div>
-        </div>
       </main>
 
       <FloatingDock />

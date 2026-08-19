@@ -12,19 +12,21 @@ export const useUser = () => {
 };
 
 export const UserProvider = ({ session, children }) => {
+  const [userProfile, setUserProfile] = useState(null);
   const [profilePhoto, setProfilePhoto] = useState(null);
   const [loading, setLoading] = useState(false);
 
-  const fetchProfilePhoto = async () => {
+  const fetchProfile = async () => {
     if (!session?.token) return;
     try {
       setLoading(true);
       const res = await axios.get('/api/users/profile', {
         headers: { Authorization: `Bearer ${session.token}` }
       });
+      setUserProfile(res.data);
       setProfilePhoto(res.data.profilePhoto);
     } catch (err) {
-      console.error('Failed to load profile photo globally:', err);
+      console.error('Failed to load profile globally:', err);
     } finally {
       setLoading(false);
     }
@@ -32,14 +34,15 @@ export const UserProvider = ({ session, children }) => {
 
   useEffect(() => {
     if (session?.token) {
-      fetchProfilePhoto();
+      fetchProfile();
     } else {
+      setUserProfile(null);
       setProfilePhoto(null);
     }
   }, [session]);
 
   return (
-    <UserContext.Provider value={{ profilePhoto, setProfilePhoto, fetchProfilePhoto, loading }}>
+    <UserContext.Provider value={{ userProfile, profilePhoto, setProfilePhoto, fetchProfilePhoto: fetchProfile, loading }}>
       {children}
     </UserContext.Provider>
   );

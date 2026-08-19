@@ -1,4 +1,5 @@
 import React from 'react';
+import { useNavigate } from 'react-router-dom';
 import Navbar from '../components/Navbar';
 import FloatingDock from '../components/FloatingDock';
 import UserCard from '../components/UserCard';
@@ -7,6 +8,7 @@ import { usePrompt } from '../context/PromptContext';
 import { useNetwork } from '../context/NetworkContext';
 
 const Network = ({ session, onLogout }) => {
+  const navigate = useNavigate();
   const { showPrompt } = usePrompt();
   
   const {
@@ -23,16 +25,17 @@ const Network = ({ session, onLogout }) => {
   } = useNetwork();
 
   return (
-    <div className="min-h-screen bg-rgukt-slate flex flex-col font-sans">
+    <div className="h-screen md:min-h-screen md:h-auto bg-rgukt-slate flex flex-col font-sans overflow-hidden md:overflow-visible">
       <Navbar 
         isLanding={false} 
         searchQuery={searchQuery} 
         setSearchQuery={setSearchQuery} 
         session={session}
         onLogout={onLogout}
+        onPlusClick={() => setIsModalOpen(true)}
       />
 
-      <main className="flex-1 max-w-6xl mx-auto w-full px-4 pt-8 pb-60">
+      <main className="flex-1 overflow-y-auto md:overflow-visible min-h-0 md:min-h-auto w-full max-w-6xl mx-auto px-4 pt-8 pb-32 md:pb-60">
         <div className="flex justify-between items-end mb-8 px-2">
           <div>
             <h2 className="text-2xl font-bold text-charcoal tracking-tight">Alumni Directory</h2>
