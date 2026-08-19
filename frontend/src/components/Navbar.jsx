@@ -71,7 +71,8 @@ const Navbar = ({ isLanding = false, searchQuery, setSearchQuery, session, onLog
   const isModalHandledLocally = location.pathname === '/home' || location.pathname === '/network' || location.pathname === '/jobs';
 
   return (
-    <header className="sticky top-0 z-40 bg-white border-b border-slate-100 px-4 sm:px-6 py-3 shadow-xs">
+    <>
+      <header className="fixed top-0 left-0 right-0 z-40 bg-white border-b border-slate-100 px-4 sm:px-6 py-3 shadow-xs">
       <div className="max-w-7xl mx-auto flex items-center gap-3 sm:gap-6 justify-between">
        
         <Link 
@@ -250,7 +251,9 @@ const Navbar = ({ isLanding = false, searchQuery, setSearchQuery, session, onLog
           session={session}
         />
       )}
-    </header>
+      </header>
+      <div className="h-[61px] shrink-0" />
+    </>
   );
 };
 
