@@ -1,0 +1,34 @@
+\chapter{Frequently Asked Questions}
+\label{ch:faq}
+
+This chapter answers common technical and functional questions about the RGUKT Connect platform.
+
+\section{Identity and Authentication}
+
+\subsection{Why is registration limited to `@rgukt.ac.in` email addresses?}
+Limiting registration to university-issued email domains prevents external users from signing up, protecting the platform's community focus and security.
+
+\subsection{Can I sign up if I do not have a university email address?}
+No. The platform requires a valid `@rgukt.ac.in` email to complete the registration and verification workflow.
+
+\subsection{How long are OTP codes valid for verification?}
+Both registration and password recovery OTPs are valid for exactly 5 minutes from the time they are generated.
+
+\section{Real-Time Messaging}
+
+\subsection{Can I message any member in the alumni directory?}
+No. To prevent spam and unsolicited messages, users must first send a connection request. Private messaging is enabled only after the recipient accepts the connection request.
+
+\subsection{Does the chat service support offline messaging?}
+Yes. If a user is offline, messages are saved in the database. When the user logs back in, the client retrieves unread messages from the backend history endpoint.
+
+\section{Technical Architecture}
+
+\subsection{How are profile pictures and media attachments stored?}
+Media files are uploaded to Amazon S3. The database only stores the resulting public S3 URL, keeping the database footprint small and improving query performance.
+
+\subsection{Does the platform support horizontal scaling?}
+The API gateway and Spring Boot backend are stateless and can scale horizontally in Kubernetes. However, the default WebSocket STOMP broker is stateful and runs in-memory, which requires a Redis Pub/Sub backplane for horizontal scaling.
+
+\subsection{Why do my tests with email prefixes starting with `test` not send emails?}
+To simplify development and automated testing, the backend skips the SMTP email sending process for emails with the prefix `test` and sets the OTP to `123456`.

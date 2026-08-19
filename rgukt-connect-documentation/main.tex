@@ -1,0 +1,235 @@
+\documentclass[11pt,a4paper,oneside]{report}
+
+% --- Language & Encoding ---
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+
+% --- Page Geometry ---
+\usepackage[top=1in, bottom=1in, left=1in, right=1in]{geometry}
+
+% --- Colors ---
+\usepackage{xcolor}
+\definecolor{RguktMaroon}{HTML}{800000}
+\definecolor{RguktGold}{HTML}{FFD700}
+\definecolor{Charcoal}{HTML}{111827}
+\definecolor{LightGrey}{HTML}{F9FAFB}
+\definecolor{BorderGrey}{HTML}{E2E8F0}
+\definecolor{CodeGreen}{HTML}{008000}
+\definecolor{CodeBlue}{HTML}{0000FF}
+\definecolor{CodePurple}{HTML}{800080}
+
+% --- Typography ---
+\usepackage{amsmath}
+\usepackage{microtype}
+\usepackage{helvet}
+\renewcommand{\familydefault}{\sfdefault} % Modern sans-serif look
+
+% --- Navigation & Hyperlinks ---
+\usepackage[pdftex]{graphicx}
+\usepackage{float}
+\usepackage{caption}
+\usepackage{subcaption}
+\usepackage[hidelinks]{hyperref}
+\usepackage{bookmark}
+
+% --- Tables ---
+\usepackage{booktabs}
+\usepackage{tabularx}
+\usepackage{longtable}
+
+% --- Code Formatting ---
+\usepackage{listings}
+\lstset{
+    backgroundcolor=\color{LightGrey},
+    basicstyle=\ttfamily\small\color{Charcoal},
+    breakatwhitespace=false,
+    breaklines=true,
+    captionpos=b,
+    commentstyle=\color{CodeGreen},
+    keywordstyle=\color{CodeBlue}\bfseries,
+    stringstyle=\color{CodePurple},
+    frame=single,
+    rulecolor=\color{BorderGrey},
+    keepspaces=true,
+    numbers=left,
+    numberstyle=\tiny\color{gray},
+    numbersep=5pt,
+    showspaces=false,
+    showstringspaces=false,
+    showtabs=false,
+    tabsize=2
+}
+
+\lstdefinelanguage{json}{
+    basicstyle=\ttfamily\small\color{Charcoal},
+    backgroundcolor=\color{LightGrey},
+    numbers=left,
+    numberstyle=\tiny\color{gray},
+    showstringspaces=false,
+    breaklines=true,
+    frame=single,
+    rulecolor=\color{BorderGrey},
+    string=[s]{"}{"},
+    stringstyle=\color{CodePurple},
+    comment=[l]{//},
+    morecomment=[s]{/*}{*/},
+    commentstyle=\color{CodeGreen},
+    literate=
+     *{0}{{{\color{CodeBlue}0}}}{1}
+      {1}{{{\color{CodeBlue}1}}}{1}
+      {2}{{{\color{CodeBlue}2}}}{1}
+      {3}{{{\color{CodeBlue}3}}}{1}
+      {4}{{{\color{CodeBlue}4}}}{1}
+      {5}{{{\color{CodeBlue}5}}}{1}
+      {6}{{{\color{CodeBlue}6}}}{1}
+      {7}{{{\color{CodeBlue}7}}}{1}
+      {8}{{{\color{CodeBlue}8}}}{1}
+      {9}{{{\color{CodeBlue}9}}}{1}
+      {:}{{{\color{RguktMaroon}{:}}}}{1}
+      {,}{{{\color{RguktMaroon}{,}}}}{1}
+      {\{}{{{\color{Charcoal}{\{}}}}{1}
+      {\}}{{{\color{Charcoal}{\}}}}}{1}
+      {[}{{{\color{Charcoal}{[}}}}{1}
+      {]}{{{\color{Charcoal}{]}}}}{1},
+}
+
+% --- TikZ for Diagrams ---
+\usepackage{tikz}
+\usetikzlibrary{shapes.geometric, arrows, positioning, fit, calc, backgrounds}
+\tikzstyle{block} = [rectangle, draw=RguktMaroon, fill=white, text=Charcoal, minimum width=3.5cm, minimum height=1.2cm, text centered, rounded corners, line width=1.2pt, align=center]
+\tikzstyle{cloud} = [ellipse, draw=RguktMaroon, fill=white, text=Charcoal, minimum width=2.5cm, minimum height=1cm, text centered, line width=1.2pt, align=center]
+\tikzstyle{arrow} = [thick,->,>=stealth,color=RguktMaroon,line width=1.1pt]
+\tikzstyle{line} = [thick,-,color=RguktMaroon,line width=1.1pt]
+
+% --- Headers & Footers ---
+\usepackage{fancyhdr}
+\pagestyle{fancy}
+\fancyhf{}
+\fancyhead[L]{\textcolor{RguktMaroon}{\textbf{RGUKT Connect}}}
+\fancyhead[R]{\textcolor{gray}{\leftmark}}
+\fancyfoot[C]{\thepage}
+\renewcommand{\headrulewidth}{0.5pt}
+\renewcommand{\footrulewidth}{0.0pt}
+
+% --- Section Spacing & Titles ---
+\usepackage{titlesec}
+\titleformat{\chapter}[display]
+  {\normalfont\huge\bfseries\color{RguktMaroon}}
+  {\chaptername\ \thechapter}{20pt}{\Huge}
+\titleformat{\section}
+  {\normalfont\Large\bfseries\color{RguktMaroon}}{\thesection}{1em}{}
+\titleformat{\subsection}
+  {\normalfont\large\bfseries\color{RguktMaroon}}{\thesubsection}{1em}{}
+
+% --- Bibliography Settings ---
+\usepackage{cite}
+
+\begin{document}
+
+% ==========================================
+% COVER PAGE
+% ==========================================
+\begin{titlepage}
+    \centering
+    \vspace*{1.5cm}
+    
+    {\Huge \bfseries \color{RguktMaroon} RGUKT Connect} \\[0.5cm]
+    {\Large \bfseries \color{Charcoal} Technical and Product Documentation} \\[0.8cm]
+    
+    \vspace{1.5cm}
+    
+    % Professional Vector Accent Box
+    \begin{tikzpicture}
+        \draw[line width=3pt, color=RguktMaroon] (0,0) -- (12,0);
+        \draw[line width=1pt, color=RguktGold] (0,-0.2) -- (12,-0.2);
+    \end{tikzpicture}
+    
+    \vspace{1.5cm}
+    
+    \begin{minipage}{0.8\textwidth}
+        \centering
+        \large \color{Charcoal}
+        A secure, dedicated professional networking platform bridging alumni and students of Rajiv Gandhi University of Knowledge Technologies.
+    \end{minipage}
+    
+    \vspace{2.5cm}
+    
+    \large
+    \textbf{Project Context:} Professional Peer Networking, Referrals, and Mentorship \\
+    \textbf{Target Audience:} Software Engineers, Recruiters, Collaborators, and Alumni \\
+    
+    \vfill
+    
+    \begin{tikzpicture}
+        \draw[line width=1pt, color=RguktGold] (0,0) -- (12,0);
+        \draw[line width=3pt, color=RguktMaroon] (0,-0.2) -- (12,-0.2);
+    \end{tikzpicture}
+    
+    \vspace{0.8cm}
+    
+    {\large \color{Charcoal} Version 2.0.0 | \today}
+\end{titlepage}
+
+% ==========================================
+% EXECUTIVE SUMMARY (Before Chapters)
+% ==========================================
+\chapter*{Executive Summary}
+\addcontentsline{toc}{chapter}{Executive Summary}
+
+RGUKT Connect is an enterprise-grade professional networking and mentorship platform designed exclusively for the community of the Rajiv Gandhi University of Knowledge Technologies (RGUKT). Built to establish a secure, verified digital bridge between current university students and alumni working in the industry, the platform facilitates direct career guidance, verified job referrals, and real-time collaboration.
+
+\section*{Key Capabilities}
+\begin{itemize}
+    \item \textbf{Secure Verification:} Restricts enrollment to authorized university members through a dual-step identity verification requiring a valid `@rgukt.ac.in` domain and individual student ID numbers validated via automated One-Time Passwords (OTP).
+    \item \textbf{Verified Professional Portfolios:} Offers comprehensive profiles containing detailed academic histories, verified work experiences, project source linkages (GitHub/LinkedIn), and academic branches.
+    \item \textbf{Mentorship and Alumni Directory:} Provides a searchable directory of the RGUKT network, allowing students to easily discover and reach out to seniors who possess active careers in specific organizations.
+    \item \textbf{Direct Referrals \& Job Board:} Enables verified alumni and administrators to publish career opportunities and offer direct referrals, skipping the generic application process.
+    \item \textbf{Real-Time Messaging:} Employs a STOMP-based WebSocket communication layer to enable instant, persistent messaging between connected members.
+\end{itemize}
+
+\section*{Technical Overview}
+RGUKT Connect features a modern split-architecture. The backend is powered by Java 21, Spring Boot 3/4, Spring Security, Hibernate ORM, and a PostgreSQL database. It offloads binary assets (such as profile pictures and post media) directly to Amazon S3. The frontend is built as a highly responsive single-page application using React 19, Vite, Tailwind CSS 4.0, and Axios. Real-time notifications and message deliveries are bridged using a STOMP messaging broker over WebSockets. Deployment is optimized using containerized Docker environments managed by a Jenkins automation pipeline and orchestrated inside a Kubernetes cluster.
+
+% ==========================================
+% TOC, FIGURES, TABLES
+% ==========================================
+\tableofcontents
+\listoffigures
+\listoftables
+
+% ==========================================
+% CHAPTERS INCLUSION
+% ==========================================
+\include{chapters/introduction}
+\include{chapters/problem-statement}
+\include{chapters/product-overview}
+\include{chapters/features}
+\include{chapters/user-roles}
+\include{chapters/architecture}
+\include{chapters/technology-stack}
+\include{chapters/application-workflow}
+\include{chapters/frontend}
+\include{chapters/backend}
+\include{chapters/database}
+\include{chapters/api}
+\include{chapters/authentication}
+\include{chapters/security}
+\include{chapters/deployment}
+\include{chapters/testing}
+\include{chapters/performance}
+\include{chapters/scalability}
+\include{chapters/troubleshooting}
+\include{chapters/limitations}
+\include{chapters/roadmap}
+\include{chapters/contributing}
+\include{chapters/faq}
+\include{chapters/conclusion}
+
+% ==========================================
+% REFERENCES (Bibliography)
+% ==========================================
+\nocite{*}
+\bibliographystyle{plain}
+\bibliography{references}
+
+\end{document}

@@ -1,0 +1,20 @@
+\chapter{Performance Tuning}
+\label{ch:performance}
+
+This chapter details the performance configurations implemented in RGUKT Connect and recommends tuning strategies for future scaling.
+
+\section{Implemented Performance Configurations}
+\begin{itemize}
+    \item \textbf{JPA Lazy Fetching:} Entity mappings use lazy fetching (\texttt{FetchType.LAZY}) for collections (such as `likedBy` in `Post` and `likedBy` in `Comment`). This prevents the system from loading related records until they are requested.
+    \item \textbf{HikariCP Connection Pool:} Database connections are managed by a HikariCP pool. HikariCP reduces connection latency by keeping a pool of active database connections open, avoiding the overhead of establishing a new TCP connection for every request.
+    \item \textbf{Binary Offloading to S3:} Profile pictures and post attachments are offloaded directly to Amazon S3. The database only stores the resulting URL strings, keeping database size small and reducing query latency.
+    \item \textbf{Index-Optimized Relationships:} Core tables use auto-generated indexes on primary and foreign keys, speeding up join operations.
+\end{itemize}
+
+\section{Performance Tuning Recommendations}
+\begin{enumerate}
+    \item \textbf{Resolve N+1 Query Issues:} When loading the community feed, the application maps each `Post` entity to a `PostResponseDTO`. This maps user details, comment counts, and like states, which can trigger additional queries for each post in the list (the N+1 query problem). Using entity graphs or fetch joins (`JOIN FETCH`) in custom JPQL queries would allow the system to load this data in a single query.
+    \item \textbf{Query Pagination:} Endpoints like `GET /api/posts` and `GET /api/jobs` load all records in a single request. As the platform grows, loading all records will degrade response times. The endpoints should use Spring Data's `Pageable` interface to paginate results (e.g., loading 20 posts at a time).
+    \item \textbf{API Caching with Redis:} Read-heavy endpoints that change infrequently (such as the alumni directory directory search and job board listings) should be cached using Redis. This reduces database load and speeds up response times.
+    \item \textbf{Frontend Asset Optimizations:} The React client should implement code splitting using `React.lazy` and `Suspense` to load route components on demand, reducing the size of the initial JavaScript bundle.
+\end{enumerate}

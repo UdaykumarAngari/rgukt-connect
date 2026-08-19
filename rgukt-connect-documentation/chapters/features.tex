@@ -1,0 +1,63 @@
+\chapter{Features}
+\label{ch:features}
+
+This chapter details the functional capabilities of the RGUKT Connect platform, including validation logic, storage configurations, and network constraints.
+
+\section{Identity Verification \& OTP Lifecycle}
+Account security begins during registration and password recovery.
+\begin{itemize}
+    \item \textbf{Registration Verification:} Users enter their name, university email, and student ID. The system validates that the email domain matches `@rgukt.ac.in` and the ID is exactly 7 characters. It generates a 6-digit OTP, stores it in an in-memory `ConcurrentHashMap` with a 5-minute expiry, and sends it via SMTP.
+    \item \textbf{Password Recovery:} The recovery process uses a similar workflow. The system verifies the user exists, generates an OTP, and requires its submission alongside a new password.
+    \item \textbf{Testing Shortcut:} To streamline automated testing and development, emails starting with the prefix `test` bypass SMTP sending. The system hardcodes the OTP to `123456`.
+\end{itemize}
+
+\section{Alumni Directory \& Connection Management}
+Discovering other members and establishing contact uses a directory and a connection workflow:
+\begin{itemize}
+    \item \textbf{Directory Search:} Users can search the global registry, which lists name, batch, branch, profile picture, and current employment role. The directory automatically excludes the current user.
+    \item \textbf{Relationship Matrix:} Connections use a state machine with the states:
+    \begin{itemize}
+        \item \texttt{NOT\_CONNECTED}: No relationship exists. Users see a "Connect" option.
+        \item \texttt{PENDING\_SENT}: The current user sent a request. They see a "Pending" option.
+        \item \texttt{PENDING\_RECEIVED}: The current user received a request. They see "Accept" and "Reject" options.
+        \item \texttt{ACCEPTED}: The connection is established. Users can send private messages.
+    \end{itemize}
+    \item \textbf{Action Handling:} Rejecting or cancelling a request deletes the database row. Accepting updates the status to \texttt{ACCEPTED} and triggers a real-time notification to the sender.
+\end{itemize}
+
+\section{Real-Time STOMP Messaging}
+Private messaging uses WebSockets to support real-time delivery:
+\begin{itemize}
+    \item \textbf{STOMP Protocol:} The client connects using a STOMP client over WebSockets (`ws://<host>/ws-chat/websocket`). The connection handshake includes a JWT token in the `Authorization` header, which is validated by a custom WebSocket channel interceptor.
+    \item \textbf{Topic Subscriptions:} Users subscribe to `/user/queue/messages` for incoming messages. Sent messages are posted to `/api/chat/send` and saved to PostgreSQL.
+    \item \textbf{Delivery Indicators:} The UI displays unread counts. If a user is not currently viewing the active chat, the app increments the unread count and plays a notification sound.
+\end{itemize}
+
+\section{Opportunities Board \& Job Referrals}
+To streamline employment opportunities, the platform provides a dedicated Job Board:
+\begin{itemize}
+    \item \textbf{Role Restrictions:} Only users with the role `ALUMNI` or `ADMIN` can post jobs or mark posts as `referral`. If a student attempts to post, the system returns a validation error.
+    \item \textbf{Attributes:} Posts contain company name, role title, location, salary, application URL, employment type, expiration date, and a referral availability marker.
+\end{itemize}
+
+\section{Community Feed \& Media Integration}
+The central feed is an interactive dashboard where users share information:
+\begin{itemize}
+    \item \textbf{Post Types:} Supports standard text posts, code snippets (with syntax highlighting), and media attachments.
+    \item \textbf{Media Uploads:} Images and videos are uploaded to AWS S3. S3 keys follow the format:
+    \begin{equation}
+        \text{Key} = \text{posts/}\{idNumber\}\text{-}\{timestamp\}\{extension\}
+    \end{equation}
+    \item \textbf{Interactions:} Users can like posts and add nested comments. Like states are updated dynamically, and deleting a post cascades to delete all comments.
+\end{itemize}
+
+\section{Profile Customization}
+Profiles display academic and professional backgrounds:
+\begin{itemize}
+    \item \textbf{Data Collections:} Users can add, edit, and delete multiple education history blocks, professional experience listings, and personal portfolio projects.
+    \item \textbf{Avatar Uploads:} Custom avatar uploads are saved to AWS S3 using the key:
+    \begin{equation}
+        \text{Key} = \text{profiles/}\{idNumber\}\text{-avatar}\{extension\}
+    \end{equation}
+    When uploading a new picture, the system deletes the old image from S3.
+\end{itemize}

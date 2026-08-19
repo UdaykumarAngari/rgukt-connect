@@ -1,0 +1,42 @@
+\begin{thebibliography}{1}
+
+\bibitem{kubernetes}
+The~Kubernetes Authors.
+\newblock Kubernetes orchestration for containerized applications.
+\newblock \url{https://kubernetes.io/}, 2026.
+
+\bibitem{reactjs}
+Facebook.
+\newblock React: A javascript library for building user interfaces.
+\newblock \url{https://react.dev/}, 2025.
+
+\bibitem{stomp}
+STOMP~Specification Group.
+\newblock Stomp: Simple text orientated messaging protocol.
+\newblock \url{https://stomp.github.io/}, 2012.
+
+\bibitem{rfc7519}
+Michael Jones, John Bradley, and Nat Sakimura.
+\newblock Rfc 7519: Json web token (jwt), 2015.
+
+\bibitem{jenkins}
+The~Jenkins Project.
+\newblock Jenkins automation server.
+\newblock \url{https://www.jenkins.io/}, 2026.
+
+\bibitem{postgresql}
+O.~O. Regina and S.~H. Leo.
+\newblock {\em PostgreSQL: Up and Running}.
+\newblock O'Reilly Media, 2017.
+
+\bibitem{awss3}
+Amazon~Web Services.
+\newblock Amazon simple storage service (s3) documentation.
+\newblock \url{https://aws.amazon.com/s3/}, 2026.
+
+\bibitem{springboot}
+Craig Walls.
+\newblock {\em Spring Boot in Action}.
+\newblock Manning Publications, 2016.
+
+\end{thebibliography}

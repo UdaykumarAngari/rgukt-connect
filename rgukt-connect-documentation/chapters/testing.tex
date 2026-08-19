@@ -1,0 +1,44 @@
+\chapter{Testing \& Automated Cleanup}
+\label{ch:testing}
+
+This chapter details the testing strategies and automated test data cleanup mechanisms implemented in RGUKT Connect.
+
+\section{Existing Test Suite}
+The application contains the standard Spring Boot context initialization test:
+\begin{lstlisting}[language=java]
+@SpringBootTest
+class RguktConnectApplicationTests {
+    @Test
+    void contextLoads() {
+    }
+}
+\end{lstlisting}
+
+This test executes during the build phase (`mvn clean package`) to verify that the application context, Spring beans, database configurations, and environment dependencies load correctly.
+
+\section{Developer Testing Shortcuts}
+To support manual testing and local development, the platform provides two developer features in the authentication layer:
+\begin{enumerate}
+    \item \textbf{Bypass Email Verification:} For emails starting with the prefix `test` (e.g., `teststudent@rgukt.ac.in` or `testalumni@rgukt.ac.in`), the system skips the SMTP email sending process.
+    \item \textbf{Hardcoded OTP Key:} For these test accounts, the OTP is set to `123456`. This allows developers and automated scripts to register and reset passwords without access to a real email inbox.
+\end{enumerate}
+
+\section{Automated Test Data Cleanup Scheduler}
+To prevent database bloating from test accounts, the system runs an automated cleanup scheduler. A background thread (`CleanupScheduler`) runs every 5 minutes (`fixedRate = 300000` milliseconds) using Spring's `@Scheduled` annotation:
+\begin{itemize}
+    \item \textbf{Cutoff Period:} The scheduler defines a cutoff time of exactly 2 days before the current execution time:
+    \begin{lstlisting}[language=java]
+    LocalDateTime cutoff = LocalDateTime.now().minusDays(2);
+    \end{lstlisting}
+    \item \textbf{Post Deletions:} The scheduler identifies posts created by accounts with the `test` prefix that are older than the 2-day cutoff. It deletes all nested comment replies, top-level comments, and then deletes the post entity.
+    \item \textbf{Connection Deletions:} The scheduler identifies pending connection requests involving `test` accounts that are older than 2 days. It deletes associated connection request notifications and removes the connection entity.
+\end{itemize}
+
+\section{Recommended Testing Strategy}
+To expand test coverage, the following testing plan is recommended:
+\begin{itemize}
+    \item \textbf{Unit Testing (JUnit 5 + Mockito):} Target the service layer (`UserService`, `PostService`, `ConnectionService`) to verify business rules (such as validating email domains and role permissions) using mocked database states.
+    \item \textbf{Controller Integration Testing (MockMvc):} Write integration tests using `@WebMvcTest` to verify that API controllers return the correct HTTP status codes and JSON schemas.
+    \item \textbf{WebSocket STOMP Testing:} Build a test client to verify that messaging frames are routed correctly over the STOMP protocol.
+    \item \textbf{Frontend End-to-End (E2E) Testing:} Use Playwright or Cypress to automate user flows (such as registration, connections, and real-time chat) in a browser.
+\end{itemize}

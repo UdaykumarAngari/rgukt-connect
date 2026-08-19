@@ -1,0 +1,173 @@
+\chapter{Database Design \& ER Diagram}
+\label{ch:database}
+
+RGUKT Connect uses a PostgreSQL database. The schema is mapped using Hibernate ORM with the `update` DDL strategy. This chapter details the database entities, tables, relationships, and includes a detailed Entity-Relationship (ER) diagram.
+
+\section{Database Table Definitions}
+The relational database consists of ten primary tables.
+
+\subsection{Users Table (`users`)}
+Stores the core authentication and identity records.
+\begin{itemize}
+    \item \textbf{`id`:} `BIGINT` (Primary Key, Auto-increment).
+    \item \textbf{`id\_number`:} `VARCHAR(7)` (Unique, e.g., B211449).
+    \item \textbf{`name`:} `VARCHAR(255)` (Full name).
+    \item \textbf{`university\_email`:} `VARCHAR(255)` (Unique, ending in `@rgukt.ac.in`).
+    \item \textbf{`password`:} `VARCHAR(255)` (BCrypt hash).
+    \item \textbf{`role`:} `VARCHAR(50)` (e.g., STUDENT, ALUMNI, ADMIN).
+    \item \textbf{`created\_at`:} `TIMESTAMP` (Auto-generated).
+\end{itemize}
+
+\subsection{User Details Table (`user\_details`)}
+Stores profile extensions. Linked to `users` via a One-to-One relationship.
+\begin{itemize}
+    \item \textbf{`id`:} `BIGINT` (Primary Key).
+    \item \textbf{`user\_id`:} `BIGINT` (Foreign Key pointing to `users.id`, Unique).
+    \item \textbf{`mobile\_number`:} `VARCHAR(15)` (Default: `9876543210`).
+    \item \textbf{`personal\_email`:} `VARCHAR(255)` (Optional).
+    \item \textbf{`branch`:} `VARCHAR(50)` (Academic branch, e.g., CSE, ECE).
+    \item \textbf{`batch`:} `VARCHAR(10)` (e.g., 2021).
+    \item \textbf{`profile\_photo`:} `VARCHAR(500)` (S3 URL).
+    \item \textbf{`description`:} `TEXT` (Professional bio).
+    \item \textbf{`github\_url` / `linkedin\_url`:} `VARCHAR(500)`.
+    \item \textbf{`mentored\_students\_count`:} `INT` (Default: 0).
+\end{itemize}
+
+\subsection{Education Details Table (`education\_details`)}
+Tracks the academic history of users. Linked via a Many-to-One relationship to `users`.
+\begin{itemize}
+    \item \textbf{`id`:} `BIGINT` (Primary Key).
+    \item \textbf{`user\_id`:} `BIGINT` (Foreign Key pointing to `users.id`).
+    \item \textbf{`institution\_name`:} `VARCHAR(255)`.
+    \item \textbf{`degree`:} `VARCHAR(100)`.
+    \item \textbf{`field\_of\_study`:} `VARCHAR(255)`.
+    \item \textbf{`start\_year` / `end\_year`:} `INT`.
+    \item \textbf{`grade`:} `VARCHAR(50)`.
+\end{itemize}
+
+\subsection{User Experiences Table (`user\_experiences`)}
+Tracks the professional history of users. Linked via a Many-to-One relationship to `users`.
+\begin{itemize}
+    \item \textbf{`id`:} `BIGINT` (Primary Key).
+    \item \textbf{`user\_id`:} `BIGINT` (Foreign Key pointing to `users.id`).
+    \item \textbf{`title` / `company\_name` / `location`:} `VARCHAR(255)`.
+    \item \textbf{`employment\_type` / `location\_type`:} `VARCHAR(100)` (e.g., Remote, On-site).
+    \item \textbf{`start\_date` / `end\_date`:} `DATE`.
+    \item \textbf{`is\_current\_role`:} `BOOLEAN`.
+    \item \textbf{`description`:} `TEXT`.
+\end{itemize}
+
+\subsection{Projects Table (`projects`)}
+Tracks user projects. Linked via a Many-to-One relationship to `users`.
+\begin{itemize}
+    \item \textbf{`id`:} `BIGINT` (Primary Key).
+    \item \textbf{`user\_id`:} `BIGINT` (Foreign Key pointing to `users.id`).
+    \item \textbf{`title`:} `VARCHAR(255)`.
+    \item \textbf{`description`:} `TEXT`.
+    \item \textbf{`project\_url` / `repo\_url`:} `VARCHAR(500)`.
+\end{itemize}
+
+\subsection{Posts Table (`posts`)}
+Stores community feed items. Linked to `users` as author.
+\begin{itemize}
+    \item \textbf{`id`:} `BIGINT` (Primary Key).
+    \item \textbf{`author\_id`:} `BIGINT` (Foreign Key pointing to `users.id`).
+    \item \textbf{`type`:} `VARCHAR(50)` (e.g., text, referral, image).
+    \item \textbf{`content`:} `TEXT`.
+    \item \textbf{`code\_snippet`:} `TEXT` (Optional, supports code shares).
+    \item \textbf{`company` / `role`:} `VARCHAR(255)` (Optional, for referral type).
+    \item \textbf{`media\_url`:} `VARCHAR(500)` (AWS S3 file attachment).
+    \item \textbf{`created\_at`:} `TIMESTAMP`.
+\end{itemize}
+
+\subsection{Comments Table (`comments`)}
+Nested post comment structures. Linked to `posts` and `users` (as author).
+\begin{itemize}
+    \item \textbf{`id`:} `BIGINT` (Primary Key).
+    \item \textbf{`post\_id`:} `BIGINT` (Foreign Key pointing to `posts.id`).
+    \item \textbf{`author\_id`:} `BIGINT` (Foreign Key pointing to `users.id`).
+    \item \textbf{`parent\_id`:} `BIGINT` (Self-referential Foreign Key pointing to `comments.id` for nested replies).
+    \item \textbf{`content`:} `TEXT`.
+    \item \textbf{`created\_at`:} `TIMESTAMP`.
+\end{itemize}
+
+\subsection{Connections Table (`connections`)}
+Handles networking relationships. Includes a unique constraint on the pair `(sender\_id, receiver\_id)`.
+\begin{itemize}
+    \item \textbf{`id`:} `BIGINT` (Primary Key).
+    \item \textbf{`sender\_id`:} `BIGINT` (Foreign Key pointing to `users.id`).
+    \item \textbf{`receiver\_id`:} `BIGINT` (Foreign Key pointing to `users.id`).
+    \item \textbf{`status`:} `VARCHAR(50)` (e.g., PENDING, ACCEPTED).
+    \item \textbf{`created\_at` / `updated\_at`:} `TIMESTAMP`.
+\end{itemize}
+
+\subsection{Chat Messages Table (`chat\_messages`)}
+Persistent history for chat messages.
+\begin{itemize}
+    \item \textbf{`id`:} `BIGINT` (Primary Key).
+    \item \textbf{`sender\_id`:} `BIGINT` (Foreign Key pointing to `users.id`).
+    \item \textbf{`receiver\_id`:} `BIGINT` (Foreign Key pointing to `users.id`).
+    \item \textbf{`content`:} `TEXT` (Encrypted or raw text storage).
+    \item \textbf{`is\_read`:} `BOOLEAN` (Default: false).
+    \item \textbf{`timestamp`:} `TIMESTAMP`.
+\end{itemize}
+
+\subsection{Notifications Table (`notifications`)}
+Tracks alerts.
+\begin{itemize}
+    \item \textbf{`id`:} `BIGINT` (Primary Key).
+    \item \textbf{`recipient\_id`:} `BIGINT` (Foreign Key pointing to `users.id`).
+    \item \textbf{`sender\_id`:} `BIGINT` (Foreign Key pointing to `users.id`).
+    \item \textbf{`type`:} `VARCHAR(100)` (e.g., CONNECTION\_REQUEST, CONNECTION\_ACCEPTED).
+    \item \textbf{`related\_id`:} `BIGINT` (Polymorphic resource ID).
+    \item \textbf{`is\_read`:} `BOOLEAN`.
+    \item \textbf{`created\_at`:} `TIMESTAMP`.
+\end{itemize}
+
+\section{Database ER Diagram}
+Figure~\ref{fig:er_diagram} shows the database schema relationships.
+
+\begin{figure}[H]
+    \centering
+    \scalebox{0.75}{
+    \begin{tikzpicture}[node distance=2.2cm, auto, >=stealth']
+        % Entities
+        \node [block, fill=LightGrey] (user) {\textbf{User} \\ id, idNumber, email, role};
+        \node [block, left=3.5cm of user] (det) {\textbf{UserDetails} \\ id, branch, batch, bio, photo};
+        \node [block, above left=2cm and 1cm of user] (edu) {\textbf{EducationDetail} \\ id, institution, grade};
+        \node [block, above right=2cm and 1.5cm of user] (exp) {\textbf{UserExperience} \\ id, company, role, dates};
+        \node [block, right=4cm of user] (proj) {\textbf{Project} \\ id, title, repoUrl, url};
+        
+        \node [block, below left=3cm and 2cm of user] (post) {\textbf{Post} \\ id, type, content, media};
+        \node [block, below=4cm of user] (conn) {\textbf{Connection} \\ id, sender\_id, receiver\_id, status};
+        \node [block, below right=3cm and 2cm of user] (msg) {\textbf{ChatMessage} \\ id, sender\_id, receiver\_id, content};
+        
+        \node [block, below=2cm of post] (comm) {\textbf{Comment} \\ id, content, parent\_id};
+        \node [block, below=2cm of msg] (notif) {\textbf{Notification} \\ id, type, related\_id, is\_read};
+
+        % Relationships
+        % One-to-One
+        \draw [thick, -] (user) -- node [above] {1:1} (det);
+        
+        % One-to-Many User -> sub profiles
+        \draw [thick, -] (user) -- node [left] {1:N} (edu);
+        \draw [thick, -] (user) -- node [right] {1:N} (exp);
+        \draw [thick, -] (user) -- node [above] {1:N} (proj);
+        
+        % One-to-Many User -> feed & interactions
+        \draw [thick, -] (user) -- node [left] {1:N} (post);
+        \draw [thick, -] (user) -- node [near start, right] {1:N} (conn);
+        \draw [thick, -] (user) -- node [right] {1:N} (msg);
+        
+        % Connections
+        \draw [thick, -] (post) -- node [left] {1:N} (comm);
+        \draw [thick, -] (user) |- node [near end, left] {1:N} (comm);
+        \draw [thick, -] (user) |- node [near end, right] {1:N} (notif);
+        
+        % Self join on Comment
+        \draw [thick, ->] (comm.west) -- ++(-0.5,0) |- node [above, near start] {0:N} (comm.south west);
+    \end{tikzpicture}
+    }
+    \caption{RGUKT Connect Relational Database ER Schema Diagram}
+    \label{fig:er_diagram}
+\end{figure}

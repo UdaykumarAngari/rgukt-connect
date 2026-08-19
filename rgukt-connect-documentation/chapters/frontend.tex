@@ -1,0 +1,80 @@
+\chapter{Frontend Architecture}
+\label{ch:frontend}
+
+The frontend of RGUKT Connect is built as a single-page application (SPA) using React 19 and compiled with Vite. This chapter details the directory layout, state management architecture, navigation system, and theme configuration.
+
+\section{Directory Structure}
+The frontend source code is organized into folders to separate components, pages, and state context:
+\begin{itemize}
+    \item \textbf{`src/main.jsx`:} Entry point of the application. Configures Axios defaults (e.g., setting the backend base URL via `import.meta.env.VITE\_API\_URL || 'http://localhost:8000'`).
+    \item \textbf{`src/App.jsx`:} Core router component. Configures the route paths, wraps the application inside context providers, and verifies session states.
+    \item \textbf{`src/context/`:} Contains React Context files that handle global states:
+    \begin{itemize}
+        \item \textbf{`NotificationContext`:} Manages global STOMP connections, unread notification counts, and real-time alerts.
+        \item \textbf{`UserContext`:} Fetches and caches the logged-in user's profile.
+        \item \textbf{`HomeContext`:} Coordinates the community post feed, like actions, and comment additions.
+        \item \textbf{`JobsContext`:} Manages the active job boards, filtering, and job creations.
+        \item \textbf{`NetworkContext`:} Coordinates member search directories and connection invitations.
+        \item \textbf{`MessagesContext`:} Handles private chat histories and real-time message streams.
+        \item \textbf{`PromptContext`:} Coordinates modal warnings and confirmations.
+    \end{itemize}
+    \item \textbf{`src/pages/`:} Contains page views, including Landing, Login, Register, ForgotPassword, Home, Network, Jobs, Messages, and Profile.
+    \item \textbf{`src/components/`:} Houses reusable UI components (e.g., Navbar, UserCard, PostCard, modals).
+\end{itemize}
+
+\section{State Synchronization \& Context Providers}
+To prevent prop-drilling, global states are managed using React Context. The root node of the component tree is wrapped in the following provider hierarchy:
+\begin{lstlisting}[language=xml]
+<NotificationProvider session={session}>
+  <PromptProvider>
+    <UserProvider session={session}>
+      <HomeProvider session={session} onLogout={handleLogout}>
+        <JobsProvider session={session} onLogout={handleLogout}>
+          <NetworkProvider session={session} onLogout={handleLogout}>
+            <MessagesProvider session={session} onLogout={handleLogout}>
+               <BrowserRouter> ... </BrowserRouter>
+            </MessagesProvider>
+          </NetworkProvider>
+        </JobsProvider>
+      </HomeProvider>
+    </UserProvider>
+  </PromptProvider>
+</NotificationProvider>
+\end{lstlisting}
+
+This setup ensures that whenever the authenticated `session` transitions (e.g., on login or logout), the dependent contexts clean up their internal cache and reset their states.
+
+\section{Routing \& Navigation}
+Routes are split into public pages and protected workspaces using a custom `ProtectedRoute` wrapper. The route mappings are summarized in Table~\ref{tab:route_mappings}.
+
+\begin{table}[H]
+    \centering
+    \caption{Frontend Route Mappings and Access Rules}
+    \label{tab:route_mappings}
+    \begin{tabularx}{\textwidth}{l l l X}
+        \toprule
+        \textbf{Route Path} & \textbf{Component} & \textbf{Access Level} & \textbf{Redirect Rule (If Unauthorized)} \\
+        \midrule
+        `/` & `Landing` & Public & None \\
+        `/login` & `Login` & Public (Anonymous) & Redirect to `/home` if already authenticated \\
+        `/register` & `Register` & Public (Anonymous) & Redirect to `/home` if already authenticated \\
+        `/forgot-password` & `ForgotPassword` & Public (Anonymous) & Redirect to `/home` if already authenticated \\
+        `/home` & `Home` & Protected (Session) & Redirect to `/login` if token missing \\
+        `/network` & `Network` & Protected (Session) & Redirect to `/login` if token missing \\
+        `/jobs` & `Jobs` & Protected (Session) & Redirect to `/login` if token missing \\
+        `/messages` & `Messages` & Protected (Session) & Redirect to `/login` if token missing \\
+        `/profile` & `Profile` & Protected (Session) & Redirect to `/login` if token missing \\
+        `*` & (Fallback) & Redirect to `/` & N/A \\
+        \bottomrule
+    \end{tabularx}
+\end{table}
+
+\section{Design System \& Styling}
+Styling uses Tailwind CSS v4.0. The layout theme is customized in `src/index.css` inside the `@theme` block. Core variables include:
+\begin{itemize}
+    \item \textbf{Brand Primary Color:} `--color-rgukt-maroon` set to `\#800000` (burgundy).
+    \item \textbf{Brand Accent Color:} `--color-rgukt-gold` set to `\#ffd700` (yellow gold).
+    \item \textbf{Background Neutral:} `--color-rgukt-slate` set to `\#f9fafb` (off-white).
+    \item \textbf{Font Stack:} Google Fonts \textbf{Inter} for body content, \textbf{Outfit} for headers, and \textbf{Source Code Pro} for code blocks.
+\end{itemize}
+Hover states and micro-animations use Tailwind utility modifiers (`transition-all`, `hover:scale-[1.02]`, `active:scale-[0.98]`) to provide immediate visual feedback.

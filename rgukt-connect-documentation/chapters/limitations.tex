@@ -1,0 +1,34 @@
+\chapter{System Limitations}
+\label{ch:limitations}
+
+This chapter details the current technical limitations of the RGUKT Connect platform.
+
+\section{In-Memory OTP Cache Storage}
+\begin{itemize}
+    \item \textbf{Limitation:} Registration and password recovery OTPs are stored in-memory using `ConcurrentHashMap` instances.
+    \item \textbf{Impact:} This design makes the authentication layer stateful. If the backend server restarts, crashes, or scales horizontally to multiple pods, users will experience validation errors when submitting OTPs, as the validation cache is tied to the memory space of a single server instance.
+\end{itemize}
+
+\section{Monolithic Database Constraints}
+\begin{itemize}
+    \item \textbf{Limitation:} All data (users, connections, posts, comments, notifications, chat logs) is stored in a single PostgreSQL instance.
+    \item \textbf{Impact:} The database is a single point of failure (SPOF) and a potential bottleneck as query traffic scales.
+\end{itemize}
+
+\section{Single-Node WebSocket Broker}
+\begin{itemize}
+    \item \textbf{Limitation:} The WebSocket STOMP service uses Spring's default `SimpleBroker`, which runs in-memory within the application process.
+    \item \textbf{Impact:} As discussed in the scalability blueprint (Chapter~\ref{ch:scalability}), this setup prevents the system from running multiple backend replicas in production. Messages cannot be routed between users connected to different server instances.
+\end{itemize}
+
+\section{Email Notification Gaps}
+\begin{itemize}
+    \item \textbf{Limitation:} The system sends email alerts (via SMTP) only for registration and password recovery OTPs.
+    \item \textbf{Impact:} Important community events (such as receiving a new connection request, connection acceptances, or direct messages) only trigger in-app notifications. If a user is offline, they will not receive email notifications about these events, which can reduce active user engagement.
+\end{itemize}
+
+\section{Session Management Security}
+\begin{itemize}
+    \item \textbf{Limitation:} The frontend stores JWT tokens in LocalStorage (`userSession`).
+    \item \textbf{Impact:} Storing sensitive session data in LocalStorage makes the application vulnerable to Cross-Site Scripting (XSS) attacks. If an attacker injects a malicious script, they can access the token and compromise the user session.
+\end{itemize}

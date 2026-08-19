@@ -1,0 +1,69 @@
+\chapter{Product Overview}
+\label{ch:product_overview}
+
+RGUKT Connect is designed as a secure, specialized, and real-time professional ecosystem. This chapter details the core product definition, its target user groups, boundaries, and the general user journey.
+
+\section{Target User Roles}
+The platform is designed around three main user groups within the university community:
+\begin{enumerate}
+    \item \textbf{Students (Current Undergraduates):} Users seeking career guidance, mentorship, project reviews, and direct job or internship referrals. They use the platform to search for alumni, build professional profiles, participate in discussions, and apply for listings.
+    \item \textbf{Alumni (Graduated Professionals):} Users who are currently employed in the industry or pursuing advanced degrees. They act as mentors, write posts sharing industry trends, publish job openings from their employers, and offer direct referrals.
+    \item \textbf{Administrators (Platform Managers):} Users responsible for managing the platform. They can delete posts, manage jobs, check system health, and oversee user activity.
+\end{enumerate}
+
+\section{Platform Boundaries}
+To preserve security and institutional focus, the platform maintains strict operational boundaries:
+\begin{itemize}
+    \item \textbf{Closed Registration:} Only users with emails ending in `@rgukt.ac.in` and 7-character registration numbers can sign up. External registrations are rejected.
+    \item \textbf{Verification Loop:} System interaction is blocked until the registration email is verified using a 6-digit OTP delivered via SMTP.
+    \item \textbf{Connection-Based Interaction:} To prevent spam, private messaging is restricted. A student can only initiate a direct chat with an alumnus or other student once they send a connection request and the recipient accepts it.
+\end{itemize}
+
+\section{User Journey \& Flow}
+The user journey is divided into authentication, discovery, and engagement. When a user first opens the web application, the root route checks the LocalStorage session token. If the token is missing or expired, the user is redirected to the public Landing page, where they can choose to log in or register. Once authenticated, they enter the main platform containing the Home Feed, Network Directory, Jobs Board, Chat client, and Profile dashboard.
+
+Figure~\ref{fig:user_flow} shows the complete user journey flowchart.
+
+\begin{figure}[H]
+    \centering
+    \begin{tikzpicture}[node distance=2cm, auto]
+        % Define block styles locally if needed
+        \node [block, fill=RguktMaroon, text=white] (landing) {Landing Page};
+        \node [block, below=1.5cm of landing] (authCheck) {Session Valid?};
+        
+        \node [block, left=2.5cm of authCheck] (login) {Log In (JWT)};
+        \node [block, left=2.5cm of landing] (register) {Register (Email OTP)};
+        
+        \node [block, below=1.5cm of authCheck, fill=LightGrey] (workspace) {Main Workspace};
+        
+        \node [block, below=1.5cm of workspace] (feed) {Home Feed};
+        \node [block, left=4cm of feed] (network) {Network Directory};
+        \node [block, right=4cm of feed] (jobs) {Jobs Board};
+        \node [block, below=1.5cm of network] (chat) {Real-Time Chat};
+        \node [block, below=1.5cm of jobs] (profile) {Profile Editor};
+
+        % Connect nodes
+        \draw [arrow] (landing) -- (authCheck);
+        \draw [arrow] (authCheck) -- node [near start, left] {Yes} (workspace);
+        \draw [arrow] (authCheck) -- node [above] {No} (login);
+        \draw [arrow] (login) |- (register);
+        \draw [arrow] (register) -- (landing);
+        \draw [arrow] (login) |- ($(workspace.west) + (0,0.2)$);
+        
+        \draw [arrow] (workspace) -- (feed);
+        \draw [arrow] (workspace) -| (network);
+        \draw [arrow] (workspace) -| (jobs);
+        
+        \draw [arrow] (network) -- (chat);
+        \draw [arrow] (jobs) -- (profile);
+        \draw [arrow] (feed) |- (profile);
+        \draw [arrow] (chat) -- (profile);
+        
+        % Background shading
+        \begin{scope}[on background layer]
+            \node[draw=BorderGrey, dashed, line width=1.5pt, fill=LightGrey!40, rounded corners, fit=(feed) (network) (jobs) (chat) (profile), label=above:\textbf{Authenticated Features}] (box) {};
+        \end{scope}
+    \end{tikzpicture}
+    \caption{RGUKT Connect User Journey and Platform Navigation Flow}
+    \label{fig:user_flow}
+\end{figure}

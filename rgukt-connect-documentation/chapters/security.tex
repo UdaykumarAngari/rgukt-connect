@@ -1,0 +1,23 @@
+\chapter{Security Architecture \& Hardening}
+\label{ch:security}
+
+This chapter reviews the security measures implemented in RGUKT Connect and outlines recommendations for future hardening.
+
+\section{Implemented Security Controls}
+\begin{itemize}
+    \item \textbf{Identity Verification Restrictions:} Only users with `@rgukt.ac.in` emails can register. Student registration IDs are checked to ensure they contain exactly 7 characters, preventing external sign-ups.
+    \item \textbf{In-Memory OTP Protection:} OTP codes are stored in-memory using `ConcurrentHashMap` caches with an automatic 5-minute timeout. This prevents long-term storage of temporary codes.
+    \item \textbf{Stateless Authorization:} System actions require a JWT token. This eliminates session hijacking risks on the server by removing all server-side session state.
+    \item \textbf{CORS Configuration:} The backend enforces CORS policies using the `CORS\_ALLOWED\_ORIGINS` environment variable. The filter checks the request origin and blocks requests from unauthorized domains.
+    \item \textbf{S3 File Storage Isolation:} S3 uploads are saved using unique paths linked to user IDs and timestamps. The application does not accept custom file names, protecting the system against directory traversal attacks.
+    \item \textbf{SQL Injection Prevention:} Database queries use Spring Data JPA's parameterized methods. The Hibernate engine compiles these queries into prepared statements, preventing SQL injection vulnerabilities.
+\end{itemize}
+
+\section{Future Security Recommendations}
+\begin{enumerate}
+    \item \textbf{SSL/TLS Encryption:} Endpoints must use HTTPS. Production deployments should configure Nginx Ingress to terminate TLS certificates (using Let's Encrypt or similar tools) to encrypt data in transit.
+    \item \textbf{Rate Limiting on OTP Endpoints:} The API currently does not restrict how often a user can call `send-otp`. Attackers could exploit this to flood the SMTP queue or spam users. Implementing a rate limiter (such as Bucket4j or Redis token bucket) would prevent abuse.
+    \item \textbf{JWT Blocklisting with Redis:} Because JWT tokens are stateless, they cannot be invalidated before their expiration date. Implementing a Redis-based blocklist would allow users to log out immediately or enable administrators to revoke compromised tokens.
+    \item \textbf{Secrets Management:} The production environments should load database passwords, S3 keys, and JWT secrets from a secure secrets provider (such as HashiCorp Vault or Kubernetes Secrets) instead of plain text environment files.
+    \item \textbf{Input Sanitization:} To protect the platform against Cross-Site Scripting (XSS) attacks in the community feed, the client and server should sanitize user input, scrubbing HTML tags and scripts from post bodies and code snippets.
+\end{enumerate}

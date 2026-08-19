@@ -1,0 +1,42 @@
+\chapter{Technology Stack}
+\label{ch:technology_stack}
+
+The selection of the technology stack for RGUKT Connect was driven by considerations of security, developer productivity, execution performance, and deployment automation. This chapter outlines the software languages, frameworks, and storage systems used.
+
+\section{Tech Stack Matrix}
+Table~\ref{tab:tech_stack} details each layer of the application.
+
+\begin{table}[H]
+    \centering
+    \caption{RGUKT Connect Layered Technology Stack}
+    \label{tab:tech_stack}
+    \begin{tabularx}{\textwidth}{l X l X}
+        \toprule
+        \textbf{Layer} & \textbf{Technology / Tool} & \textbf{Version} & \textbf{Primary Purpose / Rationale} \\
+        \midrule
+        Frontend Core & React & 19.2.5 & Component-based UI rendering with state synchronization. \\
+        Frontend Build & Vite & 8.0.10 & Rapid hot module reloading and optimized ES module bundling. \\
+        Styling System & Tailwind CSS & 4.2.4 & Utility-first CSS theme compilation. \\
+        API Client & Axios & 1.17.0 & Promise-based HTTP client supporting request interception and custom headers. \\
+        WS Client & @stomp/stompjs & 7.3.0 & WebSockets STOMP protocol abstraction client. \\
+        Backend Engine & Spring Boot & 3.4.x / 4.x & Enterprise-grade application runner. \\
+        Language & Java JDK & 21 & Modern features and performance improvements. \\
+        ORM Layer & Hibernate / Spring JPA & Default & Automatic entity mapping and transaction management. \\
+        DB Driver & PostgreSQL JDBC & 42.x & Database connectivity driver. \\
+        Connection Pool & HikariCP & Default & High-speed JDBC connection pool. \\
+        Database Engine & PostgreSQL & 15 / 16 & Relational database. \\
+        Binary Storage & Amazon S3 & SDK v1/v2 & Secure object storage for media attachments. \\
+        Mail Server & JavaMail / SMTP & Default & Relational connection for OTP deliveries. \\
+        CI/CD Server & Jenkins & Latest & Automation server managing build pipelines. \\
+        Orchestration & Kubernetes & 1.28+ & Orchestrator running replicated pods. \\
+        \bottomrule
+    \end{tabularx}
+\end{table}
+
+\section{Technical Rationale for Primary Choices}
+\begin{itemize}
+    \item \textbf{Java 21 \& Spring Boot:} JDK 21 introduces virtual threads and enhanced pattern matching, improving application performance. Spring Boot provides pre-built security configurations, WebSocket support, and JPA integrations out of the box, reducing boilerplate code.
+    \item \textbf{PostgreSQL:} Chosen over NoSQL options because the core data model (users, connections, comments, likes) is highly relational. PostgreSQL supports transaction management and ACID properties, which are critical for preserving connection states and notification structures.
+    \item \textbf{React 19 \& Vite:} React 19 improves concurrent rendering and state management. Vite replaces Webpack to compile code faster, accelerating the development cycle.
+    \item \textbf{Amazon S3 for Binaries:} Storing image files directly inside a database degrades query performance. By offloading media files to S3 and saving only their generated public URLs in the database, the database remains compact.
+\end{itemize}

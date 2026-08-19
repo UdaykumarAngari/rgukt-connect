@@ -1,0 +1,57 @@
+\chapter{Authentication Mechanics}
+\label{ch:authentication}
+
+RGUKT Connect uses stateless token-based authentication. This chapter details password hashing, JSON Web Token (JWT) signatures, request-level verification filters, and WebSocket handshake authentication.
+
+\section{Password Hashing via BCrypt}
+User passwords are encrypted before storage. The system uses Spring Security's `BCryptPasswordEncoder` with a default strength factor of 10. BCrypt incorporates a random salt for each hash, securing stored passwords against rainbow table attacks:
+\begin{lstlisting}[language=java]
+String securePassword = passwordEncoder.encode(requestDTO.getPassword());
+user.setPassword(securePassword);
+\end{lstlisting}
+
+During login, the system matches the raw password against the stored hash using:
+\begin{lstlisting}[language=java]
+passwordEncoder.matches(loginRequest.getPassword(), user.getPassword())
+\end{lstlisting}
+
+\section{JWT Signature \& Payload Claims}
+Upon successful authentication, the server generates a signed JWT access token. 
+\begin{itemize}
+    \item \textbf{Signature Algorithm:} HMAC-SHA256 (`HS256`).
+    \item \textbf{Signing Key:} Loaded from the `JWT\_SECRET` environment variable.
+    \item \textbf{Payload Claims:} The JWT contains:
+    \begin{itemize}
+        \item Subject (`sub`): University email address.
+        \item Issued At (`iat`): Timestamp of creation.
+        \item Expiration (`exp`): Timestamp when the token expires.
+        \item Custom Claims: User ID number and account Role.
+    \end{itemize}
+\end{itemize}
+
+\section{Request Filtering: `JwtFilter`}
+For HTTP requests, the custom `JwtFilter` class (which extends `OncePerRequestFilter`) processes the security context:
+\begin{enumerate}
+    \item It extracts the `Authorization` header from the incoming request.
+    \item It checks if the header begins with the prefix `Bearer `.
+    \item It parses the token using the secret key and extracts the email and user roles.
+    \item If the token is valid, it builds a `UsernamePasswordAuthenticationToken` and sets it in Spring Security's context:
+    \begin{lstlisting}[language=java]
+    SecurityContextHolder.getContext().setAuthentication(authenticationToken);
+    \end{lstlisting}
+\end{enumerate}
+
+\section{WebSocket Handshake Authentication Interceptor}
+Since WebSockets are upgrade connections that do not use standard HTTP filters after the initial handshake, securing STOMP frames requires a different approach.
+
+The application registers a custom channel interceptor in `WebSocketConfig` that intercepts incoming STOMP command headers during the connection handshake (`CONNECT` frame):
+\begin{enumerate}
+    \item The client includes the JWT token in the `Authorization` header inside the STOMP connection headers.
+    \item The `configureClientInboundChannel` interceptor extracts the `Authorization` header.
+    \item It parses and validates the token.
+    \item If valid, it extracts the user's details and registers a custom `Principal` object linked to the user's unique Database ID (converted to a string).
+    \item This mapping allows the backend to route private messages to specific users using:
+    \begin{lstlisting}[language=java]
+    messagingTemplate.convertAndSendToUser(recipientId.toString(), "/queue/messages", messageDto);
+    \end{lstlisting}
+\end{enumerate}

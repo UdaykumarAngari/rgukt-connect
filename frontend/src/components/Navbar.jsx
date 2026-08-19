@@ -79,7 +79,7 @@ const Navbar = ({ isLanding = false, searchQuery, setSearchQuery, session, onLog
           className="flex items-center gap-2 shrink-0 cursor-pointer select-none focus:outline-none"
         >
           <img src={logo} alt="Logo" className="h-9 w-auto select-none" />
-          <h1 className="text-xl font-bold text-charcoal tracking-tight hidden select-none">
+          <h1 className="text-lg sm:text-xl font-bold text-charcoal tracking-tight select-none">
             RGUKT <span className="text-rgukt-maroon">Connect</span>
           </h1>
         </Link>

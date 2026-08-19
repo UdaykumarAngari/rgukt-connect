@@ -1,0 +1,87 @@
+\chapter{Application Workflows}
+\label{ch:application_workflow}
+
+This chapter details the operational workflows of RGUKT Connect, outlining the steps, endpoints, and data transformations for key processes.
+
+\section{Registration \& OTP Verification Workflow}
+Establishing a new user account requires dual verification: university email validation and OTP challenge.
+\begin{enumerate}
+    \item \textbf{Identity Submission:} The user enters their name, ID number, and email.
+    \item \textbf{Backend Validation:} The frontend sends a request to:
+    \begin{lstlisting}[language=bash]
+    POST /api/auth/register/send-otp?email={email}&idNumber={idNumber}
+    \end{lstlisting}
+    The backend verifies the email domain is `@rgukt.ac.in`, the ID is 7 characters, and that neither the email nor the ID is already registered.
+    \item \textbf{OTP Generation:} The backend generates a 6-digit OTP, saves it in an in-memory map (`registrationOtpStorage`) with a 5-minute expiry, and sends it via SMTP.
+    \item \textbf{Bypass Check:} If the email starts with `test`, the system skips SMTP and sets the OTP to `123456`.
+    \item \textbf{Submission:} The user submits their registration details, password, and the OTP to:
+    \begin{lstlisting}[language=bash]
+    POST /api/auth/register
+    \end{lstlisting}
+    \item \textbf{Commit Phase:} The backend validates the OTP. If valid, it hashes the password with BCrypt, saves a new `User` record, creates a default `UserDetails` entry (setting default branch to `CSE` and phone to `9876543210`), and deletes the OTP from the in-memory map.
+\end{enumerate}
+
+\section{Authentication \& JWT Lifecycle}
+Logging in establishes a stateless session:
+\begin{enumerate}
+    \item \textbf{Credentials Submission:} The user submits their email and password to:
+    \begin{lstlisting}[language=bash]
+    POST /api/auth/login
+    \end{lstlisting}
+    \item \textbf{Credential Verification:} The backend verifies the email domain. It retrieves the user, validates the BCrypt password hash, and returns an error if authentication fails.
+    \item \textbf{Token Issuance:} The system generates a JWT access token containing the user's email, ID number, and role, signed with the backend secret.
+    \item \textbf{Client Cache:} The backend returns the JWT token and basic profile metadata. The React client saves this data as a JSON string in LocalStorage under the key `userSession`.
+    \item \textbf{Authorized Requests:} The client includes the token in the `Authorization` header (`Bearer <token>`) for all subsequent API requests.
+\end{enumerate}
+
+\section{Job Posting \& Referral Workflow}
+Posting a job opportunity requires specific role privileges:
+\begin{enumerate}
+    \item \textbf{Form Submission:} The user fills out the job details form.
+    \item \textbf{API Request:} The client sends the payload with the authorization token to:
+    \begin{lstlisting}[language=bash]
+    POST /api/jobs
+    \end{lstlisting}
+    \item \textbf{Role Validation:} The backend extracts the user's role from the JWT. If the role is not `ALUMNI` or `ADMIN`, the backend rejects the request with an HTTP 403 status code.
+    \item \textbf{DB Write:} If authorized, the backend creates a `Job` record linked to the posting user.
+\end{enumerate}
+
+\section{Connection \& Real-Time Notification Workflow}
+Establishing a connection updates the network graph and triggers notifications:
+\begin{enumerate}
+    \item \textbf{Connection Request:} User A clicks "Connect" on User B's profile. The client sends a request to:
+    \begin{lstlisting}[language=bash]
+    POST /api/connections/request/{userId}
+    \end{lstlisting}
+    \item \textbf{Database Entry:} The backend creates a `Connection` record with a status of `PENDING`.
+    \item \textbf{Notification Trigger:} The backend creates a `Notification` entry with the type \texttt{CONNECTION\_REQUEST} and the ID of the connection request.
+    \item \textbf{Real-Time Push:} The backend pushes the notification over WebSockets to the recipient:
+    \begin{lstlisting}[language=bash]
+    /user/{recipientId}/queue/notifications
+    \end{lstlisting}
+    \item \textbf{Acceptance:} User B clicks "Accept". The client sends a request to:
+    \begin{lstlisting}[language=bash]
+    PUT /api/connections/accept/{requestId}
+    \end{lstlisting}
+    The backend updates the connection status to `ACCEPTED` and pushes a \texttt{CONNECTION\_ACCEPTED} notification back to User A.
+\end{enumerate}
+
+\section{Real-Time Messaging Workflow}
+Private messaging uses WebSockets to support real-time delivery:
+\begin{enumerate}
+    \item \textbf{STOMP Handshake:} The client establishes a WebSocket connection:
+    \begin{lstlisting}[language=bash]
+    ws://<host>/ws-chat/websocket
+    \end{lstlisting}
+    A custom channel interceptor validates the JWT token in the `Authorization` header.
+    \item \textbf{Subscription:} The client subscribes to:
+    \begin{lstlisting}[language=bash]
+    /user/queue/messages
+    \end{lstlisting}
+    \item \textbf{Message Dispatch:} When sending a message, the client posts the JSON payload to `/api/chat/send` via an HTTP POST request.
+    \item \textbf{Persistence:} The backend saves the message to the database and checks if User B is currently online.
+    \item \textbf{WebSocket Delivery:} The system pushes the message to User B:
+    \begin{lstlisting}[language=bash]
+    /user/{receiverId}/queue/messages
+    \end{lstlisting}
+\end{enumerate}

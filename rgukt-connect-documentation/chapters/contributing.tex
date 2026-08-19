@@ -1,0 +1,62 @@
+\chapter{Developer Contribution Guide}
+\label{ch:contributing}
+
+This chapter outlines the guidelines for developers contributing to the RGUKT Connect codebase, covering branching strategies, coding standards, and deployment tests.
+
+\section{Branching Strategy \& Workflow}
+The repository uses a Git Flow branching model:
+\begin{itemize}
+    \item \textbf{`main`:} Production branch. Contains stable, tested releases. Direct commits to `main` are restricted.
+    \item \textbf{`develop`:} Integration branch. All features and bug fixes are integrated here first.
+    \item \textbf{`feature/*`:} Feature development branches. Created from `develop` and merged back via Pull Requests (PRs).
+    \item \textbf{`hotfix/*`:} Urgent production fixes. Created from `main` and merged into both `main` and `develop`.
+\end{itemize}
+
+\section{Coding Standards \& Formatting}
+Developers must follow consistent formatting standards across layers.
+
+\subsection{Backend Java Code Standards}
+\begin{itemize}
+    \item Use standard camelCase naming for variables and methods, and PascalCase for classes.
+    \item Maintain a clean separation of concerns: Controller classes must not execute business logic directly, and service classes must not interact with database JDBC layers directly.
+    \item Document public API endpoints using Swagger or SpringDoc annotations.
+\end{itemize}
+
+\subsection{Frontend React Code Standards}
+\begin{itemize}
+    \item Write functional components using standard ES6 syntax and React Hooks.
+    \item Manage local states with the `useState` hook, and use custom Context hooks for shared global state.
+    \item Enforce styling rules using Tailwind CSS utility classes, and extract complex layout blocks into reusable UI components.
+\end{itemize}
+
+\section{Commit Message Conventions}
+Commits should use structured, semantic prefixes:
+\begin{itemize}
+    \item \textbf{`feat:`} A new functional capability (e.g., `feat: integrate S3 avatar upload`).
+    \item \textbf{`fix:`} A bug fix (e.g., `fix: resolve CORS header mismatch`).
+    \item \textbf{`docs:`} Documentation updates (e.g., `docs: add deployment instructions`).
+    \item \textbf{`refactor:`} Code refactoring that does not change functionality (e.g., `refactor: optimize JPA fetch join`).
+    \item \textbf{`test:`} Adding or modifying tests (e.g., `test: add user service unit tests`).
+\end{itemize}
+
+\section{Pre-PR Checklist}
+Before opening a Pull Request, developers must complete the following steps:
+\begin{enumerate}
+    \item Ensure the application compiles without errors:
+    \begin{lstlisting}[language=bash]
+    # Backend check
+    mvn clean compile
+    
+    # Frontend check
+    npm run build
+    \end{lstlisting}
+    \item Run all context and unit tests:
+    \begin{lstlisting}[language=bash]
+    mvn test
+    \end{lstlisting}
+    \item Verify formatting and linting:
+    \begin{lstlisting}[language=bash]
+    npm run lint
+    \end{lstlisting}
+    \item Test API endpoints using local REST clients (such as Postman or Bruno).
+\end{enumerate}

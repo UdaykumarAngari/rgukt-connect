@@ -1,0 +1,79 @@
+\chapter{System Architecture}
+\label{ch:architecture}
+
+RGUKT Connect uses a decoupled client-server architecture. This separation isolates the presentation layer from the business logic, enabling independent scaling and updates.
+
+\section{System Architecture Overview}
+The system architecture consists of three main tiers:
+\begin{enumerate}
+    \item \textbf{Client Presentation Tier (Single-Page Application):} A React-based web application. It communicates with the backend via RESTful HTTP APIs and persistent WebSocket channels.
+    \item \textbf{API Ingress \& Gateway Tier (Reverse Proxy):} An Ingress Controller (Nginx) that routes requests based on URL path prefixes:
+    \begin{itemize}
+        \item `/api/*` routes are sent to the Spring Boot REST API.
+        \item `/ws-chat/*` connections are upgraded and sent to the STOMP WebSocket broker.
+    \end{itemize}
+    \item \textbf{Core Application Server (Spring Boot):} A Java-based backend application. It handles request filtering, security checks, STOMP broker routing, mail queue processing, and Hibernate transaction management.
+    \item \textbf{Storage \& Persistence Tier:} Divided into two parts: PostgreSQL for structured relational data, and Amazon S3 for media files.
+\end{enumerate}
+
+Figure~\ref{fig:system_architecture} illustrates the system components and their relationships.
+
+\begin{figure}[H]
+    \centering
+    \scalebox{0.85}{
+    \begin{tikzpicture}[node distance=1.5cm, auto]
+        % --- presentation tier ---
+        \node [block, fill=LightGrey, draw=RguktMaroon] (react) {React SPA \\ (Vite, Axios, STOMP)};
+        
+        % --- ingress tier ---
+        \node [block, below=1.5cm of react, fill=LightGrey] (ingress) {Nginx Ingress \\ (Path Routing Gateway)};
+        
+        % --- backend tier ---
+        \node [block, below=2cm of ingress, fill=LightGrey, minimum width=6.5cm, minimum height=3.5cm] (backend) {};
+        \node [block, fill=white, draw=RguktMaroon, minimum width=2.5cm, minimum height=0.8cm] at ($(backend.center) + (-1.5,0.9)$) (security) {Security Filter};
+        \node [block, fill=white, draw=RguktMaroon, minimum width=2.5cm, minimum height=0.8cm] at ($(backend.center) + (1.5,0.9)$) (ws) {STOMP Broker};
+        \node [block, fill=white, draw=RguktMaroon, minimum width=5.5cm, minimum height=1cm] at ($(backend.center) + (0,-0.6)$) (services) {Controllers \& Services};
+        
+        % --- storage tier ---
+        \node [block, below=2cm of backend, fill=LightGrey] (postgres) {PostgreSQL Database \\ (Relational Schema)};
+        \node [block, right=2cm of postgres, fill=LightGrey] (s3) {Amazon S3 \\ (Profile/Post Media)};
+        \node [block, left=2cm of postgres, fill=LightGrey] (smtp) {SMTP Mail Server \\ (OTP Deliveries)};
+
+        % Draw Labels for Tiers
+        \node[left=3.5cm of react] (t1) {\textbf{Presentation Tier}};
+        \node[left=3.5cm of ingress] (t2) {\textbf{Ingress Gateway Tier}};
+        \node[left=3.5cm of backend] (t3) {\textbf{Core Application Tier}};
+        \node[left=3.5cm of postgres] (t4) {\textbf{Persistence Tier}};
+
+        % Connect Tiers
+        \draw [arrow] ($(react.south) + (-0.5,0)$) -- node [left] {HTTP REST} ($(ingress.north) + (-0.5,0)$);
+        \draw [arrow] ($(react.south) + (0.5,0)$) -- node [right] {WebSocket} ($(ingress.north) + (0.5,0)$);
+        
+        \draw [arrow] ($(ingress.south) + (-1,0)$) -- node [left] {/api/*} (security.north);
+        \draw [arrow] ($(ingress.south) + (1,0)$) -- node [right] {/ws-chat/*} (ws.north);
+        
+        \draw [arrow] (security.south) -- (services.north -| security.south);
+        \draw [arrow] (ws.south) -- (services.north -| ws.south);
+        
+        \draw [arrow] (services) -- (postgres);
+        \draw [arrow] (services) -| (s3);
+        \draw [arrow] (services) -| (smtp);
+        
+        % Draw backgrounds
+        \begin{scope}[on background layer]
+            \node at ($(backend.north west) + (0.2,-0.3)$) [anchor=north west] {\textbf{Spring Boot Application}};
+        \end{scope}
+    \end{tikzpicture}
+    }
+    \caption{RGUKT Connect Decoupled Architecture Blueprint}
+    \label{fig:system_architecture}
+\end{figure}
+
+\section{Component Communication Protocols}
+The application components communicate using three primary protocols:
+\begin{enumerate}
+    \item \textbf{HTTP/HTTPS REST (JSON):} Used for all standard request-response operations, including user registration, session logins, profile editing, post submissions, and job postings.
+    \item \textbf{STOMP over WebSocket:} Used for duplex real-time communications. Rather than using raw WebSockets, the platform runs STOMP on top, providing sub-protocols for frame routing.
+    \item \textbf{JDBC (Java Database Connectivity):} Used by the Spring Data JPA layer via a HikariCP connection pool to query and write to the PostgreSQL database.
+    \item \textbf{AWS SDK (HTTP REST):} The backend uses the AWS SDK to communicate with Amazon S3. Profile picture uploads generate public S3 URLs that are stored back in PostgreSQL.
+\end{enumerate}

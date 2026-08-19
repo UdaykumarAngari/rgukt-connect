@@ -1,0 +1,70 @@
+This is BibTeX, Version 0.99d (TeX Live 2023/Debian)
+Capacity: max_strings=200000, hash_size=200000, hash_prime=170003
+The top-level auxiliary file: build/main.aux
+A level-1 auxiliary file: chapters/introduction.aux
+A level-1 auxiliary file: chapters/problem-statement.aux
+A level-1 auxiliary file: chapters/product-overview.aux
+A level-1 auxiliary file: chapters/features.aux
+A level-1 auxiliary file: chapters/user-roles.aux
+A level-1 auxiliary file: chapters/architecture.aux
+A level-1 auxiliary file: chapters/technology-stack.aux
+A level-1 auxiliary file: chapters/application-workflow.aux
+A level-1 auxiliary file: chapters/frontend.aux
+A level-1 auxiliary file: chapters/backend.aux
+A level-1 auxiliary file: chapters/database.aux
+A level-1 auxiliary file: chapters/api.aux
+A level-1 auxiliary file: chapters/authentication.aux
+A level-1 auxiliary file: chapters/security.aux
+A level-1 auxiliary file: chapters/deployment.aux
+A level-1 auxiliary file: chapters/testing.aux
+A level-1 auxiliary file: chapters/performance.aux
+A level-1 auxiliary file: chapters/scalability.aux
+A level-1 auxiliary file: chapters/troubleshooting.aux
+A level-1 auxiliary file: chapters/limitations.aux
+A level-1 auxiliary file: chapters/roadmap.aux
+A level-1 auxiliary file: chapters/contributing.aux
+A level-1 auxiliary file: chapters/faq.aux
+A level-1 auxiliary file: chapters/conclusion.aux
+The style file: plain.bst
+Database file #1: references.bib
+You've used 8 entries,
+            2118 wiz_defined-function locations,
+            559 strings with 5329 characters,
+and the built_in function-call counts, 1790 in all, are:
+= -- 163
+> -- 73
+< -- 0
++ -- 30
+- -- 22
+* -- 67
+:= -- 310
+add.period$ -- 23
+call.type$ -- 8
+change.case$ -- 33
+chr.to.int$ -- 0
+cite$ -- 8
+duplicate$ -- 66
+empty$ -- 177
+format.name$ -- 22
+if$ -- 385
+int.to.chr$ -- 0
+int.to.str$ -- 8
+missing$ -- 4
+newline$ -- 42
+num.names$ -- 16
+pop$ -- 68
+preamble$ -- 1
+purify$ -- 27
+quote$ -- 0
+skip$ -- 56
+stack$ -- 0
+substring$ -- 40
+swap$ -- 8
+text.length$ -- 0
+text.prefix$ -- 0
+top$ -- 0
+type$ -- 28
+warning$ -- 0
+while$ -- 16
+width$ -- 9
+write$ -- 80

@@ -1,0 +1,71 @@
+\chapter{Backend Architecture}
+\label{ch:backend}
+
+The backend of RGUKT Connect is built on Spring Boot, running on Java 21. This chapter details the server architecture, directory layout, request-response execution pipeline, and exception handling mechanism.
+
+\section{Modular Components}
+The backend source code is organized into packages to separate concerns:
+\begin{itemize}
+    \item \textbf{`com.uday.rguktconnect.controller`:} REST Controllers. They expose endpoints, handle request mapping, and validate parameters.
+    \item \textbf{`com.uday.rguktconnect.service`:} Interface and implementation classes. They execute business logic, run database transaction boundaries, enforce validation constraints, and interface with external systems (such as AWS S3 and Java Mail).
+    \item \textbf{`com.uday.rguktconnect.repository`:} Spring Data JPA Repositories. They define queries and database interaction boundaries.
+    \item \textbf{`com.uday.rguktconnect.entity`:} Hibernate entities. They map Java objects to PostgreSQL tables.
+    \item \textbf{`com.uday.rguktconnect.dto`:} Data Transfer Objects. They decoupled database schemas from API schemas.
+    \item \textbf{`com.uday.rguktconnect.security`:} Custom filter chains, password encryptions, JWT utilities, and Web Security policies.
+    \item \textbf{`com.uday.rguktconnect.exception`:} Global exception handlers that catch exceptions and translate them into standard JSON responses.
+\end{itemize}
+
+\section{Request-Response Execution Pipeline}
+Every API request sent to the backend goes through a structured execution pipeline:
+\begin{enumerate}
+    \item \textbf{Filter Chain (JWT Extraction):} The request first hits the `JwtFilter` class. It extracts the `Authorization` header, validates the signature, extracts the claims (email, idNumber, role), and registers the authenticated user in the `SecurityContext`.
+    \item \textbf{Security Configuration:} The request is verified against the security policy in `SecurityConfig`. If unauthorized or calling a protected resource without a session, the request is rejected with an HTTP 401/403 status code.
+    \item \textbf{REST Controller Dispatch:} The request is routed to the corresponding controller method. The controller maps incoming JSON inputs to DTO objects.
+    \item \textbf{Service Execution:} The controller invokes the service layer. The service layer executes business logic (e.g., checking if a user has permission to delete a resource) and updates data inside transaction boundaries.
+    \item \textbf{Database Persistence:} The service invokes JPA repositories to execute database actions.
+\end{enumerate}
+
+Figure~\ref{fig:request_flow} illustrates this pipeline.
+
+\begin{figure}[H]
+    \centering
+    \begin{tikzpicture}[node distance=1.5cm, auto]
+        \node [block, fill=LightGrey] (client) {Client Request};
+        \node [block, below=1cm of client] (jwt) {JwtFilter \\ (Extract \& Validate JWT)};
+        \node [block, below=1cm of jwt] (sec) {SecurityConfig \\ (Check Paths/Roles)};
+        \node [block, below=1cm of sec] (ctrl) {Controller \\ (DTO Mapping)};
+        \node [block, below=1cm of ctrl] (svc) {Service Layer \\ (Business Logic)};
+        \node [block, below=1cm of svc] (repo) {JPA Repository \\ (Hibernate ORM)};
+        \node [block, right=2cm of repo, fill=LightGrey] (db) {PostgreSQL};
+
+        % Connect nodes
+        \draw [arrow] (client) -- (jwt);
+        \draw [arrow] (jwt) -- (sec);
+        \draw [arrow] (sec) -- (ctrl);
+        \draw [arrow] (ctrl) -- (svc);
+        \draw [arrow] (svc) -- (repo);
+        \draw [arrow] (repo) -- (db);
+
+        % Error paths
+        \draw [line, dashed, color=red] (jwt) -- node[right, color=red] {Invalid Token} ($(jwt.east) + (1,0)$) |- (client);
+        \draw [line, dashed, color=red] (sec) -- node[right, color=red] {Unauthorized} ($(sec.east) + (1.5,0)$) |- (client);
+    \end{tikzpicture}
+    \caption{Backend Request-Response Pipeline and Middleware Filtering}
+    \label{fig:request_flow}
+\end{figure}
+
+\section{Global Exception Handler}
+To prevent server trace leakage and provide clean API responses, all uncaught exceptions are caught by `GlobalExceptionHandler`:
+\begin{lstlisting}[language=java]
+@RestControllerAdvice
+public class GlobalExceptionHandler {
+    @ExceptionHandler(RuntimeException.class)
+    public ResponseEntity<?> handleRuntimeException(RuntimeException ex) {
+        return ResponseEntity
+                .status(HttpStatus.BAD_REQUEST) 
+                .body(Map.of("error", ex.getMessage()));
+    }
+}
+\end{lstlisting}
+
+This advice intercepts runtime failures (such as validation failures or permission errors) and returns a JSON payload (`{"error": "<exception message>"}`) alongside a standard HTTP 400 Bad Request status code.

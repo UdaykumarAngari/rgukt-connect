@@ -1,0 +1,47 @@
+\chapter{Scalability Blueprint}
+\label{ch:scalability}
+
+This chapter details the architectural design and roadmap for scaling RGUKT Connect to support high user traffic and concurrent messaging.
+
+\section{Horizontal Scaling of Backend Pods}
+The Spring Boot backend is packaged as a stateless Docker container. This allows the application to be scaled horizontally by running multiple replicas in the Kubernetes cluster. Traffic is distributed across these replicas using a Kubernetes Service.
+
+However, scaling the stateless API layer introduces challenges for features that manage state, such as WebSockets and in-memory caches.
+
+\section{Redis Message Broker for WebSocket Sync}
+Currently, the WebSocket STOMP broker is run in-memory within each backend process. If a client connects to Pod A, and another connects to Pod B, they cannot exchange messages directly because their sessions are isolated on different servers.
+
+To support multiple backend pods, the application must use a shared message broker (such as RabbitMQ or a Redis Pub/Sub backplane) instead of the in-memory broker.
+
+\begin{figure}[H]
+    \centering
+    \begin{tikzpicture}[node distance=1.5cm, auto]
+        \node [block, fill=LightGrey] (clientA) {Client A};
+        \node [block, right=4cm of clientA, fill=LightGrey] (clientB) {Client B};
+        
+        \node [block, below=1cm of clientA] (podA) {Backend Pod A};
+        \node [block, below=1cm of clientB] (podB) {Backend Pod B};
+        
+        \node [block, below=1.5cm of $(podA.south)!0.5!(podB.south)$, fill=RguktMaroon, text=white, minimum width=8cm] (redis) {Redis Pub/Sub / STOMP Broker Backplane};
+
+        \draw [arrow] (clientA) -- (podA);
+        \draw [arrow] (clientB) -- (podB);
+        
+        \draw [arrow, <->] (podA) -- (redis -| podA);
+        \draw [arrow, <->] (podB) -- (redis -| podB);
+    \end{tikzpicture}
+    \caption{Distributed WebSocket Architecture using a Redis Pub/Sub Backplane}
+    \label{fig:redis_pubsub}
+\end{figure}
+
+As shown in Figure~\ref{fig:redis_pubsub}, when Pod A receives a message, it publishes it to the Redis channel. Pod B, which is subscribed to the Redis channel, receives the message and forwards it to Client B, enabling cross-pod messaging.
+
+\section{Database Scaling: Read-Write Separation}
+Because user activity in social platforms is read-heavy (e.g., browsing feeds, searching directories, checking jobs), the database can become a bottleneck. The following database architecture is recommended for scaling:
+\begin{itemize}
+    \item \textbf{Write Master Database:} A single database instance that processes all write operations (e.g., new posts, connections, chat logs).
+    \item \textbf{Read Replicas:} Multiple read-only databases synced asynchronously with the master. The application routes read operations (such as directory queries) to these replicas, distributing the database load.
+\end{itemize}
+
+\section{Content Delivery Network (CDN) Integration}
+To reduce load on the origin server, static assets (such as profile images and post attachments uploaded to Amazon S3) should be served through a CDN (such as Amazon CloudFront or Cloudflare). The CDN caches these assets at edge locations close to users, reducing latency and bandwidth costs.

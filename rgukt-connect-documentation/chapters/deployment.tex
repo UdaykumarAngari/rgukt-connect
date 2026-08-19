@@ -1,0 +1,76 @@
+\chapter{Deployment \& Orchestration}
+\label{ch:deployment}
+
+This chapter details the deployment architecture of RGUKT Connect, covering containerization, Kubernetes orchestration, ingress routing, and the CI/CD pipeline.
+
+\section{Dockerization (Multi-Stage Build)}
+The backend uses a multi-stage Docker build to keep production images small and secure. The compiler environment (JDK) is separated from the runtime environment (JRE).
+
+Listing~\ref{lst:dockerfile} shows the backend `Dockerfile`.
+
+\begin{lstlisting}[language=SQL, caption=Backend Multi-Stage Dockerfile, label=lst:dockerfile]
+# Stage 1: Build stage
+FROM maven:3.9.9-eclipse-temurin-21 AS build
+WORKDIR /app
+COPY pom.xml .
+RUN mvn dependency:go-offline
+COPY . .
+RUN mvn clean package -DskipTests
+
+# Stage 2: Runtime stage
+FROM eclipse-temurin:21-jre
+WORKDIR /app
+COPY --from=build /app/target/*.jar app.jar
+EXPOSE 8000
+ENTRYPOINT ["java","-jar","app.jar","--server.port=8000"]
+\end{lstlisting}
+
+\section{Kubernetes Orchestration}
+The platform is designed to run in a Kubernetes cluster, providing horizontal scaling and self-healing.
+
+\subsection{Deployment Controller (`deployment.yaml`)}
+Manages replicas and deployment updates.
+\begin{itemize}
+    \item \textbf{Replicas:} 2 pods running the image `udayangari/rgukt-connect-backend:v2`.
+    \item \textbf{Rolling Update Strategy:} Configured with `maxSurge: 1` and `maxUnavailable: 0`. This guarantees zero-downtime updates by spinning up a new container before stopping the old one.
+    \item \textbf{Probes:}
+    \begin{itemize}
+        \item \textbf{Readiness Probe:} Calls HTTP `/api/auth/health` on port 8000 after a 90-second delay to check when the pod is ready to receive traffic.
+        \item \textbf{Liveness Probe:} Calls HTTP `/api/auth/health` on port 8000 after a 120-second delay to monitor container health.
+    \end{itemize}
+    \item \textbf{Resource Allocations:}
+    \begin{itemize}
+        \item CPU: Request 250m, Limit 500m.
+        \item Memory: Request 512Mi, Limit 1Gi.
+    \end{itemize}
+\end{itemize}
+
+\subsection{Service Mapping (`service.yaml`)}
+The backend pods are exposed inside the cluster using a NodePort Service:
+\begin{itemize}
+    \item \textbf{Service Name:} `backend-service`
+    \item \textbf{Type:} `NodePort`
+    \item \textbf{Ports:} Internal port 8000 mapped to NodePort 32001. This exposes the service on port 32001 across all cluster nodes.
+\end{itemize}
+
+\subsection{Ingress Router Configuration (`ingress.yaml`)}
+An Nginx Ingress Controller handles external routing:
+\begin{itemize}
+    \item \textbf{API Routing:} Routes \texttt{/api(/|\$)(.*)} requests to \texttt{backend-service:8000}.
+    \item \textbf{WebSocket Upgrade Routing:} Routes WebSocket connections on path \texttt{/ws-chat(/|\$)(.*)} directly to the backend pods to support real-time communication.
+\end{itemize}
+
+\section{Jenkins CI/CD Pipeline}
+The build pipeline is automated using a Jenkins declarative pipeline (`Jenkinsfile`). The deployment process consists of ten stages:
+\begin{enumerate}
+    \item \textbf{Checkout:} Pulls the latest source code from the Git repository.
+    \item \textbf{Verify Environment File:} Verifies the presence of the environment file `/opt/rgukt-connect/.env`.
+    \item \textbf{Docker Hub Login:} Authenticates with Docker Hub using Jenkins credentials (`dockerhub-creds`).
+    \item \textbf{Build Docker Image:} Compiles and packages the application inside the `backend` folder, tag-naming the resulting image.
+    \item \textbf{Push Image:} Pushes the image to Docker Hub.
+    \item \textbf{Stop Old Container:} Stops and removes the active container on the host machine.
+    \item \textbf{Remove Old Image:} Deletes the stale container image.
+    \item \textbf{Pull Latest Image:} Fetches the new build.
+    \item \textbf{Run Backend:} Starts the container in the background, loading environment variables from `/opt/rgukt-connect/.env` and mapping port 8000.
+    \item \textbf{Health Check:} Runs a polling loop that sends requests to `http://localhost:8000/health` up to 30 times (every 2 seconds) to confirm the server started successfully.
+\end{enumerate}

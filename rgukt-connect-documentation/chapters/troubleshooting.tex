@@ -1,0 +1,58 @@
+\chapter{Troubleshooting \& Operational Runbook}
+\label{ch:troubleshooting}
+
+This chapter details the troubleshooting steps for common operational issues encountered during development, deployment, or system executions.
+
+\section{Database Connectivity Failures}
+\begin{itemize}
+    \item \textbf{Symptom:} The Spring Boot application fails to boot, throwing a `HikariPool-1 - Connection is not available` error.
+    \item \textbf{Cause:} The application cannot establish a socket connection to PostgreSQL, typically due to incorrect credentials, an inactive database process, or an unmapped database URL.
+    \item \textbf{Resolution:}
+    \begin{enumerate}
+        \item Verify that the PostgreSQL service is active:
+        \begin{lstlisting}[language=bash]
+        systemctl status postgresql
+        \end{lstlisting}
+        \item Verify that the environment variables (`DB\_URL`, `DB\_USERNAME`, `DB\_PASSWORD`) are loaded by the process.
+        \item For local development, check that the database `rgukt\_connect` exists in PostgreSQL.
+    \end{enumerate}
+\end{itemize}
+
+\section{CORS Policy Violations}
+\begin{itemize}
+    \item \textbf{Symptom:} API requests fail in the browser with the error: `Access to XMLHttpRequest has been blocked by CORS policy`.
+    \item \textbf{Cause:} The client application's origin does not match the origins allowed by the backend.
+    \item \textbf{Resolution:}
+    \begin{enumerate}
+        \item Check the `CORS\_ALLOWED\_ORIGINS` environment variable in the backend configuration.
+        \item Ensure it contains the frontend origin (e.g., `http://localhost:5173` or `http://localhost:3000`) without trailing slashes.
+    \end{enumerate}
+\end{itemize}
+
+\section{WebSocket Handshake dropped}
+\begin{itemize}
+    \item \textbf{Symptom:} The frontend STOMP client fails to connect, throwing a protocol error or returning an HTTP 401 Unauthorized status code.
+    \item \textbf{Cause:} The connection handshake header is missing the authorization token, the JWT token is expired, or the ingress gateway is not configured to upgrade HTTP connections to WebSockets.
+    \item \textbf{Resolution:}
+    \begin{enumerate}
+        \item Check that the client includes the token in the STOMP connection headers:
+        \begin{lstlisting}[language={}]
+        connectHeaders: { Authorization: "Bearer " + token }
+        \end{lstlisting}
+        \item If deploying in Kubernetes, verify that the Nginx Ingress Controller configuration permits connection upgrades by checking these headers:
+        \begin{lstlisting}[language={}]
+        nginx.ingress.kubernetes.io/websocket-services: "backend-service"
+        \end{lstlisting}
+    \end{enumerate}
+\end{itemize}
+
+\section{Amazon S3 Media Upload Failures}
+\begin{itemize}
+    \item \textbf{Symptom:} Uploading profile pictures or post attachments fails, and the backend logs throw an `AmazonS3Exception: Access Denied` error.
+    \item \textbf{Cause:} The backend has missing or incorrect AWS credentials, or the target S3 bucket does not exist or lacks read/write permissions.
+    \item \textbf{Resolution:}
+    \begin{enumerate}
+        \item Check the AWS environment variables: `AWS\_ACCESS\_KEY\_ID`, `AWS\_SECRET\_ACCESS\_KEY`, `AWS\_REGION`, and `AWS\_BUCKET\_NAME`.
+        \item Ensure the IAM user associated with the credentials has `s3:PutObject`, `s3:GetObject`, and `s3:DeleteObject` permissions for the target bucket.
+    \end{enumerate}
+\end{itemize}

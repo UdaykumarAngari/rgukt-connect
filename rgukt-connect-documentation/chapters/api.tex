@@ -1,0 +1,190 @@
+\chapter{API Documentation}
+\label{ch:api}
+
+RGUKT Connect exposes REST endpoints for transactional workflows and WebSocket endpoints for real-time messaging. This chapter defines the API pathways, parameters, and request/response JSON schemas.
+
+\section{Authentication \& Session Gateway}
+
+\subsection{Send Registration OTP}
+Sends a verification OTP to the user's university email address.
+\begin{itemize}
+    \item \textbf{Path:} `POST /api/auth/register/send-otp`
+    \item \textbf{Parameters (Query):}
+    \begin{itemize}
+        \item `email` (string, required): e.g., `B211449@rgukt.ac.in`
+        \item `idNumber` (string, required): e.g., `B211449`
+    \end{itemize}
+    \item \textbf{Response:} `200 OK` on success.
+\end{itemize}
+
+\subsection{Complete Registration}
+Registers a new user account after validating the email OTP.
+\begin{itemize}
+    \item \textbf{Path:} `POST /api/auth/register`
+    \item \textbf{Request Body (JSON):}
+    \begin{lstlisting}[language=json]
+    {
+      "idNumber": "B211449",
+      "name": "Jane Doe",
+      "universityEmail": "B211449@rgukt.ac.in",
+      "password": "securepassword123",
+      "role": "STUDENT",
+      "otp": "123456"
+    }
+    \end{lstlisting}
+    \item \textbf{Response Body (JSON - 200 OK):}
+    \begin{lstlisting}[language=json]
+    {
+      "id": 15,
+      "idNumber": "B211449",
+      "name": "Jane Doe",
+      "universityEmail": "B211449@rgukt.ac.in",
+      "role": "STUDENT",
+      "createdAt": "2026-08-18T12:00:00Z"
+    }
+    \end{lstlisting}
+\end{itemize}
+
+\subsection{Log In (Get JWT)}
+Authenticates credentials and returns a JWT access token.
+\begin{itemize}
+    \item \textbf{Path:} `POST /api/auth/login`
+    \item \textbf{Request Body (JSON):}
+    \begin{lstlisting}[language=json]
+    {
+      "universityEmail": "B211449@rgukt.ac.in",
+      "password": "securepassword123"
+    }
+    \end{lstlisting}
+    \item \textbf{Response Body (JSON - 200 OK):}
+    \begin{lstlisting}[language=json]
+    {
+      "accessToken": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...",
+      "user": {
+        "id": 15,
+        "idNumber": "B211449",
+        "name": "Jane Doe",
+        "universityEmail": "B211449@rgukt.ac.in",
+        "role": "STUDENT",
+        "createdAt": "2026-08-18T12:00:00Z"
+      }
+    }
+    \end{lstlisting}
+\end{itemize}
+
+\section{Profile Management}
+
+\subsection{Fetch Active User Profile}
+Retrieves the profile details of the authenticated user.
+\begin{itemize}
+    \item \textbf{Path:} `GET /api/users/profile`
+    \item \textbf{Headers:} `Authorization: Bearer <token>`
+    \item \textbf{Response Body (JSON - 200 OK):}
+    \begin{lstlisting}[language=json]
+    {
+      "id": 15,
+      "idNumber": "B211449",
+      "name": "Jane Doe",
+      "universityEmail": "B211449@rgukt.ac.in",
+      "mobileNumber": "9876543210",
+      "personalEmail": "jane.doe@gmail.com",
+      "branch": "CSE",
+      "batch": "2021",
+      "profilePhoto": "https://rgukt-connect-bucket.s3.amazonaws.com/profiles/B211449-avatar.png",
+      "description": "Software engineer intern",
+      "githubUrl": "https://github.com/janedoe",
+      "linkedinUrl": "https://linkedin.com/in/janedoe",
+      "mentoredStudentsCount": 0,
+      "projects": [],
+      "experiences": [],
+      "education": []
+    }
+    \end{lstlisting}
+\end{itemize}
+
+\section{Connection \& Networking Actions}
+
+\subsection{Request Connection}
+Sends a pending connection invitation to another user.
+\begin{itemize}
+    \item \textbf{Path:} `POST /api/connections/request/{receiverId}`
+    \item \textbf{Headers:} `Authorization: Bearer <token>`
+    \item \textbf{Response:} `200 OK` (creates request and triggers WS notification).
+\end{itemize}
+
+\subsection{Accept Connection}
+Accepts a pending connection request.
+\begin{itemize}
+    \item \textbf{Path:} `PUT /api/connections/accept/{requestId}`
+    \item \textbf{Headers:} `Authorization: Bearer <token>`
+    \item \textbf{Response:} `200 OK` (updates state and triggers WS notification).
+\end{itemize}
+
+\subsection{Fetch Connection Status}
+Checks the connection state between the active user and a target user.
+\begin{itemize}
+    \item \textbf{Path:} `GET /api/connections/status/{targetUserId}`
+    \item \textbf{Headers:} `Authorization: Bearer <token>`
+    \item \textbf{Response Body (JSON - 200 OK):}
+    \begin{lstlisting}[language=json]
+    {
+      "status": "PENDING_RECEIVED",
+      "connectionId": 48
+    }
+    \end{lstlisting}
+\end{itemize}
+
+\section{Job Board Operations}
+
+\subsection{Post Job Opportunity}
+Publishes a job or internship opportunity. Requires the role `ALUMNI` or `ADMIN`.
+\begin{itemize}
+    \item \textbf{Path:} `POST /api/jobs`
+    \item \textbf{Headers:} `Authorization: Bearer <token>`
+    \item \textbf{Request Body (JSON):}
+    \begin{lstlisting}[language=json]
+    {
+      "company": "Google",
+      "role": "Systems Engineer",
+      "location": "Hyderabad, India",
+      "salary": "25 LPA",
+      "applyUrl": "https://careers.google.com/jobs/...",
+      "type": "Full-time",
+      "expiresAt": "2026-10-31",
+      "referralAvailable": true,
+      "category": "Software Engineering"
+    }
+    \end{lstlisting}
+    \item \textbf{Response Body (JSON - 200 OK):}
+    \begin{lstlisting}[language=json]
+    {
+      "id": 8,
+      "company": "Google",
+      "role": "Systems Engineer",
+      "location": "Hyderabad, India",
+      "salary": "25 LPA",
+      "applyUrl": "https://careers.google.com/jobs/...",
+      "type": "Full-time",
+      "postedBy": "Alumni John",
+      "postedById": 3,
+      "referralAvailable": true,
+      "category": "Software Engineering",
+      "createdAt": "2026-08-18T15:30:00Z",
+      "expiresAt": "2026-10-31"
+    }
+    \end{lstlisting}
+\end{itemize}
+
+\section{WebSocket Channels}
+
+\subsection{STOMP Endpoint}
+\begin{itemize}
+    \item \textbf{URL:} `ws://<host>/ws-chat/websocket`
+    \item \textbf{Handshake Headers:} `Authorization: Bearer <token>`
+\end{itemize}
+
+\subsection{Subscribed Channels}
+\begin{itemize}
+    \item \textbf{`/user/queue/messages`:} Receives real-time private messages from connected users.
+    \item \textbf{`/user/queue/notifications`:} Receives real-time connection alerts.
+\end{itemize}

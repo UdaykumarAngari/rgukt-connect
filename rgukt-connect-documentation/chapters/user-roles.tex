@@ -1,0 +1,47 @@
+\chapter{User Roles and Permissions}
+\label{ch:user_roles}
+
+To maintain platform integrity and security, RGUKT Connect enforces Role-Based Access Control (RBAC). The application classifies users into three primary groups: Student, Alumni, and Admin.
+
+\section{Role Profiles}
+\begin{itemize}
+    \item \textbf{Student (STUDENT):} Current undergraduates at RGUKT. They can search the directory, send connection requests, post on the community feed, comment, like posts, search job postings, and chat with accepted connections. Students cannot post job opportunities or mark feed posts as career referrals.
+    \item \textbf{Alumni (ALUMNI):} Verified graduates of RGUKT. They have all student privileges, plus authorization to post jobs on the Job Board and create referral posts.
+    \item \textbf{Admin (ADMIN):} Platform managers. Admins have access to all alumni privileges and administrative overrides, including deleting any user's post, comment, or job listing.
+\end{itemize}
+
+\section{Permission Matrix}
+Table~\ref{tab:permission_matrix} summarizes the authorization rules across the system.
+
+\begin{table}[H]
+    \centering
+    \caption{RGUKT Connect Role-Based Permission Matrix}
+    \label{tab:permission_matrix}
+    \begin{tabularx}{\textwidth}{l c c c}
+        \toprule
+        \textbf{System Action / Capability} & \textbf{Student} & \textbf{Alumni} & \textbf{Admin} \\
+        \midrule
+        Register & Authenticated & Authenticated & Authenticated \\
+        Log In (JWT Retrieval) & Yes & Yes & Yes \\
+        Modify Own Profile & Yes & Yes & Yes \\
+        Upload Profile Avatar (S3) & Yes & Yes & Yes \\
+        Query Alumni Directory & Yes & Yes & Yes \\
+        Send/Accept Connections & Yes & Yes & Yes \\
+        Publish Community Feed Post & Yes & Yes & Yes \\
+        Like and Comment on Posts & Yes & Yes & Yes \\
+        Delete Own Posts / Comments & Yes & Yes & Yes \\
+        Post Job Referral Listings & No & Yes & Yes \\
+        Publish Job Postings & No & Yes & Yes \\
+        Delete Any Post / Comment & No & No & Yes \\
+        Delete Any Job Listing & No & No & Yes \\
+        Bypass Email Delivery in Dev (Test OTP) & Yes & Yes & Yes \\
+        \bottomrule
+    \end{tabularx}
+\end{table}
+
+\section{Security Policy Enforcements}
+Authorization is verified at both the frontend and backend levels:
+\begin{enumerate}
+    \item \textbf{Client-Side Filtering:} The frontend reads the `userSession` role string and conditionally hides actions like "Post Job" or "Post Referral" for students.
+    \item \textbf{Server-Side Verification:} If a client attempts to bypass frontend controls and calls a restricted endpoint (such as `POST /api/jobs` or `POST /api/posts` with type `referral`), the backend service layer validates the user's role and rejects the request if they are not an alumnus or admin.
+\end{enumerate}
