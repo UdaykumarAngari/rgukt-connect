@@ -1,8 +1,11 @@
 import React, { useState } from 'react';
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
-import { X, Eye, EyeOff, Network, Users, Globe, Share2, MessageSquare } from 'lucide-react';
+import { X, Eye, EyeOff, Network, Users, Globe, Share2, MessageSquare, Sparkles, Mail, KeyRound, Copy, Check } from 'lucide-react';
 import rguktBg from '../assets/rgukt_bg.png';
+
+const DEMO_EMAIL = 'test@rgukt.ac.in';
+const DEMO_PASSWORD = 'test1234';
 
 const Login = ({ onLoginSuccess }) => {
     const [credentials, setCredentials] = useState({
@@ -11,7 +14,27 @@ const Login = ({ onLoginSuccess }) => {
     });
     const [error, setError] = useState('');
     const [showPassword, setShowPassword] = useState(false);
+    const [showDemoWidget, setShowDemoWidget] = useState(true);
+    const [copiedField, setCopiedField] = useState('');
     const navigate = useNavigate();
+
+    const fillDemoAccount = () => {
+        setCredentials({
+            universityEmail: DEMO_EMAIL,
+            password: DEMO_PASSWORD
+        });
+        setError('');
+    };
+
+    const copyDemoValue = async (field, value) => {
+        try {
+            await navigator.clipboard.writeText(value);
+            setCopiedField(field);
+            setTimeout(() => setCopiedField(''), 1600);
+        } catch {
+            setCopiedField('');
+        }
+    };
 
     const getCurrentWeekDays = () => {
         const today = new Date();
@@ -66,7 +89,7 @@ const Login = ({ onLoginSuccess }) => {
     };
 
     return (
-        <div className="auth-container">
+        <div className={`auth-container${showDemoWidget ? ' has-demo-widget' : ''}`}>
             <style>{`
                 @import url('https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800&display=swap');
                 
@@ -340,20 +363,192 @@ const Login = ({ onLoginSuccess }) => {
                     z-index: 5;
                 }
 
+                @keyframes demoWidgetIn {
+                    from {
+                        opacity: 0;
+                        transform: translateY(18px) scale(0.98);
+                    }
+                    to {
+                        opacity: 1;
+                        transform: translateY(0) scale(1);
+                    }
+                }
+
+                .demo-access-widget {
+                    position: fixed;
+                    bottom: 24px;
+                    right: 24px;
+                    width: 292px;
+                    background: #f9f6f0;
+                    border: 1px solid rgba(226, 223, 215, 0.95);
+                    border-radius: 24px;
+                    padding: 16px 16px 14px;
+                    box-shadow: 0 22px 48px rgba(15, 23, 42, 0.28);
+                    z-index: 20;
+                    animation: demoWidgetIn 0.55s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+                    box-sizing: border-box;
+                    pointer-events: auto;
+                }
+                .demo-access-close {
+                    position: absolute;
+                    top: 10px;
+                    right: 10px;
+                    width: 28px;
+                    height: 28px;
+                    border: none;
+                    border-radius: 50%;
+                    background: #ffffff;
+                    color: #7a766e;
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                    cursor: pointer;
+                    box-shadow: 0 6px 14px rgba(0,0,0,0.08);
+                    transition: all 0.2s ease;
+                }
+                .demo-access-close:hover {
+                    transform: scale(1.08);
+                    color: #1a1a1a;
+                    box-shadow: 0 8px 16px rgba(0,0,0,0.12);
+                }
+                .demo-access-badge {
+                    display: inline-flex;
+                    align-items: center;
+                    gap: 6px;
+                    background: #ffcb45;
+                    color: #1a1a1a;
+                    font-size: 10px;
+                    font-weight: 800;
+                    letter-spacing: 0.4px;
+                    text-transform: uppercase;
+                    padding: 5px 10px;
+                    border-radius: 999px;
+                    margin-bottom: 10px;
+                    box-shadow: 0 6px 14px rgba(255, 203, 69, 0.28);
+                }
+                .demo-access-title {
+                    font-size: 15px;
+                    font-weight: 700;
+                    color: #1a1a1a;
+                    margin: 0 28px 4px 0;
+                    letter-spacing: -0.3px;
+                    line-height: 1.3;
+                }
+                .demo-access-copy {
+                    font-size: 12px;
+                    color: #7a766e;
+                    margin: 0 0 12px 0;
+                    line-height: 1.4;
+                }
+                .demo-cred-row {
+                    display: flex;
+                    align-items: center;
+                    gap: 8px;
+                    background: #f3f1eb;
+                    border-radius: 14px;
+                    padding: 8px 10px;
+                    margin-bottom: 6px;
+                }
+                .demo-cred-icon {
+                    color: #8d6e00;
+                    flex-shrink: 0;
+                }
+                .demo-cred-meta {
+                    min-width: 0;
+                    flex: 1;
+                }
+                .demo-cred-label {
+                    display: block;
+                    font-size: 9px;
+                    font-weight: 700;
+                    color: #7a766e;
+                    text-transform: uppercase;
+                    letter-spacing: 0.4px;
+                }
+                .demo-cred-value {
+                    display: block;
+                    font-size: 12px;
+                    font-weight: 600;
+                    color: #1a1a1a;
+                    font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+                    overflow: hidden;
+                    text-overflow: ellipsis;
+                    white-space: nowrap;
+                }
+                .demo-copy-btn {
+                    border: none;
+                    background: transparent;
+                    color: #7a766e;
+                    cursor: pointer;
+                    padding: 4px;
+                    display: flex;
+                    align-items: center;
+                    border-radius: 8px;
+                    flex-shrink: 0;
+                }
+                .demo-copy-btn:hover {
+                    color: #1a1a1a;
+                    background: rgba(255,255,255,0.7);
+                }
+                .demo-access-note {
+                    font-size: 11px;
+                    color: #7a766e;
+                    margin: 8px 0 12px;
+                    font-style: italic;
+                    line-height: 1.35;
+                }
+                .demo-access-cta {
+                    width: 100%;
+                    padding: 11px 14px;
+                    border-radius: 20px;
+                    border: none;
+                    background: #ffcb45;
+                    color: #1a1a1a;
+                    font-size: 13px;
+                    font-weight: 700;
+                    cursor: pointer;
+                    transition: all 0.25s ease;
+                    box-shadow: 0 8px 18px rgba(255, 203, 69, 0.28);
+                    font-family: inherit;
+                }
+                .demo-access-cta:hover {
+                    background: #f5bc2c;
+                    transform: translateY(-1px);
+                    box-shadow: 0 10px 22px rgba(255, 203, 69, 0.38);
+                }
+                .demo-access-cta:active {
+                    transform: translateY(1px);
+                }
+
                 @media (max-width: 900px) {
+                    .auth-container.has-demo-widget {
+                        align-items: flex-start;
+                        padding-top: 16px;
+                        padding-bottom: 196px;
+                        overflow-y: auto;
+                    }
                     .auth-card {
                         height: auto;
-                        max-height: 90vh;
+                        max-height: none;
                         max-width: 440px;
                         flex-direction: column;
                         padding: 24px;
-                        overflow-y: auto;
+                        overflow-y: visible;
+                        margin: 0 auto;
                     }
                     .auth-right {
                         display: none;
                     }
                     .auth-left {
                         padding: 10px 0;
+                    }
+                    .demo-access-widget {
+                        left: 16px;
+                        right: 16px;
+                        bottom: 16px;
+                        width: auto;
+                        max-width: 440px;
+                        margin: 0 auto;
                     }
                 }
 
@@ -462,7 +657,7 @@ const Login = ({ onLoginSuccess }) => {
                     
                     <img src={rguktBg} alt="RGUKT Campus" className="auth-bg-img" />
                     
-                    {/* Dark gradient overlay for contrast */}
+                    
                     <div style={{
                         position: 'absolute',
                         top: 0,
@@ -473,8 +668,7 @@ const Login = ({ onLoginSuccess }) => {
                         zIndex: 1,
                         pointerEvents: 'none'
                     }} />
-
-                    {/* Animated SVG Network Connections */}
+ 
                     <svg className="network-svg" viewBox="0 0 400 600" fill="none" xmlns="http://www.w3.org/2000/svg" style={{
                         position: 'absolute',
                         top: 0,
@@ -501,8 +695,7 @@ const Login = ({ onLoginSuccess }) => {
                         <circle cx="160" cy="560" r="5" fill="#ffcb45" className="network-node-glow" />
                         <circle cx="380" cy="230" r="3.5" fill="#ffffff" />
                     </svg>
-
-                    {/* Floating Community/Networking Icons */}
+ 
                     <div className="floating-bg-icon" style={{ top: '18%', right: '22%', animation: 'floatSlow 6s ease-in-out infinite' }}>
                         <Network size={24} style={{ opacity: 0.35 }} />
                     </div>
@@ -562,6 +755,65 @@ const Login = ({ onLoginSuccess }) => {
                     </div>
                 </div>
             </div>
+
+            {showDemoWidget && (
+                <aside className="demo-access-widget" aria-label="Demo account access">
+                    <button
+                        type="button"
+                        className="demo-access-close"
+                        aria-label="Dismiss demo access"
+                        onClick={() => setShowDemoWidget(false)}
+                    >
+                        <X size={14} />
+                    </button>
+
+                    <div className="demo-access-badge">
+                        <Sparkles size={12} />
+                        Demo Access
+                    </div>
+
+                    <h3 className="demo-access-title">Are you a recruiter or employee?</h3>
+                    <p className="demo-access-copy">Check out RGUKT Connect using our demo account.</p>
+
+                    <div className="demo-cred-row">
+                        <Mail size={14} className="demo-cred-icon" />
+                        <div className="demo-cred-meta">
+                            <span className="demo-cred-label">Email</span>
+                            <span className="demo-cred-value">{DEMO_EMAIL}</span>
+                        </div>
+                        <button
+                            type="button"
+                            className="demo-copy-btn"
+                            aria-label="Copy demo email"
+                            onClick={() => copyDemoValue('email', DEMO_EMAIL)}
+                        >
+                            {copiedField === 'email' ? <Check size={14} /> : <Copy size={14} />}
+                        </button>
+                    </div>
+
+                    <div className="demo-cred-row">
+                        <KeyRound size={14} className="demo-cred-icon" />
+                        <div className="demo-cred-meta">
+                            <span className="demo-cred-label">Password</span>
+                            <span className="demo-cred-value">{DEMO_PASSWORD}</span>
+                        </div>
+                        <button
+                            type="button"
+                            className="demo-copy-btn"
+                            aria-label="Copy demo password"
+                            onClick={() => copyDemoValue('password', DEMO_PASSWORD)}
+                        >
+                            {copiedField === 'password' ? <Check size={14} /> : <Copy size={14} />}
+                        </button>
+                    </div>
+
+                    <p className="demo-access-note">Demo data is automatically cleared every 48 hours.</p>
+
+                    <button type="button" className="demo-access-cta" onClick={fillDemoAccount}>
+                        Use Demo Account
+                    </button>
+                </aside>
+            )}
         </div>
     );
 };
