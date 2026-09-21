@@ -1,7 +1,7 @@
 package com.uday.rguktconnect.service.posts.impl;
 
-import com.uday.rguktconnect.dto.CommentRequestDTO;
-import com.uday.rguktconnect.dto.CommentResponseDTO;
+import com.uday.rguktconnect.dto.comments.CommentRequestDTO;
+import com.uday.rguktconnect.dto.comments.CommentResponseDTO;
 import com.uday.rguktconnect.entity.Comment;
 import com.uday.rguktconnect.entity.Post;
 import com.uday.rguktconnect.entity.User;

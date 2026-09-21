@@ -1,9 +1,9 @@
 package com.uday.rguktconnect.service.user;
 
-import com.uday.rguktconnect.dto.AuthRequestDTO;
-import com.uday.rguktconnect.dto.AuthResponseDTO;
-import com.uday.rguktconnect.dto.UserRegisterRequestDTO;
-import com.uday.rguktconnect.dto.UserResponseDTO;
+import com.uday.rguktconnect.dto.auth.AuthRequestDTO;
+import com.uday.rguktconnect.dto.auth.AuthResponseDTO;
+import com.uday.rguktconnect.dto.user.UserRegisterRequestDTO;
+import com.uday.rguktconnect.dto.user.UserResponseDTO;
  
 public interface UserService {
     UserResponseDTO registerUser(UserRegisterRequestDTO requestDTO);

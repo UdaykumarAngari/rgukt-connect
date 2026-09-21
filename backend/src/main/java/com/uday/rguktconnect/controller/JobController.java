@@ -1,8 +1,8 @@
 package com.uday.rguktconnect.controller;
 
-import com.uday.rguktconnect.dto.JobCreateRequestDTO;
-import com.uday.rguktconnect.dto.JobResponseDTO;
-import com.uday.rguktconnect.service.JobService;
+import com.uday.rguktconnect.dto.jobs.JobCreateRequestDTO;
+import com.uday.rguktconnect.dto.jobs.JobResponseDTO;
+import com.uday.rguktconnect.service.job.JobService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;

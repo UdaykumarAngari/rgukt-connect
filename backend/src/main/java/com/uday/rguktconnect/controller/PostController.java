@@ -1,10 +1,10 @@
 package com.uday.rguktconnect.controller;
 
-import com.uday.rguktconnect.dto.PostCreateRequestDTO;
-import com.uday.rguktconnect.dto.PostResponseDTO;
+import com.uday.rguktconnect.dto.posts.PostCreateRequestDTO;
+import com.uday.rguktconnect.dto.posts.PostResponseDTO;
 import com.uday.rguktconnect.entity.User;
 import com.uday.rguktconnect.repository.user.UserRepository;
-import com.uday.rguktconnect.service.FileStorageService;
+import com.uday.rguktconnect.service.filestorage.FileStorageService;
 import com.uday.rguktconnect.service.posts.PostService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;

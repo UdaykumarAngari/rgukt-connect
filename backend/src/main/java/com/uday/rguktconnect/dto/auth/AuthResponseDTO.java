@@ -1,5 +1,6 @@
-package com.uday.rguktconnect.dto;
+package com.uday.rguktconnect.dto.auth;
 
+import com.uday.rguktconnect.dto.user.UserResponseDTO;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;

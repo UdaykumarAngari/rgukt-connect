@@ -1,6 +1,6 @@
 package com.uday.rguktconnect.service.notification;
 
-import com.uday.rguktconnect.dto.NotificationResponseDTO;
+import com.uday.rguktconnect.dto.notification.NotificationResponseDTO;
 import com.uday.rguktconnect.entity.Notification;
 import com.uday.rguktconnect.entity.User;
 import java.util.List;

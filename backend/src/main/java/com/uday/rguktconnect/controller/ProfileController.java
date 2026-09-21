@@ -1,7 +1,7 @@
 package com.uday.rguktconnect.controller;
 
-import com.uday.rguktconnect.dto.ProfileResponseDTO;
-import com.uday.rguktconnect.dto.ProfileUpdateRequestDTO;
+import com.uday.rguktconnect.dto.profile.ProfileResponseDTO;
+import com.uday.rguktconnect.dto.profile.ProfileUpdateRequestDTO;
 import com.uday.rguktconnect.entity.EducationDetail;
 import com.uday.rguktconnect.entity.Project;
 import com.uday.rguktconnect.entity.UserExperiences;

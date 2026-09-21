@@ -1,4 +1,4 @@
-package com.uday.rguktconnect.service;
+package com.uday.rguktconnect.service.filestorage;
 
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;

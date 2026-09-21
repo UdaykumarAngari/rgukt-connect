@@ -1,7 +1,7 @@
 package com.uday.rguktconnect.controller;
 
-import com.uday.rguktconnect.dto.CommentRequestDTO;
-import com.uday.rguktconnect.dto.CommentResponseDTO;
+import com.uday.rguktconnect.dto.comments.CommentRequestDTO;
+import com.uday.rguktconnect.dto.comments.CommentResponseDTO;
 import com.uday.rguktconnect.service.posts.CommentService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;

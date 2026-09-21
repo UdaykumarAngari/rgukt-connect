@@ -1,7 +1,7 @@
 package com.uday.rguktconnect.service.user;
 
-import com.uday.rguktconnect.dto.ProfileResponseDTO;
-import com.uday.rguktconnect.dto.ProfileUpdateRequestDTO;
+import com.uday.rguktconnect.dto.profile.ProfileResponseDTO;
+import com.uday.rguktconnect.dto.profile.ProfileUpdateRequestDTO;
 import com.uday.rguktconnect.entity.UserExperiences;
 import com.uday.rguktconnect.entity.EducationDetail;
 import com.uday.rguktconnect.entity.Project;

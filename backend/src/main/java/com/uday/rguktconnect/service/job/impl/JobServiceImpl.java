@@ -1,12 +1,12 @@
-package com.uday.rguktconnect.service.impl;
+package com.uday.rguktconnect.service.job.impl;
 
-import com.uday.rguktconnect.dto.JobCreateRequestDTO;
-import com.uday.rguktconnect.dto.JobResponseDTO;
+import com.uday.rguktconnect.dto.jobs.JobCreateRequestDTO;
+import com.uday.rguktconnect.dto.jobs.JobResponseDTO;
 import com.uday.rguktconnect.entity.Job;
 import com.uday.rguktconnect.entity.User;
-import com.uday.rguktconnect.repository.JobRepository;
+import com.uday.rguktconnect.repository.jobs.JobRepository;
 import com.uday.rguktconnect.repository.user.UserRepository;
-import com.uday.rguktconnect.service.JobService;
+import com.uday.rguktconnect.service.job.JobService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;

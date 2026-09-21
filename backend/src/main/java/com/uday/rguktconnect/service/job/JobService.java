@@ -1,7 +1,7 @@
-package com.uday.rguktconnect.service;
+package com.uday.rguktconnect.service.job;
 
-import com.uday.rguktconnect.dto.JobCreateRequestDTO;
-import com.uday.rguktconnect.dto.JobResponseDTO;
+import com.uday.rguktconnect.dto.jobs.JobCreateRequestDTO;
+import com.uday.rguktconnect.dto.jobs.JobResponseDTO;
 
 import java.util.List;
 

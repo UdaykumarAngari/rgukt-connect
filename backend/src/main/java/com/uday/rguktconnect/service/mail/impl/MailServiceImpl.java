@@ -1,6 +1,6 @@
-package com.uday.rguktconnect.service.impl;
+package com.uday.rguktconnect.service.mail.impl;
 
-import com.uday.rguktconnect.service.MailService;
+import com.uday.rguktconnect.service.mail.MailService;
 import jakarta.mail.internet.MimeMessage;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.mail.javamail.JavaMailSender;

@@ -1,7 +1,7 @@
 package com.uday.rguktconnect.service.posts;
 
-import com.uday.rguktconnect.dto.CommentRequestDTO;
-import com.uday.rguktconnect.dto.CommentResponseDTO;
+import com.uday.rguktconnect.dto.comments.CommentRequestDTO;
+import com.uday.rguktconnect.dto.comments.CommentResponseDTO;
 
 import java.util.List;
 

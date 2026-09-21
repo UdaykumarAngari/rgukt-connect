@@ -1,4 +1,4 @@
-package com.uday.rguktconnect.dto;
+package com.uday.rguktconnect.dto.posts;
 
 import lombok.Builder;
 import lombok.Data;

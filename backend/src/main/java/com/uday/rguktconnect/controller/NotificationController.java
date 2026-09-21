@@ -1,6 +1,6 @@
 package com.uday.rguktconnect.controller;
 
-import com.uday.rguktconnect.dto.NotificationResponseDTO;
+import com.uday.rguktconnect.dto.notification.NotificationResponseDTO;
 import com.uday.rguktconnect.service.notification.NotificationService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;

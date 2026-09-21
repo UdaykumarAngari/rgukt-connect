@@ -1,13 +1,14 @@
 package com.uday.rguktconnect.service.user.impl;
 
-import com.uday.rguktconnect.dto.AuthRequestDTO;
-import com.uday.rguktconnect.dto.AuthResponseDTO;
-import com.uday.rguktconnect.dto.UserRegisterRequestDTO;
-import com.uday.rguktconnect.dto.UserResponseDTO;
+import com.uday.rguktconnect.dto.auth.AuthRequestDTO;
+import com.uday.rguktconnect.dto.auth.AuthResponseDTO;
+import com.uday.rguktconnect.dto.user.UserRegisterRequestDTO;
+import com.uday.rguktconnect.dto.user.UserResponseDTO;
 import com.uday.rguktconnect.entity.User;
 import com.uday.rguktconnect.entity.UserDetails;
 import com.uday.rguktconnect.repository.user.UserDetailsRepository;
 import com.uday.rguktconnect.repository.user.UserRepository;
+import com.uday.rguktconnect.service.mail.MailService;
 import com.uday.rguktconnect.service.user.UserService;
 import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -31,7 +32,7 @@ public class UserServiceImpl implements UserService {
     private JwtUtil jwtUtil;
 
     @Autowired
-    private com.uday.rguktconnect.service.MailService mailService;
+    private MailService mailService;
 
     private final java.util.Map<String, String> otpStorage = new java.util.concurrent.ConcurrentHashMap<>();
     private final java.util.Map<String, java.time.LocalDateTime> otpExpiry = new java.util.concurrent.ConcurrentHashMap<>();

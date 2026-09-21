@@ -1,4 +1,4 @@
-package com.uday.rguktconnect.dto;
+package com.uday.rguktconnect.dto.comments;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;

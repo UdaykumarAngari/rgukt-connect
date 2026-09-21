@@ -1,7 +1,7 @@
 package com.uday.rguktconnect.service.posts;
 
-import com.uday.rguktconnect.dto.PostCreateRequestDTO;
-import com.uday.rguktconnect.dto.PostResponseDTO;
+import com.uday.rguktconnect.dto.posts.PostCreateRequestDTO;
+import com.uday.rguktconnect.dto.posts.PostResponseDTO;
 
 import java.util.List;
 public interface PostService {

@@ -1,4 +1,4 @@
-package com.uday.rguktconnect.dto;
+package com.uday.rguktconnect.dto.profile;
 
 import com.uday.rguktconnect.entity.UserExperiences;
 import com.uday.rguktconnect.entity.EducationDetail;

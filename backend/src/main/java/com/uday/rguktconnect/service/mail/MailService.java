@@ -1,4 +1,4 @@
-package com.uday.rguktconnect.service;
+package com.uday.rguktconnect.service.mail;
 
 public interface MailService {
     void sendOtp(String toEmail, String otp);

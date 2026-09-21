@@ -1,4 +1,4 @@
-package com.uday.rguktconnect.repository;
+package com.uday.rguktconnect.repository.jobs;
 
 import com.uday.rguktconnect.entity.Job;
 import org.springframework.data.jpa.repository.JpaRepository;

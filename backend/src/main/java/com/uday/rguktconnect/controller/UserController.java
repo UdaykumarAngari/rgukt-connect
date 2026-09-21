@@ -1,10 +1,10 @@
 package com.uday.rguktconnect.controller;
 
 
-import com.uday.rguktconnect.dto.AuthRequestDTO;
-import com.uday.rguktconnect.dto.AuthResponseDTO;
-import com.uday.rguktconnect.dto.UserRegisterRequestDTO;
-import com.uday.rguktconnect.dto.UserResponseDTO;
+import com.uday.rguktconnect.dto.auth.AuthRequestDTO;
+import com.uday.rguktconnect.dto.auth.AuthResponseDTO;
+import com.uday.rguktconnect.dto.user.UserRegisterRequestDTO;
+import com.uday.rguktconnect.dto.user.UserResponseDTO;
 import com.uday.rguktconnect.service.user.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;

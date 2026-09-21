@@ -1,7 +1,7 @@
 package com.uday.rguktconnect.service.user.impl;
 
-import com.uday.rguktconnect.dto.ProfileResponseDTO;
-import com.uday.rguktconnect.dto.ProfileUpdateRequestDTO;
+import com.uday.rguktconnect.dto.profile.ProfileResponseDTO;
+import com.uday.rguktconnect.dto.profile.ProfileUpdateRequestDTO;
 import com.uday.rguktconnect.entity.*;
 import com.uday.rguktconnect.repository.user.*;
 import com.uday.rguktconnect.service.user.ProfileService;
@@ -10,7 +10,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
-import com.uday.rguktconnect.service.FileStorageService;
+import com.uday.rguktconnect.service.filestorage.FileStorageService;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
