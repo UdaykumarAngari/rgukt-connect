@@ -19,7 +19,6 @@ import java.util.Objects;
 
 @RestController
 @RequestMapping("/api/users")
-@CrossOrigin(origins = "*")
 public class ProfileController {
 
     @Autowired
