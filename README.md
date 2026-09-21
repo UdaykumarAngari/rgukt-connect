@@ -91,7 +91,7 @@ Media    Connect Requests        Verified Openings        Direct Guidance
 | Feature | Description |
 | :--- | :--- |
 | **🔒 Institutional Identity Verification** | Enforces `@rgukt.ac.in` domain and 7-character ID format. Issues temporary 6-digit OTPs via JavaMail SMTP with 5-minute validity. |
-| **👥 Comprehensive Directory** | Filter verified students and alumni by name, branch, batch, and company; send, accept, decline, or cancel connection invitations. |
+| **👥 Comprehensive  Directory** | Filter verified students and alumni by name, branch, batch, and company; send, accept, decline, or cancel connection invitations. |
 | **💼 Job & Referral Board** | Role-restricted posting (Alumni & Admin only). Students browse verified jobs/internships and request direct employee referrals. |
 | **💬 Real-Time Messaging** | Sub-protocol STOMP over WebSockets (`ws://`) with custom JWT handshake interceptors, message queuing, unread counts, and audio alerts. |
 | **📰 Community Feed** | Post updates, rich media (images and videos uploaded to AWS S3), and code snippets; includes real-time like toggles and nested comments. |
@@ -224,7 +224,7 @@ rgukt-connect/
 
 ---
 
-## 🚀 Getting Started & Local Setup
+##  Getting Started & Local Setup
 
 Follow these steps to run the complete RGUKT Connect platform on your local machine.
 
@@ -364,7 +364,7 @@ CREATE DATABASE rgukt_connect;
 
 #### Opportunities & Job Board
 * `GET  /api/jobs` — Lists active job openings and internship listings
-* `POST /api/jobs` — Publishes a new listing (*Requires role `ALUMNI` or `ADMIN`*)
+* `POST /api/jobs` — Publishes a new listing (*Requires role `ALUMNI` or `STUDENT`*)
 * `DELETE /api/jobs/{id}` — Deletes an active listing (*Owner or Admin only*)
 
 #### Posts & Community Feed
@@ -451,4 +451,4 @@ Contributions from the RGUKT Basar community are warmly welcome!
 
 ## 📄 License
 
-This project is developed for the **Rajiv Gandhi University of Knowledge Technologies (RGUKT) Basar** community. All rights reserved.
+This project is licensed under the [MIT License](LICENSE).
